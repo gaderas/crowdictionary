@@ -1,0 +1,19 @@
+{
+    "sources": {
+        "fifa": {
+            "useCacheMatchesPage": true,
+            "useCacheMatchPages": true,
+            "useCachePdfs": false,
+            "domain": "www.fifa.com",
+            "all_matches_path": "/worldcup/matches/index.html"
+        }
+    },
+    "data": {
+        "source": "mysql",
+        "dbConfig": {
+            "host": "localhost",
+            "database": "soccr",
+            "connectionLimit": 10
+        }
+    }
+}

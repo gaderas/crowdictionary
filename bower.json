@@ -1,0 +1,24 @@
+{
+  "name": "crowdictionary",
+  "version": "0.0.1",
+  "authors": [
+    "Gerardo Moad <gerardo@gerardomoad.com>"
+  ],
+  "description": "kickass crowdsourced dictionary",
+  "main": "app.js",
+  "license": "GPL 3",
+  "private": true,
+  "dependencies": {
+    "jquery": "*",
+    "jquery.ui": "*",
+    "backbone": "~1.1.2",
+    "underscore": "~1.6.0"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
