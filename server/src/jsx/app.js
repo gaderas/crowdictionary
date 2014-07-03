@@ -13,6 +13,8 @@ var shared = require('../../../shared/build/js/app.js');
 //var Mock = require('./data.mock.js');
 var dsFactory = require('./dsFactory.js');
 var nconf = require('nconf');
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 
 var NODE_ENV = process.env.NODE_ENV;
 
@@ -31,7 +33,9 @@ var mockData = dsFactory(nconf);
 
 console.log('mockData: ' + mockData);
 
-var CrowDictionary = shared.CrowDictionary;
+var CrowDictionary = shared.CrowDictionary,
+    routesInfo = shared.routesInfo,
+    setSe = shared.setSe;
 
 //app.use(serve('./client/build'));
 
@@ -59,17 +63,40 @@ appWs.get('/teams', function *(next) {
     this.body = mockData.getTeams();
 });
 
-_.forEach(shared.pages, function (routeFunc, routeName) {
-    console.log('adding route with name ' + routeName + '?');
-    appReact.get(routeName, function *(next) {
+var ServerRouterEmitter = function () {
+    EventEmitter.call(this);
+    this.matchRoute = function (route, routeParams) {
+        this.emit('matchRoute', route, routeParams);
+    };
+};
+ServerRouterEmitter.prototype = Object.create(EventEmitter.prototype);
+
+var se = new ServerRouterEmitter();
+
+
+_.forEach(routesInfo, function (routeInfo) {
+    console.log('adding server route ' + routeInfo.serverRoute + '?');
+    appReact.get(routeInfo.serverRoute, function *(next) {
         yield next;
         //var markup = serverRoute.server(this.params);
         var markup = React.renderComponentToString(
-            <CrowDictionary router="" clientOrServer="server"/>
+            <CrowDictionary/>
         );
+        console.log("this.params: " + JSON.stringify(_.toArray(this.params)));
+        se.matchRoute(routeInfo.serverRoute, this.params);
         this.body = markup;
     });
 });
+
+appReact.get('/dummy/:something', function *(next) {
+    yield next;
+    //var markup = serverRoute.server(this.params);
+    console.log("this.params: " + JSON.stringify(_.toArray(this.params)));
+    se.matchRoute('/dummy', this.params.something);
+    this.body = 'dummay';
+});
+
+setSe(se);
 
 /*appReact.get('/', function *(next) {
     console.log('hier');

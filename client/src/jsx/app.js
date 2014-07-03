@@ -1,10 +1,13 @@
 /** @jsx React.DOM */
 
+var util = require('util');
 var React = require('react');
 var _ = require('lodash');
 var shared = require('../../../../shared/build/js/app.js');
 
-var CrowDictionary = shared.CrowDictionary;
+var CrowDictionary = shared.CrowDictionary,
+    routesInfo = shared.routesInfo,
+    setCe = shared.setCe;
 
 console.log('ehlos');
 /*var routes = _.map(shared.pages, function (page, routeName) {
@@ -23,35 +26,50 @@ console.log('ehlos');
         );
     }
 });*/
-var routes = {
-    '': 'home',
-    'fake': 'fake'
-};
 
-var Router = Backbone.Router.extend({
-    routes: routes,
+var Router = Backbone.Router.extend(
+    _.merge(
+        {
+            routes: _.zipObject(_.map(routesInfo, function (routeInfo) {
+                return routeInfo.clientRoute;
+            }), _.map(routesInfo, function (routeInfo) {
+                return routeInfo.clientRouterFuncName
+            }))
+        },
+        _.zipObject(_.map(routesInfo, function (routeInfo) {
+            return routeInfo.clientRouterFuncName
+        }), _.map(routesInfo, function (routeInfo) {
+            return routeInfo.clientRouterFunc.bind(this)
+        }))
+    )
 
-    home: function () {
+    /*home: function () {
         console.log('home!');
         React.renderComponent(
-            <CrowDictionary router="" clientOrServer="server"/>,
+            <CrowDictionary/>,
             document
         );
     },
 
     fake: function () {
         console.log('fake');
-    }
-});
+    }*/
+);
 
-console.log("Router: " + Router);
+//console.log("Router: " + Router);
 
 var router = new Router();
 
-Backbone.history.start();
+setCe(router);
 
-router.navigate('', {trigger: true});
-router.navigate('home', {trigger: true});
-router.navigate('fake', {trigger: true});
+Backbone.history.start({
+    pushState: true,
+    hashChange: true
+    // hashChange: Modernizr.history ? true : false
+});
 
-console.log('done navigating?');
+//router.navigate('', {trigger: true});
+//router.navigate('home', {trigger: true});
+//router.navigate('', {trigger: true});
+//router.navigate('fake', {trigger: true});
+//console.log('done navigating?');

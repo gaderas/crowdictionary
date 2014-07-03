@@ -3,20 +3,185 @@
 var React = require('react');
 var bs = require('./bootstrap.js');
 var _ = require('lodash');
+var util = require('util');
 
 var Layout = bs.Layout;
 var Widget = bs.Widget;
 
-var CrowDictionary = React.createClass({
-    getInitialState: function () {
+var EventEmitter = require('events').EventEmitter;
+
+var ClientRouterEmitter = function () {
+    EventEmitter.call(this);
+    this.matchRoute = function (route, routeParams) {
+        this.emit('matchRoute', route, routeParams);
+    };
+};
+ClientRouterEmitter.prototype = Object.create(EventEmitter.prototype);
+
+var clientRouterEmitter = new ClientRouterEmitter();
+
+clientRouterEmitter.on('matchRoute', function (route, routeParams) {
+    console.log(util.format("on matchRoute. route: %s, routeParams: %s", route, JSON.stringify(routeParams)));
+});
+
+
+var clientRouterFunc = function () {
+    React.renderComponent(
+        <CrowDictionary/>,
+        document
+    );
+};
+
+var ce,
+    se,
+    setSe = function (callback) {
+        se = callback;
+    },
+    setCe = function (callback) {
+        ce = callback;
+    };
+
+var routesInfo = [
+    {
+        serverRoute: '/',
+        serverParamNames: [],
+        clientRoute: '',
+        clientRouterFunc: clientRouterFunc,
+        clientRouterFuncName: '/',
+        calculateStateFunc: function () {
+            return {
+                viewing: 'PhraseSearchResults',
+                searchTerm: 'hijazo de mi vidaza',
+                searchResults: [
+                    {phrase: 'hijazo de mi vidaza', topDefinition: 'asi le dicen al muñecón', key: 1},
+                    {phrase: 'hijo del mal dormir', topDefinition: 'cuando alguien te cae mal', key: 2}
+                ]
+            };
+        }
+    },
+    {
+        serverRoute: '/phrases/:phrase',
+        serverParamNames: ['phrase'],
+        clientRoute: 'phrases/:phrase',
+        clientRouterFunc: clientRouterFunc,
+        clientRouterFuncName: '/phrases/:phrase',
+        calculateStateFunc: function () {
+            return {
+                viewing: 'PhraseSearchResults',
+                searchTerm: 'hijazo de mi vidaza',
+                searchResults: [
+                    {phrase: 'hijazo de mi vidaza', topDefinition: 'asi le dicen al muñecón', key: 1},
+                    {phrase: 'hijo del mal dormir', topDefinition: 'cuando alguien te cae mal', key: 2}
+                ]
+            };
+        }
+    },
+    {
+        serverRoute: '/searchPhrase/:searchTerm',
+        serverParamNames: ['searchTerm'],
+        clientRoute: 'searchPhrase/:searchTerm',
+        clientRouterFunc: clientRouterFunc,
+        clientRouterFuncName: '/searchPhrase/:searchTerm',
+        calculateStateFunc: function () {
+            return {
+                viewing: 'PhraseSearchResults',
+                searchTerm: 'hijazo de mi vidaza',
+                searchResults: [
+                    {phrase: 'hijazo de mi vidaza', topDefinition: 'asi le dicen al muñecón', key: 1},
+                    {phrase: 'hijo del mal dormir', topDefinition: 'cuando alguien te cae mal', key: 2}
+                ]
+            };
+        }
+    }
+];
+
+var normalizeRouteInfo = function (clientOrServer, routeInfo, data) {
+    if ('server' === clientOrServer) {
+        //console.log('aveeee' + JSON.stringify(routeInfo));
         return {
-            viewing: 'PhraseSearchResults',
-            searchTerm: 'hijazo de mi vidaza',
-            searchResults: [
-                {phrase: 'hijazo de mi vidaza', topDefinition: 'asi le dicen al muñecón', key: 1},
-                {phrase: 'hijo del mal dormir', topDefinition: 'cuando alguien te cae mal', key: 2}
-            ]
+            route: routeInfo.serverRoute,
+            params: _.zipObject(
+                _.map(routeInfo.serverParamNames, function (paramName) {
+                    return paramName;
+                }),
+                _.map(routeInfo.serverParamNames, function (paramName) {
+                    return data[paramName];
+                })
+            )
         };
+    } else if ('client' === clientOrServer) {
+        var args = data[1];
+        return {
+            route: routeInfo.clientRouterFuncName,
+            params: _.zipObject(
+                _.map(routeInfo.serverParamNames, function (paramName) {
+                    return paramName;
+                }),
+                _.map(routeInfo.serverParamNames, function (paramName) {
+                    return args.shift();
+                })
+            )
+        };
+    } else {
+        throw new Error("first argument (clientOrServer) should be 'client' or 'server'.");
+    }
+};
+
+var CrowDictionary = React.createClass({
+/*var routes = {
+    '': 'home',
+    'phrases/:phrase': 'phrases',
+    'searchPhrase/:searchTerm': 'searchPhrase'
+};
+
+var Router = Backbone.Router.extend({
+    routes: routes,
+
+    home: function () {
+        console.log('home!');
+        React.renderComponent(
+            <CrowDictionary/>,
+            document
+        );
+    },
+
+    fake: function () {
+        console.log('fake');
+    }
+});
+
+//console.log("Router: " + Router);
+
+var router = new Router();
+
+Backbone.history.start({
+    pushState: true,
+    hashChange: true
+    // hashChange: Modernizr.history ? true : false
+});*/
+
+    getInitialState: function () {
+        return {};
+    },
+    componentWillMount: function () {
+        if (se) {
+            se.on('matchRoute', function (route, routeParams) {
+                var routeInfo = _.where(routesInfo, {serverRoute: route})[0],
+                    nRouteInfo = normalizeRouteInfo('server', routeInfo, routeParams);
+                console.log("das nRouteInfo: " + JSON.stringify(nRouteInfo));
+            });
+        }
+        if (ce) {
+            ce.on('route', function (route, arg1) {
+                var routeInfo = _.where(routesInfo, {clientRouterFuncName: route})[0],
+                    nRouteInfo = normalizeRouteInfo('client', routeInfo, arguments);
+                console.log("das nRouteInfo: " + JSON.stringify(nRouteInfo));
+            });
+        }
+        console.log("component will mount");
+        this.setState({
+            searchTerm: 'peninerve'
+        });
     },
     handleUserInput: function (state) {
         this.setState({
@@ -30,13 +195,13 @@ var CrowDictionary = React.createClass({
               <script src="/static/js/dep/underscore.js" />
               <script src="/static/js/dep/jquery.js" />
               <script src="/static/js/dep/backbone.js" />
-              <script src="/static/js/app.js" />
             </head>
             <body>
             <div>
                 <TopBar onUserInput={this.handleUserInput}/>
                 <PhraseSearchResults searchTerm={this.state.searchTerm} searchResults={this.state.searchResults}/>
             </div>
+            <script src="/static/js/app.js" />
             </body>
             </html>
         );
@@ -206,47 +371,20 @@ var InterfaceComponent = React.createClass({
     }
 });
 
-var pages = {
-    '/': {
-        /*'func': function (params) {
-            console.log('route /');
-            var component = (
-                <InterfaceComponent router=
-            );
-            return component;
-            //var markup = React.renderComponentToString(component);
-            //return markup;
-        },*/
-        'paramNames': []
-    },
-    '/searchPhrase/:searchTerm': {
-        /*'func': function (params) {
-            console.log('route /posts/:id');
-            var component = (
-                <Layout>
-                    <p>From server: <Widget clientOrServer="server" postId={params.id}/></p>
-                    <p><div id="client"></div></p>
-                </Layout>
-            );
-            return component;
-            //var markup = React.renderComponentToString(component);
-            //return markup;
-        },*/
-        'paramNames': ['searchTerm']
-    }
-};
+/*if (Backbone) {
+    // we're in FE
+    require('../../../client/build/js/app.js');
+} else {
+    // we're in BE
+    require('../../../server/build/js/app.js');
+}*/
 
-/*var Widget = React.createClass({
-    render: function () {
-        return <p>hello there!</p>;
-    }
-});*/
-/*React.renderComponent(
-    <h1>Hello, world!</h1>,
-    document.getElementById('example')
-);*/
 
 module.exports.bs = bs;
-module.exports.pages = pages;
 module.exports.InterfaceComponent = InterfaceComponent;
 module.exports.CrowDictionary = CrowDictionary;
+module.exports.routesInfo = routesInfo;
+module.exports.ce = ce;
+module.exports.se = se;
+module.exports.setSe = setSe;
+module.exports.setCe = setCe;
