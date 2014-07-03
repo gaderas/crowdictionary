@@ -35,7 +35,10 @@ console.log('mockData: ' + mockData);
 
 var CrowDictionary = shared.CrowDictionary,
     routesInfo = shared.routesInfo,
-    setSe = shared.setSe;
+    setSe = shared.setSe,
+    ne = shared.ne,
+    getNormalizedRouteInfo = shared.getNormalizedRouteInfo;
+    setNRouteInfo = shared.setNRouteInfo;
 
 //app.use(serve('./client/build'));
 
@@ -78,13 +81,15 @@ _.forEach(routesInfo, function (routeInfo) {
     console.log('adding server route ' + routeInfo.serverRoute + '?');
     appReact.get(routeInfo.serverRoute, function *(next) {
         yield next;
+        setNRouteInfo(getNormalizedRouteInfo('server', routeInfo.serverRoute, this.params));
         //var markup = serverRoute.server(this.params);
-        var markup = React.renderComponentToString(
-            <CrowDictionary/>
-        );
-        console.log("this.params: " + JSON.stringify(_.toArray(this.params)));
-        se.matchRoute(routeInfo.serverRoute, this.params);
-        this.body = markup;
+        //se.matchRoute(routeInfo.serverRoute, this.params);
+        //ne.on('matchRoute', (function (route, params) {
+            var markup = React.renderComponentToString(
+                <CrowDictionary/>
+            );
+            this.body = markup;
+        //}).bind(this));
     });
 });
 

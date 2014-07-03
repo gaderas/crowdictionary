@@ -4,26 +4,74 @@ var React = require('react');
 var bs = require('./bootstrap.js');
 var _ = require('lodash');
 var util = require('util');
+var EventEmitter = require('events').EventEmitter;
 
 var Layout = bs.Layout;
 var Widget = bs.Widget;
 
-var EventEmitter = require('events').EventEmitter;
 
-var ClientRouterEmitter = function () {
+
+
+
+var NormalizedRouterEmitter = function () {
     EventEmitter.call(this);
     this.matchRoute = function (route, routeParams) {
         this.emit('matchRoute', route, routeParams);
     };
 };
-ClientRouterEmitter.prototype = Object.create(EventEmitter.prototype);
+NormalizedRouterEmitter.prototype = Object.create(EventEmitter.prototype);
 
-var clientRouterEmitter = new ClientRouterEmitter();
+var ne = new NormalizedRouterEmitter();
 
-clientRouterEmitter.on('matchRoute', function (route, routeParams) {
-    console.log(util.format("on matchRoute. route: %s, routeParams: %s", route, JSON.stringify(routeParams)));
-});
 
+var nRouteInfo,
+    setNRouteInfo = function (newNRouteInfo) {
+        nRouteInfo = newNRouteInfo;
+    },
+    ce,
+    se,
+    latestState = {searchTerm: 'virgencito'},
+    setInitialState = function (initialState) {
+        latestState = initialState
+    },
+    setSe = function (callback) {
+        se = callback;
+        if (se) {
+            var nRouteInfo;
+            se.on('matchRoute', (function (route, routeParams) {
+                var routeInfo = _.where(routesInfo, {serverRoute: route})[0],
+
+                nRouteInfo = normalizeRouteInfo('server', routeInfo, routeParams);
+                console.log("das nRouteInfo: " + JSON.stringify(nRouteInfo));
+                ne.matchRoute(nRouteInfo.route, nRouteInfo.params);
+            }).bind(this));
+        }
+    },
+    setCe = function (callback) {
+        ce = callback;
+        if (ce) {
+            var nRouteInfo;
+            ce.on('route', (function (route, arg1) {
+                var routeInfo = _.where(routesInfo, {clientRouterFuncName: route})[0],
+
+                nRouteInfo = normalizeRouteInfo('client', routeInfo, arguments);
+                console.log("das nRouteInfo: " + JSON.stringify(nRouteInfo));
+                ne.matchRoute(nRouteInfo.route, nRouteInfo.params);
+            }).bind(this));
+        }
+    };
+
+var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams) {
+    return normalizeRouteInfo(clientOrServer, routeInfo, routeParams);
+};
+
+
+/**
+ * takes a `routeInfo` as normalized by normalizeRouteInfo()
+ */
+var getStateForRouteInfo = function (routeInfo) {
+    return {searchTerm: 'whatevs'};
+};
 
 var clientRouterFunc = function () {
     React.renderComponent(
@@ -31,15 +79,6 @@ var clientRouterFunc = function () {
         document
     );
 };
-
-var ce,
-    se,
-    setSe = function (callback) {
-        se = callback;
-    },
-    setCe = function (callback) {
-        ce = callback;
-    };
 
 var routesInfo = [
     {
@@ -128,60 +167,11 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, data) {
 };
 
 var CrowDictionary = React.createClass({
-/*var routes = {
-    '': 'home',
-    'phrases/:phrase': 'phrases',
-    'searchPhrase/:searchTerm': 'searchPhrase'
-};
-
-var Router = Backbone.Router.extend({
-    routes: routes,
-
-    home: function () {
-        console.log('home!');
-        React.renderComponent(
-            <CrowDictionary/>,
-            document
-        );
-    },
-
-    fake: function () {
-        console.log('fake');
-    }
-});
-
-//console.log("Router: " + Router);
-
-var router = new Router();
-
-Backbone.history.start({
-    pushState: true,
-    hashChange: true
-    // hashChange: Modernizr.history ? true : false
-});*/
-
     getInitialState: function () {
-        return {};
+        return latestState;
     },
     componentWillMount: function () {
-        if (se) {
-            se.on('matchRoute', function (route, routeParams) {
-                var routeInfo = _.where(routesInfo, {serverRoute: route})[0],
-                    nRouteInfo = normalizeRouteInfo('server', routeInfo, routeParams);
-                console.log("das nRouteInfo: " + JSON.stringify(nRouteInfo));
-            });
-        }
-        if (ce) {
-            ce.on('route', function (route, arg1) {
-                var routeInfo = _.where(routesInfo, {clientRouterFuncName: route})[0],
-                    nRouteInfo = normalizeRouteInfo('client', routeInfo, arguments);
-                console.log("das nRouteInfo: " + JSON.stringify(nRouteInfo));
-            });
-        }
-        console.log("component will mount");
-        this.setState({
-            searchTerm: 'peninerve'
-        });
+        this.setState(getStateForRouteInfo(nRouteInfo));
     },
     handleUserInput: function (state) {
         this.setState({
@@ -207,6 +197,7 @@ Backbone.history.start({
         );
     }
 });
+
 
 var TopBar = React.createClass({
     render: function () {
@@ -371,14 +362,6 @@ var InterfaceComponent = React.createClass({
     }
 });
 
-/*if (Backbone) {
-    // we're in FE
-    require('../../../client/build/js/app.js');
-} else {
-    // we're in BE
-    require('../../../server/build/js/app.js');
-}*/
-
 
 module.exports.bs = bs;
 module.exports.InterfaceComponent = InterfaceComponent;
@@ -388,3 +371,6 @@ module.exports.ce = ce;
 module.exports.se = se;
 module.exports.setSe = setSe;
 module.exports.setCe = setCe;
+module.exports.ne = ne;
+module.exports.getNormalizedRouteInfo = getNormalizedRouteInfo;
+module.exports.setNRouteInfo = setNRouteInfo;
