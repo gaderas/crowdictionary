@@ -35,8 +35,6 @@ console.log('mockData: ' + mockData);
 
 var CrowDictionary = shared.CrowDictionary,
     routesInfo = shared.routesInfo,
-    setSe = shared.setSe,
-    ne = shared.ne,
     getNormalizedRouteInfo = shared.getNormalizedRouteInfo;
     setNRouteInfo = shared.setNRouteInfo;
 
@@ -66,30 +64,16 @@ appWs.get('/teams', function *(next) {
     this.body = mockData.getTeams();
 });
 
-var ServerRouterEmitter = function () {
-    EventEmitter.call(this);
-    this.matchRoute = function (route, routeParams) {
-        this.emit('matchRoute', route, routeParams);
-    };
-};
-ServerRouterEmitter.prototype = Object.create(EventEmitter.prototype);
-
-var se = new ServerRouterEmitter();
-
 
 _.forEach(routesInfo, function (routeInfo) {
     console.log('adding server route ' + routeInfo.serverRoute + '?');
     appReact.get(routeInfo.serverRoute, function *(next) {
         yield next;
         setNRouteInfo(getNormalizedRouteInfo('server', routeInfo.serverRoute, this.params));
-        //var markup = serverRoute.server(this.params);
-        //se.matchRoute(routeInfo.serverRoute, this.params);
-        //ne.on('matchRoute', (function (route, params) {
-            var markup = React.renderComponentToString(
-                <CrowDictionary/>
-            );
-            this.body = markup;
-        //}).bind(this));
+        var markup = React.renderComponentToString(
+            <CrowDictionary/>
+        );
+        this.body = markup;
     });
 });
 
@@ -97,17 +81,9 @@ appReact.get('/dummy/:something', function *(next) {
     yield next;
     //var markup = serverRoute.server(this.params);
     console.log("this.params: " + JSON.stringify(_.toArray(this.params)));
-    se.matchRoute('/dummy', this.params.something);
     this.body = 'dummay';
 });
 
-setSe(se);
-
-/*appReact.get('/', function *(next) {
-    console.log('hier');
-    yield next;
-    this.body = shared.serverRoutes render();
-});*/
 
 app.use(mount('/static', serve('./client/build')));
 app.use(mount('/v1', appWs));

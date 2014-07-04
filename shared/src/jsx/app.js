@@ -10,59 +10,18 @@ var Layout = bs.Layout;
 var Widget = bs.Widget;
 
 
-
-
-
-var NormalizedRouterEmitter = function () {
-    EventEmitter.call(this);
-    this.matchRoute = function (route, routeParams) {
-        this.emit('matchRoute', route, routeParams);
-    };
-};
-NormalizedRouterEmitter.prototype = Object.create(EventEmitter.prototype);
-
-var ne = new NormalizedRouterEmitter();
-
-
 var nRouteInfo,
     setNRouteInfo = function (newNRouteInfo) {
         nRouteInfo = newNRouteInfo;
+        console.log('on setNRouteInfo!!');
     },
-    ce,
-    se,
-    latestState = {searchTerm: 'virgencito'},
-    setInitialState = function (initialState) {
-        latestState = initialState
-    },
-    setSe = function (callback) {
-        se = callback;
-        if (se) {
-            var nRouteInfo;
-            se.on('matchRoute', (function (route, routeParams) {
-                var routeInfo = _.where(routesInfo, {serverRoute: route})[0],
-
-                nRouteInfo = normalizeRouteInfo('server', routeInfo, routeParams);
-                console.log("das nRouteInfo: " + JSON.stringify(nRouteInfo));
-                ne.matchRoute(nRouteInfo.route, nRouteInfo.params);
-            }).bind(this));
-        }
-    },
-    setCe = function (callback) {
-        ce = callback;
-        if (ce) {
-            var nRouteInfo;
-            ce.on('route', (function (route, arg1) {
-                var routeInfo = _.where(routesInfo, {clientRouterFuncName: route})[0],
-
-                nRouteInfo = normalizeRouteInfo('client', routeInfo, arguments);
-                console.log("das nRouteInfo: " + JSON.stringify(nRouteInfo));
-                ne.matchRoute(nRouteInfo.route, nRouteInfo.params);
-            }).bind(this));
-        }
-    };
+    initialState = {searchTerm: 'virgencito'};
 
 var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams) {
-    return normalizeRouteInfo(clientOrServer, routeInfo, routeParams);
+    return _.merge(
+        normalizeRouteInfo(clientOrServer, routeInfo, routeParams),
+        {clientOrServer: clientOrServer}
+    );
 };
 
 
@@ -73,7 +32,15 @@ var getStateForRouteInfo = function (routeInfo) {
     return {searchTerm: 'whatevs'};
 };
 
-var clientRouterFunc = function () {
+/**
+ * was bound to `this` of Backbone router
+ */
+var clientRouterFunc = function (routeInfo) {
+    var args = _.toArray(arguments),
+        params = _.map(routeInfo.serverParamNames, function (paramName) {
+            return args.shift();
+        });
+    setNRouteInfo(getNormalizedRouteInfo('client', routeInfo.clientRoute, params));
     React.renderComponent(
         <CrowDictionary/>,
         document
@@ -168,9 +135,10 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, data) {
 
 var CrowDictionary = React.createClass({
     getInitialState: function () {
-        return latestState;
+        return initialState;
     },
     componentWillMount: function () {
+        console.log('running on ' + nRouteInfo.clientOrServer);
         this.setState(getStateForRouteInfo(nRouteInfo));
     },
     handleUserInput: function (state) {
@@ -367,10 +335,5 @@ module.exports.bs = bs;
 module.exports.InterfaceComponent = InterfaceComponent;
 module.exports.CrowDictionary = CrowDictionary;
 module.exports.routesInfo = routesInfo;
-module.exports.ce = ce;
-module.exports.se = se;
-module.exports.setSe = setSe;
-module.exports.setCe = setCe;
-module.exports.ne = ne;
 module.exports.getNormalizedRouteInfo = getNormalizedRouteInfo;
 module.exports.setNRouteInfo = setNRouteInfo;

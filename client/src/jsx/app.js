@@ -6,8 +6,7 @@ var _ = require('lodash');
 var shared = require('../../../../shared/build/js/app.js');
 
 var CrowDictionary = shared.CrowDictionary,
-    routesInfo = shared.routesInfo,
-    setCe = shared.setCe;
+    routesInfo = shared.routesInfo;
 
 console.log('ehlos');
 /*var routes = _.map(shared.pages, function (page, routeName) {
@@ -39,7 +38,7 @@ var Router = Backbone.Router.extend(
         _.zipObject(_.map(routesInfo, function (routeInfo) {
             return routeInfo.clientRouterFuncName
         }), _.map(routesInfo, function (routeInfo) {
-            return routeInfo.clientRouterFunc.bind(this)
+            return routeInfo.clientRouterFunc.bind(this, routeInfo)
         }))
     )
 
@@ -60,7 +59,6 @@ var Router = Backbone.Router.extend(
 
 var router = new Router();
 
-setCe(router);
 
 Backbone.history.start({
     pushState: true,
