@@ -11,9 +11,10 @@ var Widget = bs.Widget;
 
 
 var nRouteInfo,
-    setNRouteInfo = function (newNRouteInfo) {
+    setupRoute = function (newNRouteInfo, callback) {
+        console.log('on setupRoute!!');
+        callback(null, newNRouteInfo);
         nRouteInfo = newNRouteInfo;
-        console.log('on setNRouteInfo!!');
     },
     initialState = {searchTerm: 'virgencito'};
 
@@ -40,11 +41,12 @@ var clientRouterFunc = function (routeInfo) {
         params = _.map(routeInfo.serverParamNames, function (paramName) {
             return args.shift();
         });
-    setNRouteInfo(getNormalizedRouteInfo('client', routeInfo.clientRoute, params));
-    React.renderComponent(
-        <CrowDictionary/>,
-        document
-    );
+    setupRoute(getNormalizedRouteInfo('client', routeInfo.clientRoute, params), function (error, routeInfo) {
+        React.renderComponent(
+            <CrowDictionary/>,
+            document
+        );
+    });
 };
 
 var routesInfo = [
@@ -136,10 +138,6 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, data) {
 var CrowDictionary = React.createClass({
     getInitialState: function () {
         return initialState;
-    },
-    componentWillMount: function () {
-        console.log('running on ' + nRouteInfo.clientOrServer);
-        this.setState(getStateForRouteInfo(nRouteInfo));
     },
     handleUserInput: function (state) {
         this.setState({
@@ -333,7 +331,7 @@ var InterfaceComponent = React.createClass({
 
 module.exports.bs = bs;
 module.exports.InterfaceComponent = InterfaceComponent;
-module.exports.CrowDictionary = CrowDictionary;
 module.exports.routesInfo = routesInfo;
 module.exports.getNormalizedRouteInfo = getNormalizedRouteInfo;
-module.exports.setNRouteInfo = setNRouteInfo;
+module.exports.setupRoute = setupRoute;
+module.exports.CrowDictionary = CrowDictionary;
