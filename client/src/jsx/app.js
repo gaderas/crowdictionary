@@ -42,6 +42,7 @@ var Router = Backbone.Router.extend(
         }))
     )
 
+);
     /*home: function () {
         console.log('home!');
         React.renderComponent(
@@ -53,7 +54,6 @@ var Router = Backbone.Router.extend(
     fake: function () {
         console.log('fake');
     }*/
-);
 
 //console.log("Router: " + Router);
 

@@ -1,10 +1,12 @@
 /** @jsx React.DOM */
 
+var Q = require('q');
 var React = require('react');
 var bs = require('./bootstrap.js');
 var _ = require('lodash');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
+//var request = require('request');
 
 var Layout = bs.Layout;
 var Widget = bs.Widget;
@@ -16,9 +18,14 @@ var nRouteInfo,
         callback(null, newNRouteInfo);
         nRouteInfo = newNRouteInfo;
     },
-    initialState = {searchTerm: 'virgencito'};
+    initialState = {searchTerm: 'virgencito'},
+    setInitialState = function (state) {
+        initialState = state;
+    };
 
 var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams) {
+    console.log('on getNormalizedRouteInfo(), routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
+    console.log('on getNormalizedRouteInfo(), routeParams: ' + JSON.stringify(routeParams, ' ', 4));
     return _.merge(
         normalizeRouteInfo(clientOrServer, routeInfo, routeParams),
         {clientOrServer: clientOrServer}
@@ -26,27 +33,42 @@ var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams) {
 };
 
 
-/**
- * takes a `routeInfo` as normalized by normalizeRouteInfo()
- */
-var getStateForRouteInfo = function (routeInfo) {
-    return {searchTerm: 'whatevs'};
-};
 
 /**
  * was bound to `this` of Backbone router
  */
 var clientRouterFunc = function (routeInfo) {
-    var args = _.toArray(arguments),
+    console.log('on clientRouterFunc() begin');
+    var args = _(arguments).toArray().slice(1).value(),
+        fake3 = console.log('on clientRouterFunc(), args: ' + JSON.stringify(args)),
         params = _.map(routeInfo.serverParamNames, function (paramName) {
             return args.shift();
+        }),
+        fake1 = console.log('on clientRouterFunc(), routeInfo: ' + JSON.stringify(routeInfo)),
+        fake2 = console.log('on clientRouterFunc(), params: ' + JSON.stringify(params)),
+        nRouteInfo = getNormalizedRouteInfo('client', routeInfo, params);
+
+
+    console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
+    console.log('args: ' + JSON.stringify(args, ' ', 4));
+    console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
+    Q($.ajax({url: '/v1/teams', type: 'GET'}))
+        .then(function (data) {
+            console.log('on client with a body of length: ' + data.length);
+            setInitialState({
+                searchTerm: 'beginning of boday: "' + data.substr(0, 10) + '"'
+            });
+            React.renderComponent(
+                <CrowDictionary/>,
+                document
+            );
         });
-    setupRoute(getNormalizedRouteInfo('client', routeInfo.clientRoute, params), function (error, routeInfo) {
+    /*setupRoute(getNormalizedRouteInfo('client', routeInfo.clientRoute, params), function (error, routeInfo) {
         React.renderComponent(
             <CrowDictionary/>,
             document
         );
-    });
+    });*/
 };
 
 var routesInfo = [
@@ -118,7 +140,11 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, data) {
             )
         };
     } else if ('client' === clientOrServer) {
-        var args = data[1];
+        console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
+        console.log('data: ' + JSON.stringify(data, ' ', 4));
+        var args = data;
+        console.log('on clientzz');
+        console.log('on normalizeRouteInfo(), routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
         return {
             route: routeInfo.clientRouterFuncName,
             params: _.zipObject(
@@ -135,7 +161,53 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, data) {
     }
 };
 
+
+/*var AsyncMixin = {
+    asyncRenderComponentToString = function (component, ) {
+    }
+};*/
+var ReactAsync = {
+};
+
 var CrowDictionary = React.createClass({
+    componentWillMount: function () {
+        //this.setState({searchTerm: 'success-ish'});
+        /*request('http://www.google.com', (function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                //callback(null, body); // Print the google web page.
+                this.setState({searchTerm: 'i like'});
+                return;
+            } else {
+                console.log("error fetching googoogoog.el.com!!");
+                //callback(error);
+                return;
+            }
+        }).bind(this));*/
+    },
+    /*asyncRenderComponentToString: function (callback) {
+        this.type.asyncGetInitialState(function (err, resp) {
+            if (err) {
+                console.log('errerus');
+            }
+            this.type.setState({
+                searchTerm: 'got google page with length: ' + resp.length
+            });
+        });
+        var markup = React.renderComponentToString(this);
+        callback(null, markup);
+    },*/
+    /*asyncGetInitialState: function (callback) {
+        request('http://www.google.com', function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                callback(null, body); // Print the google web page.
+                return;
+            } else {
+                console.log("error fetching googoogoog.el.com!!");
+                callback(error);
+                return;
+            }
+        });
+    },*/
     getInitialState: function () {
         return initialState;
     },
@@ -335,3 +407,4 @@ module.exports.routesInfo = routesInfo;
 module.exports.getNormalizedRouteInfo = getNormalizedRouteInfo;
 module.exports.setupRoute = setupRoute;
 module.exports.CrowDictionary = CrowDictionary;
+module.exports.setInitialState = setInitialState;

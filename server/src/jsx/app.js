@@ -1,5 +1,7 @@
 /** @jsx React.DOM */
 
+var Q = require('q');
+var request = require('request');
 var React = require('react');
 var serve = require('koa-static');
 var koa = require('koa');
@@ -36,7 +38,9 @@ console.log('mockData: ' + mockData);
 var CrowDictionary = shared.CrowDictionary,
     routesInfo = shared.routesInfo,
     getNormalizedRouteInfo = shared.getNormalizedRouteInfo,
-    setupRoute = shared.setupRoute;
+    setupRoute = shared.setupRoute,
+    asyncRenderComponentToString = shared.asyncRenderComponentToString,
+    setInitialState = shared.setInitialState;
 
 //app.use(serve('./client/build'));
 
@@ -64,12 +68,48 @@ appWs.get('/teams', function *(next) {
     this.body = mockData.getTeams();
 });
 
+var requestSomething = function (callback) {
+    request('http://localhost:3000/v1/teams', function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            callback(null, body); // Print the google web page.
+            return;
+        } else {
+            console.log("error fetching googoogoog.el.com!!");
+            callback(error);
+            return;
+        }
+    });
+};
+
+var requestSome = Q.denodeify(requestSomething);
+
 
 _.forEach(routesInfo, function (routeInfo) {
     console.log('adding server route ' + routeInfo.serverRoute + '?');
     appReact.get(routeInfo.serverRoute, function *(next) {
-        yield next;
-        setupRoute(getNormalizedRouteInfo('server', routeInfo.serverRoute, this.params), function (error, routeInfo) {
+        //yield next;
+        yield requestSome()
+            .then((function (body) {
+                var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params);
+                console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
+                setInitialState({
+                    searchTerm: 'beginning of boday: "' + body.substr(0, 10) + '"'
+                });
+                var markup = React.renderComponentToString(
+                    <CrowDictionary/>
+                );
+                this.body = markup;
+            }).bind(this));
+        /*asyncRenderComponentToString(
+            <CrowDictionary/>,
+            function (err, mkup) {
+                if (err) {
+                    console.error('errortz');
+                }
+                this.body = markup;
+            }
+        );*/
+        /*setupRoute(getNormalizedRouteInfo('server', routeInfo.serverRoute, this.params), function (error, routeInfo) {
             CrowDictionary.componentWillMount = function () {
                 console.log('running on ' + nRouteInfo.clientOrServer);
                 this.setState(getStateForRouteInfo(routeInfo));
@@ -78,7 +118,7 @@ _.forEach(routesInfo, function (routeInfo) {
                 <CrowDictionary/>
             );
             this.body = markup;
-        });
+        });*/
     });
 });
 
