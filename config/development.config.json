@@ -12,8 +12,14 @@
         "source": "mysql",
         "dbConfig": {
             "host": "localhost",
-            "database": "soccr",
+            "database": "crowdictionary",
             "connectionLimit": 10
+        }
+    },
+    "cookies": {
+        "user": {
+            "name": "U",
+            "secrets": ""
         }
     }
 }
