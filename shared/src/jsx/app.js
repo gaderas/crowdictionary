@@ -52,12 +52,13 @@ var clientRouterFunc = function (routeInfo) {
     console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
     console.log('args: ' + JSON.stringify(args, ' ', 4));
     console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
-    Q($.ajax({url: '/v1/teams', type: 'GET'}))
+    Q($.ajax({url: 'http://localhost:3000/v1/lang/es-MX/phrases', type: 'GET'}))
         .then(function (data) {
             console.log('on client with a body of length: ' + data.length);
-            setInitialState({
-                searchTerm: 'beginning of boday: "' + data.substr(0, 10) + '"'
-            });
+            console.log('on client with body (data): ' + JSON.stringify(data));
+            /*setInitialState({
+                searchTerm: 'beginning of boday: "'  + '"'
+            });*/
             React.renderComponent(
                 <CrowDictionary/>,
                 document

@@ -108,7 +108,7 @@ Data.prototype.getDefinitions = function (params) {
     return pQuery("SELECT d.* FROM `phrase` p LEFT JOIN `definition` d ON p.id = d.phrase_id WHERE ? AND ? ORDER BY d.updated ASC", [{'d.lang': actualParams.lang}, {'p.phrase': actualParams.phrase}]);
 };
 
-Data.prototype.createDefinition = function (payload) {
+Data.prototype.putDefinition = function (payload) {
     var pQuery = this.pQuery;
 
     if (!payload.contributor_id) {
@@ -126,7 +126,7 @@ Data.prototype.getVotes = function (params) {
     return pQuery("SELECT * FROM `vote` WHERE definition_id IN (?)", params.definition_ids);
 };
 
-Data.prototype.createVote = function (payload) {
+Data.prototype.putVote = function (payload) {
     var pQuery = this.pQuery;
 
     if (!payload.contributor_id) {

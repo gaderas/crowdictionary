@@ -24,6 +24,7 @@ CREATE TABLE `definition` (
     `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated` TIMESTAMP DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
+    UNIQUE INDEX (`lang`, `phrase_id`, `contributor_id`),
     INDEX (`phrase_id`),
     INDEX (`contributor_id`)
 );
@@ -36,6 +37,7 @@ CREATE TABLE `vote` (
     `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated` TIMESTAMP DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
+    UNIQUE INDEX (`definition_id`, `contributor_id`),
     INDEX (`definition_id`),
     INDEX (`contributor_id`)
 );

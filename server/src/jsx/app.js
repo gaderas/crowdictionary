@@ -19,6 +19,8 @@ var nconf = require('nconf');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var appUtil = require('../../../shared/build/js/util.js');
+var Keygrip = require('keygrip');
+var crypto = require('crypto');
 
 var NODE_ENV = process.env.NODE_ENV;
 
@@ -49,15 +51,38 @@ var CrowDictionary = shared.CrowDictionary,
 appReact.use(router(appReact));
 app.keys = nconf.get("cookies:user:secrets").split(',');
 appWs.use(function *(next) {
+    var browserId = this.cookies.get('browserId', {signed: true}),
+        keygrip = new Keygrip(app.keys),
+        crumb,
+        now = new Date();;
+    if (!browserId) {
+        try {
+            browserId = keygrip.sign(crypto.randomBytes(256));
+        } catch (ex) {
+            console.log("couldn't generate a random browserId with error: " + ex.message);
+            browserId = 'l;dsffjs;adj';
+        }
+        this.cookies.set('browserId', browserId, {signed: true, expires: new Date(now.getFullYear()+1, now.getMonth(), now.getDate())});
+    }
+    app.crumb = keygrip.sign(browserId);
     console.log('csrf middleware before yield');
     yield next;
     console.log('csrf middleware after yield');
 });
 appWs.use(function *(next) {
+    var contributorCookie = this.cookies.get('contributor', {signed: true}),
+        contributor;
+    try {
+        contributor = JSON.parse(contributorCookie);
+    } catch(ex) {
+        contributor = null;
+    }
+    appWs.contributor = contributor;
     console.log('authentication middleware before yield');
     yield next;
     console.log('authentication middleware after yield');
 });
+// @TODO: implement CSRF prevention/crumb
 appWs.use(bodyParser());
 appWs.use(router(appWs));
 
@@ -95,10 +120,9 @@ appWs.post('/login', function *(next) {
 });
 
 appWs.get('/login', function *(next) {
-    var contributorCookie = this.cookies.get('contributor', {signed: true});
     yield next;
-    this.status = contributorCookie ? 200 : 401;
-    this.body = JSON.parse(contributorCookie) || {message: "not logged in"};
+    this.status = appWs.contributor ? 200 : 401;
+    this.body = appWs.contributor ? _.merge(appWs.contributor, {crumb: app.crumb}) : {message: "not logged in"};
 });
 
 appWs.get('/contributors', function *(next) {
@@ -108,9 +132,22 @@ appWs.get('/contributors', function *(next) {
 });
 
 appWs.put('/contributors', function *(next) {
-    console.log('put /contributors incoming body: ' + JSON.stringify(this.request.body));
     var requestBody = appUtil.getObjectWithoutProps(this.request.body, ['status', 'verified', 'verification_code', 'verification_retries']);
-    this.body = yield mockData.putContributor(this.query, requestBody)
+    console.log('put /contributors incoming body: ' + JSON.stringify(this.request.body));
+    if (!appWs.contributor) {
+        this.status = 401;
+        this.body = "not logged in";
+        return;
+    } else if (appWs.contributor.email !== this.query.email) {
+        this.status = 403;
+        this.body = "trying to modify a contributor record for a user other than the signed in user";
+        return;
+    } else if (app.crumb !== requestBody.crumb) {
+        this.status = 403;
+        this.body = "invalid crumb";
+        return;
+    }
+    this.body = yield mockData.putContributor(this.query, appUtil.getObjectWithoutProps(requestBody, ['crumb']))
         .then(function (res) {
             return {message: "contributor created/updated"};
         })
@@ -138,6 +175,7 @@ appWs.get('/lang/:lang/phrases/:phrase', function *(next) {
 });
 
 appWs.put('/lang/:lang/phrases/:phrase', function *(next) {
+    console.log("phrase in URI: '" + this.params.phrase + "'");
     console.log('put /phrases incoming body: ' + JSON.stringify(this.request.body));
     var requestBody = appUtil.getObjectWithoutProps(this.request.body, ['contributor_id']),
         contributorCookie = this.cookies.get('contributor', {signed: true}),
@@ -148,6 +186,12 @@ appWs.put('/lang/:lang/phrases/:phrase', function *(next) {
         this.body = {message: "unauthenticated call not allowed"};
         return;
     }
+    if (requestBody.crumb !== app.crumb) {
+        this.status = 401;
+        this.body = {message: "invalid crumb provided"};
+        return;
+    }
+    requestBody = appUtil.getObjectWithoutProps(requestBody, ['crumb']); // once validated, get rid of crumb
     if (this.params.phrase !== requestBody.phrase || this.params.lang !== requestBody.lang) {
         this.status = 400;
         this.body = {message: "'phrase' or 'lang' value mistmatch between URI and HTTP request body"};
@@ -181,6 +225,10 @@ appWs.get('/lang/:lang/phrases/:phrase/definitions', function *(next) {
         });
 });
 
+/**
+ * Up to one definition per lang/phrase/contributor, i.e.:
+ * the first POST creates a record. following POSTs update record.
+ */
 appWs.post('/lang/:lang/phrases/:phrase/definitions', function *(next) {
     var requestBody = appUtil.getObjectWithoutProps(this.request.body, ['contributor_id']),
         contributorCookie = this.cookies.get('contributor', {signed: true}),
@@ -191,13 +239,20 @@ appWs.post('/lang/:lang/phrases/:phrase/definitions', function *(next) {
         this.body = {message: "unauthenticated call not allowed"};
         return;
     }
+    if (requestBody.crumb !== app.crumb) {
+        this.status = 401;
+        this.body = {message: "invalid crumb provided"};
+        return;
+    }
     if (this.params.phrase !== requestBody.phrase) {
+        console.log(util.format("this.params.phrase (%s) !== requestBody.phrase (%s)", this.params.phrase, requestBody.phrase));
         this.status = 400;
         this.body = {message: "'phrase' value mistmatch between URI and HTTP request body"};
         return;
     }
-    // stip out 'phrase', we'll attach 'phrase_id' below...
-    requestBody = appUtil.getObjectWithoutProps(requestBody, ['phrase']);
+    // strip out 'phrase', we'll attach 'phrase_id' below...
+    // strip out 'crumb'
+    requestBody = appUtil.getObjectWithoutProps(requestBody, ['phrase', 'crumb']);
 
     yield mockData.getPhrases({lang: this.params.lang, phrase: this.params.phrase})
         .then(function (res) {
@@ -210,16 +265,16 @@ appWs.post('/lang/:lang/phrases/:phrase/definitions', function *(next) {
         .then(function (phraseId) {
             console.log('phraseId to be used for new definition insert: ' + phraseId);
             requestBody.phrase_id = phraseId;
-            return mockData.createDefinition(requestBody);
+            return mockData.putDefinition(requestBody);
         })
         .then((function (res) {
             this.status = 200;
-            this.body = {message: "definition created"};
+            this.body = {message: "definition created/updated"};
             return;
         }).bind(this))
         .fail((function (err) {
             this.status = 500;
-            this.body = {message: "couldn't create definition. error: " + err};
+            this.body = {message: "couldn't create/update definition. error: " + err};
             return;
         }).bind(this));
 });
@@ -237,13 +292,19 @@ appWs.put('/definitions/:definition_id/vote', function *(next) {
         this.body = {message: "unauthenticated call not allowed"};
         return;
     }
+    if (requestBody.crumb !== app.crumb) {
+        this.status = 401;
+        this.body = {message: "invalid crumb provided"};
+        return;
+    }
     if (this.params.definition_id != requestBody.definition_id) {
         this.status = 400;
         console.log("requestBody: " + JSON.stringify(requestBody));
         this.body = {message: "'definition_id' value mistmatch between URI and HTTP request body"};
         return;
     }
-    yield mockData.createVote(requestBody)
+    requestBody = appUtil.getObjectWithoutProps(requestBody, ['crumb']);
+    yield mockData.putVote(requestBody)
         .then((function (res) {
             this.status = 200;
             this.body = {message: "vote submitted"};
@@ -254,28 +315,9 @@ appWs.put('/definitions/:definition_id/vote', function *(next) {
         }).bind(this));
 });
 
-appWs.get('/users/:username', function *(next) {
-    yield next;
-    this.body = mockData.getUser(this.params.username);
-});
-
-appWs.get('/users', function *(next) {
-    yield next;
-    this.body = mockData.getUsers();
-});
-
-appWs.get('/teams/:teamname', function *(next) {
-    yield next;
-    this.body = mockData.getTeam(this.params.teamname);
-});
-
-appWs.get('/teams', function *(next) {
-    yield next;
-    this.body = mockData.getTeams();
-});
 
 var requestSomething = function (callback) {
-    request('http://localhost:3000/v1/teams', function (error, response, body) {
+    request('http://localhost:3000/v1/lang/es-MX/phrases', function (error, response, body) {
         if (!error && response.statusCode == 200) {
             callback(null, body); // Print the google web page.
             return;
@@ -298,9 +340,9 @@ _.forEach(routesInfo, function (routeInfo) {
             .then((function (body) {
                 var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params);
                 console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
-                setInitialState({
-                    searchTerm: 'beginning of boday: "' + body.substr(0, 10) + '"'
-                });
+                /*setInitialState({
+                    searchTerm: 'beginning of boday: "' +  '"'
+                });*/
                 var markup = React.renderComponentToString(
                     <CrowDictionary/>
                 );
