@@ -77,6 +77,33 @@ Data.prototype.getPhrases = function (params) {
     }
 };
 
+/**
+ * similar to getPhrases(), but returns a set that is made up of the following
+ * sub-sets in the following order:
+ * * an exact match, if it exists
+ * * phrases starting with search term, if they exist
+ * * phrases containing search term
+ */
+Data.prototype.searchPhrase = function (params) {
+    var pQuery = this.pQuery,
+        existingParams = _.reduce(params, function (result, val, key) {
+            if (val) {
+                result[key] = val;
+            }
+            return result;
+        }, {}),
+        splitParams = appUtil.splitObject(existingParams, ['start', 'limit']),
+        fake = console.log('splitParams: ' + JSON.stringify(splitParams)),
+        actualParams = splitParams[0],
+        actualLimits = splitParams[1];
+    if (!actualParams.lang) {
+        throw Error("error. tried to query phrases without specifying 'lang'");
+    }
+    return pQuery("select * from phrase where phrase = ? " +
+                  " UNION select * from phrase where phrase like ? and phrase != ? " +
+                  " UNION select * from phrase where phrase like ? and phrase not like ?", [actualParams.search, actualParams.search+'%', actualParams.search, '%'+actualParams.search+'%', actualParams.search+'%']);
+};
+
 Data.prototype.putPhrase = function (payload) {
     var pQuery = this.pQuery,
         insertBy;
@@ -101,12 +128,26 @@ Data.prototype.getDefinitions = function (params) {
         fake = console.log('splitParams: ' + JSON.stringify(splitParams)),
         actualParams = splitParams[0],
         actualLimits = splitParams[1];
-    if (!actualParams.lang || !actualParams.phrase) {
-        throw Error("error. tried to query definitions without specifying 'lang' and/or 'phrase'");
+    if (!actualParams.phrase && !actualParams.phraseIds) {
+        throw Error("error. tried to query definitions without specifying 'phrase' or 'phraseIds'");
+    }
+    if (actualParams.phrase && !actualParams.lang) {
+        throw Error("error. tried to query definitions by 'phrase' without specifying 'lang'");
+    }
+    if (actualParams.phrase && actualParams.phraseIds) {
+        throw Error("error. tried to query definitions specifying both 'phrase' and 'phraseIds'. only one of the two should be specified.");
     }
 
-    return pQuery("SELECT d.* FROM `phrase` p LEFT JOIN `definition` d ON p.id = d.phrase_id WHERE ? AND ? ORDER BY d.updated ASC", [{'d.lang': actualParams.lang}, {'p.phrase': actualParams.phrase}]);
+    if (actualParams.phrase) {
+        return pQuery("SELECT d.* FROM `phrase` p LEFT JOIN `definition` d ON p.id = d.phrase_id WHERE ? AND ? ORDER BY d.updated ASC", [{'d.lang': actualParams.lang}, {'p.phrase': actualParams.phrase}]);
+    } else {
+        return pQuery("SELECT * FROM `definition` WHERE `phrase_id` IN (?) ORDER BY updated ASC", [actualParams.phraseIds.split(',')]);
+    }
 };
+
+/*Data.prototype.searchDefinition
+ * depending on `params.mode`, it will behave in one of the following ways:
+ * # `mode` === `search`*/
 
 Data.prototype.putDefinition = function (payload) {
     var pQuery = this.pQuery;

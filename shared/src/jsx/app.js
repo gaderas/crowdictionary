@@ -6,7 +6,13 @@ var bs = require('./bootstrap.js');
 var _ = require('lodash');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
-//var request = require('request');
+var request;
+if ("undefined" !== typeof XMLHttpRequest) {
+    request = require('browser-request');
+} else {
+    request = require('request');
+}
+var pRequest = Q.denodeify(request);
 
 var Layout = bs.Layout;
 var Widget = bs.Widget;
@@ -52,15 +58,25 @@ var clientRouterFunc = function (routeInfo) {
     console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
     console.log('args: ' + JSON.stringify(args, ' ', 4));
     console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
-    Q($.ajax({url: 'http://localhost:3000/v1/lang/es-MX/phrases', type: 'GET'}))
+    /*Q($.ajax({url: 'http://localhost:3000/v1/lang/es-MX/phrases', type: 'GET'}))
         .then(function (data) {
             console.log('on client with a body of length: ' + data.length);
             console.log('on client with body (data): ' + JSON.stringify(data));
-            /*setInitialState({
-                searchTerm: 'beginning of boday: "'  + '"'
-            });*/
+            //setInitialState({
+                //searchTerm: 'beginning of boday: "'  + '"'
+            //});
             React.renderComponent(
                 <CrowDictionary/>,
+                document
+            );
+        });*/
+    //Q($.ajax({url: 'http://localhost:3000/v1/lang/es-MX/phrases', type: 'GET'}))
+    Q(routeInfo.calculateStateFunc())
+        .then(function (state) {
+            console.log('on client with state: ' + JSON.stringify(state));
+            setInitialState(state);
+            React.renderComponent(
+                <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />,
                 document
             );
         });
@@ -79,15 +95,53 @@ var routesInfo = [
         clientRoute: '',
         clientRouterFunc: clientRouterFunc,
         clientRouterFuncName: '/',
-        calculateStateFunc: function () {
-            return {
-                viewing: 'PhraseSearchResults',
-                searchTerm: 'hijazo de mi vidaza',
-                searchResults: [
-                    {phrase: 'hijazo de mi vidaza', topDefinition: 'asi le dicen al muñecón', key: 1},
-                    {phrase: 'hijo del mal dormir', topDefinition: 'cuando alguien te cae mal', key: 2}
-                ]
-            };
+        calculateStateFunc: function (lang) {
+            lang = lang || 'es-MX';
+            return pRequest("http://localhost:3000/v1/lang/"+lang+"/phrases")
+                .then(function (res) {
+                    console.log("reponse:" + JSON.stringify(res, ' ', 4));
+                    if (200 !== res[0].statusCode) {
+                        throw Error("couldn't fetch phrases");
+                    }
+                    var rObj = JSON.parse(res[1]),
+                        reactState = {
+                            searchTerm: "",
+                            searchResults: []
+                        };
+                    _.forEach(rObj, function (phraseObj) {
+                        reactState.searchResults.push({
+                            phrase: phraseObj.phrase,
+                            key: phraseObj.id
+                        });
+                    });
+                    return reactState;
+                })
+                .then(function (reactState) {
+                    var phraseIds = _.map(reactState.searchResults, function (searchResult) {
+                        return searchResult.key;
+                    });
+                    if (!phraseIds.length) {
+                        return reactState;
+                    }
+                    return pRequest("http://localhost:3000/v1/definitions?phraseIds="+phraseIds.join(','))
+                        .then(function (res) {
+                            if (200 !== res[0].statusCode) {
+                                throw Error("couldn't fetch definitions");
+                            }
+                            var rObj = JSON.parse(res[1]);
+                            _.forEach(reactState.searchResults, function (searchResult) {
+                                var definitions = _.where(rObj, {phrase_id: searchResult.key});
+                                searchResult.definitions = definitions;
+                                console.log('definitionz: ' + JSON.stringify(definitions));
+                                searchResult.topDefinition = _.max(definitions, function (def) {
+                                    // this will return the one with the most votes, regardless if they're upvotes or downvotes...
+                                    return def.votes.length;
+                                });
+                                console.log('top definition: ' + JSON.stringify(searchResult.topDefinition));
+                            });
+                            return reactState;
+                        });
+                });
         }
     },
     {
@@ -217,6 +271,18 @@ var CrowDictionary = React.createClass({
             searchTerm: state.searchTerm
         });
     },
+    handleGlobalLangChange: function (newLang) {
+        this.props.calculateStateFunc(newLang)
+            .then((function (newState) {
+                this.replaceState(newState);
+                console.log("newState: " + JSON.stringify(newState, ' ', 4));
+            }).bind(this));
+        /*this.setState({
+            globalLang: state.globalLang
+        });*/
+        //this.forceUpdate();
+        //console.log("setState()... done forceUpdate()... done.");
+    },
     render: function () {
         return (
             <html>
@@ -227,7 +293,7 @@ var CrowDictionary = React.createClass({
             </head>
             <body>
             <div>
-                <TopBar onUserInput={this.handleUserInput}/>
+                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} />
                 <PhraseSearchResults searchTerm={this.state.searchTerm} searchResults={this.state.searchResults}/>
             </div>
             <script src="/static/js/app.js" />
@@ -242,8 +308,8 @@ var TopBar = React.createClass({
     render: function () {
         return (
             <div>
-                <SearchBar onUserInput={this.props.onUserInput}/>
-                <NavBar/>
+                <SearchBar onUserInput={this.props.onUserInput} />
+                <NavBar onGlobalLangChange={this.props.onGlobalLangChange} />
             </div>
         );
     }
@@ -275,7 +341,26 @@ var NavBar = React.createClass({
                 <span>Home</span>
                 <span>About</span>
                 <span>Jobs</span>
+                <GlobalLangPicker onGlobalLangChange={this.props.onGlobalLangChange} />
             </div>
+        );
+    }
+});
+
+var GlobalLangPicker = React.createClass({
+    handleChange: function () {
+        console.log('in GlobalLangPicker::handleChange()');
+        var newLang = this.refs.globalLang.getDOMNode().value;
+        console.log("global lang changed to: " + newLang);
+        this.props.onGlobalLangChange(newLang);
+    },
+    render: function () {
+        return (
+            <select ref="globalLang" onChange={this.handleChange} >
+                <option value="en-US">U.S. - English</option>
+                <option value="fr-FR">France - Français</option>
+                <option value="es-MX">Mexico - Spanish</option>
+            </select>
         );
     }
 });
@@ -336,7 +421,7 @@ var Definition = React.createClass({
     render: function () {
         return (
             <div>
-                {this.props.definition}
+                {this.props.definition.definition}
             </div>
         );
     }

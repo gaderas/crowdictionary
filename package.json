@@ -19,11 +19,11 @@
     "grunt-shell": "^0.7.0",
     "jsdom": "^0.10.6",
     "react-tools": "^0.10.0",
-    "request": "^2.36.0",
     "rewire": "^2.0.1",
     "shelljs": "^0.3.0"
   },
   "dependencies": {
+    "browser-request": "^0.3.2",
     "keygrip": "^1.0.1",
     "koa": "^0.6.1",
     "koa-body-parser": "^1.1.0",
@@ -37,6 +37,7 @@
     "nodemailer-ses-transport": "^0.1.1",
     "nopt": "^3.0.0",
     "q": "^1.0.1",
-    "react": "^0.10.0"
+    "react": "^0.10.0",
+    "request": "^2.40.0"
   }
 }

@@ -14,6 +14,8 @@ Sample requests
     `curl -X PUT -d '{"email": "germoad@yahoo.com", "passhash": "poiuyt", "crumb": "xxxxx"}' -H "Content-Type: application/json" 'http://localhost:3000/v1/contributors?email=germoad@yahoo.com' --cookie-jar /tmp/cookiez -v`
 *   GET phrases - get phrases in a specific language
     `curl -H "Accept: application/json" "http://localhost:3000/v1/lang/es-MX/phrases"`
+    Search is supported e.g. by performing the following request:
+    `curl -H "Accept: application/json" "http://localhost:3000/v1/lang/es-MX/phrases?search=o"`
 *   GET phrase - get a specific phrase
     `curl -H "Accept: application/json" "http://localhost:3000/v1/lang/es-MX/phrases/hola"`
 *   PUT phrase - create/update a phrase - spaces in term must be URIEncoded (%20) in the URI

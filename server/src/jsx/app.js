@@ -162,7 +162,11 @@ appWs.get('/lang/:lang/phrases', function *(next) {
     console.log('query string: ' + JSON.stringify(this.query));
     var params = appUtil.getObjectWithoutProps(this.query, ['lang', 'phrase']);
     params.lang = this.params.lang;
-    this.body = yield mockData.getPhrases(params);
+    if (undefined !== params.search) {
+        this.body = yield mockData.searchPhrase(params);
+    } else {
+        this.body = yield mockData.getPhrases(params);
+    }
 });
 
 appWs.get('/lang/:lang/phrases/:phrase', function *(next) {
@@ -214,6 +218,19 @@ appWs.get('/lang/:lang/phrases/:phrase/definitions', function *(next) {
     params.lang = this.params.lang;
     params.phrase = this.params.phrase;
     this.body = yield mockData.getDefinitions(params)
+        .then(function (definitions) {
+            return mockData.getVotes({definition_ids: _.map(definitions, function (definition) {return definition.id})})
+                .then(function (votes) {
+                    return definitionsWithVotes = _.map(definitions, function (definition) {
+                        definition.votes = _.filter(votes, {definition_id: definition.id});
+                        return definition;
+                    });
+                });
+        });
+});
+
+appWs.get('/definitions', function *(next) {
+    this.body = yield mockData.getDefinitions(this.query)
         .then(function (definitions) {
             return mockData.getVotes({definition_ids: _.map(definitions, function (definition) {return definition.id})})
                 .then(function (votes) {
@@ -336,15 +353,25 @@ _.forEach(routesInfo, function (routeInfo) {
     console.log('adding server route ' + routeInfo.serverRoute + '?');
     appReact.get(routeInfo.serverRoute, function *(next) {
         //yield next;
-        yield requestSome()
+        /*yield requestSome()
             .then((function (body) {
                 var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params);
                 console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
-                /*setInitialState({
-                    searchTerm: 'beginning of boday: "' +  '"'
-                });*/
+                //setInitialState({
+                    //searchTerm: 'beginning of boday: "' +  '"'
+                //});
                 var markup = React.renderComponentToString(
                     <CrowDictionary/>
+                );
+                this.body = markup;
+            }).bind(this));*/
+        var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params);
+        console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
+        yield Q(routeInfo.calculateStateFunc())
+            .then((function (state) {
+                setInitialState(state);
+                var markup = React.renderComponentToString(
+                    <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />
                 );
                 this.body = markup;
             }).bind(this));
