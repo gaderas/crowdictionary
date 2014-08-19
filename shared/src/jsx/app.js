@@ -380,7 +380,7 @@ var LoginStatus = React.createClass({
             );
         } else {
             return (
-                <span>welcome!</span>
+                <span>Welcome '{loginInfo.email}'!</span><a>Log out</a>
             );
         }
     }

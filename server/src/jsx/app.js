@@ -398,6 +398,7 @@ _.forEach(routesInfo, function (routeInfo) {
         var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params);
         console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
 
+        // this is for forwarding these relevant app cookies to api calls to work. api is solely responsible for handling authorization.
         _.forEach(['browserId', 'contributor', 'browserId.sig', 'contributor.sig'], (function (cookieName) {
             var incomingCookie = this.cookies.get(cookieName, {signed: false}),
                 cookie = cookieName + '=' + incomingCookie,
