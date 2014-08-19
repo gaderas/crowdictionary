@@ -1,30 +1,20 @@
 /** @jsx React.DOM */
 
+var Q = require('q');
 var util = require('util');
 var React = require('react');
 var _ = require('lodash');
 var shared = require('../../../../shared/build/js/app.js');
 
 var CrowDictionary = shared.CrowDictionary,
-    routesInfo = shared.routesInfo;
+    routesInfo = shared.routesInfo,
+    setPRequest = shared.setPRequest;
 
 console.log('ehlos');
-/*var routes = _.map(shared.pages, function (page, routeName) {
-    var paramNames = page.paramNames;
 
-    return function () {
-        var params = {};
-        _.forOwn(paramNames, function (paramName, idx) {
-            params[paramName] = arguments(idx);
-        });
-        console.log("params for route '" + routeName + "': " + JSON.stringify(params));
-        //func.call(params);
-        React.renderComponent(
-            <InterfaceComponent router="" clientOrServer="client"/>,
-            document.html
-        );
-    }
-});*/
+var request = require('browser-request');
+var pRequest = Q.denodeify(request);
+setPRequest(pRequest);
 
 var Router = Backbone.Router.extend(
     _.merge(

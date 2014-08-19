@@ -6,13 +6,10 @@ var bs = require('./bootstrap.js');
 var _ = require('lodash');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
-var request;
-if ("undefined" !== typeof XMLHttpRequest) {
-    request = require('browser-request');
-} else {
-    request = require('request');
-}
-var pRequest = Q.denodeify(request);
+var pRequest,
+    setPRequest = function (incoming) {
+        pRequest = incoming;
+    };
 
 var Layout = bs.Layout;
 var Widget = bs.Widget;
@@ -95,17 +92,27 @@ var routesInfo = [
         clientRoute: '',
         clientRouterFunc: clientRouterFunc,
         clientRouterFuncName: '/',
-        calculateStateFunc: function (lang) {
+        calculateStateFunc: function (lang, term) {
             lang = lang || 'es-MX';
-            return pRequest("http://localhost:3000/v1/lang/"+lang+"/phrases")
-                .then(function (res) {
-                    console.log("reponse:" + JSON.stringify(res, ' ', 4));
-                    if (200 !== res[0].statusCode) {
+            term = term || '';
+            var phrasesUrl,
+                loginStateUrl = "http://localhost:3000/v1/login";
+            if (!term) {
+                phrasesUrl = "http://localhost:3000/v1/lang/"+lang+"/phrases";
+            } else {
+                phrasesUrl = "http://localhost:3000/v1/lang/"+lang+"/phrases?search="+term;
+            }
+            return Q.all([pRequest(phrasesUrl), pRequest(loginStateUrl)])
+                .spread(function (phrasesRes, loginStateRes) {
+                    console.log("login state reponse:" + JSON.stringify(loginStateRes, ' ', 4));
+                    console.log("phrases reponse:" + JSON.stringify(phrasesRes, ' ', 4));
+                    if (200 !== phrasesRes[0].statusCode) {
                         throw Error("couldn't fetch phrases");
                     }
-                    var rObj = JSON.parse(res[1]),
+                    var rObj = JSON.parse(phrasesRes[1]),
                         reactState = {
-                            searchTerm: "",
+                            globalLang: lang,
+                            searchTerm: term,
                             searchResults: []
                         };
                     _.forEach(rObj, function (phraseObj) {
@@ -114,6 +121,10 @@ var routesInfo = [
                             key: phraseObj.id
                         });
                     });
+                    // add login information if we got it
+                    if (200 === loginStateRes[0].statusCode) {
+                        reactState.loginInfo = JSON.parse(loginStateRes[1]);
+                    }
                     return reactState;
                 })
                 .then(function (reactState) {
@@ -266,24 +277,33 @@ var CrowDictionary = React.createClass({
     getInitialState: function () {
         return initialState;
     },
-    handleUserInput: function (state) {
-        this.setState({
-            searchTerm: state.searchTerm
-        });
-    },
-    handleGlobalLangChange: function (newLang) {
-        this.props.calculateStateFunc(newLang)
+    handleUserInput: function (searchTerm) {
+        this.props.calculateStateFunc(this.state.globalLang, searchTerm)
             .then((function (newState) {
-                this.replaceState(newState);
+                this.setState(newState);
                 console.log("newState: " + JSON.stringify(newState, ' ', 4));
             }).bind(this));
-        /*this.setState({
-            globalLang: state.globalLang
-        });*/
-        //this.forceUpdate();
-        //console.log("setState()... done forceUpdate()... done.");
+    },
+    handleGlobalLangChange: function (newLang) {
+        this.props.calculateStateFunc(newLang, this.state.searchTerm)
+            .then((function (newState) {
+                this.setState(newState);
+                console.log("newState: " + JSON.stringify(newState, ' ', 4));
+            }).bind(this));
+    },
+    handleToggleLoginPrompt: function () {
+        console.log('clicked on toggle login prompt...');
+        this.setState({
+            showLoginPrompt: !this.state.showLoginPrompt
+        });
     },
     render: function () {
+        var mainContent;
+        if (this.state.showLoginPrompt) {
+            mainContent = <LoginPrompt topState={this.state}/>;
+        } else {
+            mainContent = <PhraseSearchResults topState={this.state}/>;
+        }
         return (
             <html>
             <head>
@@ -293,8 +313,8 @@ var CrowDictionary = React.createClass({
             </head>
             <body>
             <div>
-                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} />
-                <PhraseSearchResults searchTerm={this.state.searchTerm} searchResults={this.state.searchResults}/>
+                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} topState={this.state}/>
+                {mainContent}
             </div>
             <script src="/static/js/app.js" />
             </body>
@@ -308,8 +328,8 @@ var TopBar = React.createClass({
     render: function () {
         return (
             <div>
-                <SearchBar onUserInput={this.props.onUserInput} />
-                <NavBar onGlobalLangChange={this.props.onGlobalLangChange} />
+                <SearchBar onUserInput={this.props.onUserInput} topState={this.props.topState}/>
+                <NavBar onGlobalLangChange={this.props.onGlobalLangChange} onToggleLoginPrompt={this.props.onToggleLoginPrompt} topState={this.props.topState}/>
             </div>
         );
     }
@@ -320,15 +340,13 @@ var SearchBar = React.createClass({
         console.log('in SearchBar::handleChange()');
         var searchTerm = this.refs.searchInput.getDOMNode().value;
         console.log("a change. searchTerm is now: " + searchTerm);
-        this.props.onUserInput({
-            searchTerm: searchTerm
-        });
+        this.props.onUserInput(searchTerm);
     },
     render: function () {
         console.log("this.handleChange: " + this.handleChange);
         return (
             <form>
-            <input type="text" defaultValue="nuthin'" placeholder="enter search term" ref="searchInput" onChange={this.handleChange}/>
+            <input type="text" defaultValue={this.props.topState.searchTerm} placeholder="enter search term" ref="searchInput" onChange={this.handleChange}/>
             </form>
         );
     }
@@ -341,8 +359,59 @@ var NavBar = React.createClass({
                 <span>Home</span>
                 <span>About</span>
                 <span>Jobs</span>
-                <GlobalLangPicker onGlobalLangChange={this.props.onGlobalLangChange} />
+                <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} />
+                <GlobalLangPicker onGlobalLangChange={this.props.onGlobalLangChange} topState={this.props.topState}/>
             </div>
+        );
+    }
+});
+
+var LoginStatus = React.createClass({
+    handleClick: function () {
+        console.log('on handleClick');
+        this.props.onToggleLoginPrompt()
+    },
+    render: function () {
+        var loginInfo = this.props.topState.loginInfo;
+        console.log("loginInfo...: " + JSON.stringify(loginInfo, ' ', 4));
+        if (undefined === loginInfo) {
+            return (
+                <span onClick={this.handleClick}>login / sign up.</span>
+            );
+        } else {
+            return (
+                <span>welcome!</span>
+            );
+        }
+    }
+});
+
+var LoginPrompt = React.createClass({
+    handleSubmit: function (e) {
+        var username = this.refs.username.getDOMNode().value,
+            password = this.refs.password.getDOMNode().value;
+        e.preventDefault();
+        console.log("user: " + username + ", pass: " + password);
+        loginStateUrl = "http://localhost:3000/v1/login";
+        return pRequest({method: "POST", url: loginStateUrl, body: {email: username, passhash: password}, json:true})
+            .then(function(res) {
+                if (200 !== res[0].statusCode) {
+                    throw Error("invalid credentials");
+                }
+                var rObj = JSON.parse(res[1]);
+                console.log("login success!");
+            });
+    },
+    render: function () {
+        var display = this.props.topState.showLoginPrompt ? "block" : "none",
+            style = {display: display};
+        return (
+            <form onSubmit={this.handleSubmit}>
+            <div>Login</div>
+            <input ref="username" type="text"/>
+            <input ref="password" type="password"/>
+            <input type="submit" value="log in"/>
+            </form>
         );
     }
 });
@@ -356,7 +425,7 @@ var GlobalLangPicker = React.createClass({
     },
     render: function () {
         return (
-            <select ref="globalLang" onChange={this.handleChange} >
+            <select ref="globalLang" onChange={this.handleChange} defaultValue={this.props.topState.globalLang}>
                 <option value="en-US">U.S. - English</option>
                 <option value="fr-FR">France - Français</option>
                 <option value="es-MX">Mexico - Spanish</option>
@@ -368,7 +437,7 @@ var GlobalLangPicker = React.createClass({
 var PhraseSearchResults = React.createClass({
     render: function () {
         var phraseSearchResults = [];
-        _.forEach(this.props.searchResults, function (result) {
+        _.forEach(this.props.topState.searchResults, function (result) {
             //phrase topDefinition
             phraseSearchResults.push(
                 <PhraseSearchResult searchResult={result} key={result.key} />
@@ -376,7 +445,7 @@ var PhraseSearchResults = React.createClass({
         });
         return (
             <div>
-                <TopSearchCaption searchTerm={this.props.searchTerm}/>
+                <TopSearchCaption topState={this.props.topState}/>
                 <div className="phraseSearchResultsList">
                     {phraseSearchResults}
                 </div>
@@ -390,7 +459,7 @@ var TopSearchCaption = React.createClass({
     render: function () {
         return (
             <div>
-                showing results for '{this.props.searchTerm}'
+                showing results for '{this.props.topState.searchTerm}'
             </div>
         );
     }
@@ -494,3 +563,4 @@ module.exports.getNormalizedRouteInfo = getNormalizedRouteInfo;
 module.exports.setupRoute = setupRoute;
 module.exports.CrowDictionary = CrowDictionary;
 module.exports.setInitialState = setInitialState;
+module.exports.setPRequest = setPRequest;

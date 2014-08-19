@@ -23,6 +23,8 @@ Sample requests
 /v1/lang/es-MX/phrases/chau" --cookie /tmp/cookiez`
 *   GET definitions - get definitions for a specific phrase
     `curl -H "Accept: application/json" "http://localhost:3000/v1/lang/es-MX/phrases/hola/definitions" --cookie /tmp/cookiez -v`
+*   GET definitions - get definitions for supplied set of `phrase_id`
+    `curl -H "Accept: application/json" "http://localhost:3000/v1/definitions?phraseIds=2,3,1" --cookie /tmp/cookiez -v`
 *   POST definition - create a definition or update it if current user already submitted one.
     `curl -d '{"crumb": "OF4iZigBP9Eb5pvuXY2bnSnyWR4", "phrase": "hola", "definition": "algo", "lang": "es-MX"}' -H "Content-Type: application/json" "http://localhost:3000/v1/lang/es-MX/phrases/hola/definitions" --cookie /tmp/cookiez -v`
 *   PUT vote - vote or change vote if definition_id/contributor_id already voted

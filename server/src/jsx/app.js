@@ -44,7 +44,29 @@ var CrowDictionary = shared.CrowDictionary,
     getNormalizedRouteInfo = shared.getNormalizedRouteInfo,
     setupRoute = shared.setupRoute,
     asyncRenderComponentToString = shared.asyncRenderComponentToString,
-    setInitialState = shared.setInitialState;
+    setInitialState = shared.setInitialState,
+    setPRequest = shared.setPRequest;
+
+var request = require('request');
+var jar = request.jar();
+var requestWithIncomingCookies = function (urlOrOpts, done) {
+    var opts;
+    if ("string" === typeof urlOrOpts) {
+        opts = {
+            url: urlOrOpts,
+            jar: jar
+        };
+    } else {
+        opts.jar = jar;
+    }
+    return request(opts, done);
+};
+
+var pRequest = Q.denodeify(requestWithIncomingCookies);
+
+//setRequest(requestWithIncomingCookies);
+setPRequest(pRequest);
+
 
 //app.use(serve('./client/build'));
 
@@ -219,7 +241,11 @@ appWs.get('/lang/:lang/phrases/:phrase/definitions', function *(next) {
     params.phrase = this.params.phrase;
     this.body = yield mockData.getDefinitions(params)
         .then(function (definitions) {
-            return mockData.getVotes({definition_ids: _.map(definitions, function (definition) {return definition.id})})
+            var definitionIds = _.map(definitions, function (definition) {return definition.id});
+            if (!definitionIds.length) {
+                return definitions;
+            }
+            return mockData.getVotes({definition_ids: definitionIds})
                 .then(function (votes) {
                     return definitionsWithVotes = _.map(definitions, function (definition) {
                         definition.votes = _.filter(votes, {definition_id: definition.id});
@@ -232,7 +258,11 @@ appWs.get('/lang/:lang/phrases/:phrase/definitions', function *(next) {
 appWs.get('/definitions', function *(next) {
     this.body = yield mockData.getDefinitions(this.query)
         .then(function (definitions) {
-            return mockData.getVotes({definition_ids: _.map(definitions, function (definition) {return definition.id})})
+            var definitionIds = _.map(definitions, function (definition) {return definition.id});
+            if (!definitionIds.length) {
+                return definitions;
+            }
+            return mockData.getVotes({definition_ids: definitionIds})
                 .then(function (votes) {
                     return definitionsWithVotes = _.map(definitions, function (definition) {
                         definition.votes = _.filter(votes, {definition_id: definition.id});
@@ -367,6 +397,16 @@ _.forEach(routesInfo, function (routeInfo) {
             }).bind(this));*/
         var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params);
         console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
+
+        _.forEach(['browserId', 'contributor', 'browserId.sig', 'contributor.sig'], (function (cookieName) {
+            var incomingCookie = this.cookies.get(cookieName, {signed: false}),
+                cookie = cookieName + '=' + incomingCookie,
+                outgoingCookie = request.cookie(cookie);
+
+            console.log(util.format("cookieName: %s, incomingCookie: %s", cookieName, incomingCookie));
+            jar.setCookie(outgoingCookie, "http://localhost:3000");
+        }).bind(this));
+
         yield Q(routeInfo.calculateStateFunc())
             .then((function (state) {
                 setInitialState(state);
