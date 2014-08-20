@@ -147,6 +147,13 @@ appWs.get('/login', function *(next) {
     this.body = appWs.contributor ? _.merge(appWs.contributor, {crumb: app.crumb}) : {message: "not logged in"};
 });
 
+appWs.get('/logout', function *(next) {
+    yield next;
+    this.status = 200;
+    this.body = {message: "logged out"};
+    this.cookies.set('contributor', JSON.stringify(null), {signed: true});
+});
+
 appWs.get('/contributors', function *(next) {
     //yield next;
     console.log('query string: ' + JSON.stringify(this.query));

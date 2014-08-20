@@ -1,6 +1,11 @@
 Crowdsourced Dictionary
 ====
 
+TODO Performance Improvements
+----
+
+*   Don't query the /v1/login endpoint on every state change
+
 Sample requests
 ----
 

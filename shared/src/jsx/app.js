@@ -297,12 +297,64 @@ var CrowDictionary = React.createClass({
             showLoginPrompt: !this.state.showLoginPrompt
         });
     },
+    handleLogIn: function (username, password) {
+        console.log("user: " + username + ", pass: " + password);
+        loginStateUrl = "http://localhost:3000/v1/login";
+        return pRequest({method: "POST", url: loginStateUrl, body: {email: username, passhash: password}, json:true})
+            .then((function(res) {
+                if (200 !== res[0].statusCode) {
+                    throw Error("invalid credentials");
+                }
+                console.log("login success!");
+                console.log("res is: " + JSON.stringify(res, ' ', 4));
+                var rObj = res[1]; // it's already json because we called `pRequest` with `{json:true}`
+                console.log("rObj: " + JSON.stringify(rObj, ' ', 4));
+                return this.props.calculateStateFunc(this.state.globalLang, this.state.searchTerm);
+            }).bind(this))
+            .then((function (newState) {
+                newState.showLoginPrompt = false;
+                this.replaceState(newState);
+                this.forceUpdate();
+            }).bind(this))
+            .fail(function (err) {
+                console.error("failed with error: " + JSON.stringify(err));
+            });
+    },
+    handleLogOut: function () {
+        var logOutUrl = "http://localhost:3000/v1/logout";
+        return pRequest(logOutUrl)
+            .then((function (res) {
+                return this.props.calculateStateFunc(this.state.globalLang, this.state.searchTerm);
+            }).bind(this))
+            .then((function (newState) {
+                this.replaceState(newState);
+            }).bind(this));
+    },
+    handleSubmitAddPhrase: function (phrase) {
+        console.log("got a new phrase: " + phrase);
+        var lang = this.state.globalLang,
+            crumb = this.state.loginInfo.crumb,
+            addPhraseUrl = util.format("http://localhost:3000/v1/lang/%s/phrases/%s", lang, phrase);
+        return pRequest({method: "PUT", url: addPhraseUrl, body: {phrase: phrase, lang: lang, crumb: crumb}, json: true})
+            .then((function (res) {
+                if (200 !== res[0].statusCode) {
+                    throw Error("failed to add a new phrase...");
+                }
+                return this.props.calculateStateFunc(this.state.globalLang, this.state.searchTerm);
+            }).bind(this))
+            .then((function (newState) {
+                this.replaceState(newState);
+            }).bind(this))
+            .fail(function (err) {
+                console.error("got an error: " + JSON.stringify(err, ' ', 4));
+            });
+    },
     render: function () {
         var mainContent;
         if (this.state.showLoginPrompt) {
-            mainContent = <LoginPrompt topState={this.state}/>;
+            mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn}/>;
         } else {
-            mainContent = <PhraseSearchResults topState={this.state}/>;
+            mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase}/>;
         }
         return (
             <html>
@@ -313,7 +365,7 @@ var CrowDictionary = React.createClass({
             </head>
             <body>
             <div>
-                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} topState={this.state}/>
+                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} topState={this.state}/>
                 {mainContent}
             </div>
             <script src="/static/js/app.js" />
@@ -329,7 +381,7 @@ var TopBar = React.createClass({
         return (
             <div>
                 <SearchBar onUserInput={this.props.onUserInput} topState={this.props.topState}/>
-                <NavBar onGlobalLangChange={this.props.onGlobalLangChange} onToggleLoginPrompt={this.props.onToggleLoginPrompt} topState={this.props.topState}/>
+                <NavBar onGlobalLangChange={this.props.onGlobalLangChange} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} topState={this.props.topState}/>
             </div>
         );
     }
@@ -359,7 +411,7 @@ var NavBar = React.createClass({
                 <span>Home</span>
                 <span>About</span>
                 <span>Jobs</span>
-                <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} />
+                <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut}/>
                 <GlobalLangPicker onGlobalLangChange={this.props.onGlobalLangChange} topState={this.props.topState}/>
             </div>
         );
@@ -369,7 +421,10 @@ var NavBar = React.createClass({
 var LoginStatus = React.createClass({
     handleClick: function () {
         console.log('on handleClick');
-        this.props.onToggleLoginPrompt()
+        this.props.onToggleLoginPrompt();
+    },
+    handleLogOut: function () {
+        this.props.onLogOut();
     },
     render: function () {
         var loginInfo = this.props.topState.loginInfo;
@@ -380,33 +435,24 @@ var LoginStatus = React.createClass({
             );
         } else {
             return (
-                <span>Welcome '{loginInfo.email}'!</span><a>Log out</a>
+                <span>Welcome '{loginInfo.email}'! <a onClick={this.handleLogOut}>Log out</a></span>
             );
         }
     }
 });
 
 var LoginPrompt = React.createClass({
-    handleSubmit: function (e) {
+    handleLogIn: function (e) {
         var username = this.refs.username.getDOMNode().value,
             password = this.refs.password.getDOMNode().value;
         e.preventDefault();
-        console.log("user: " + username + ", pass: " + password);
-        loginStateUrl = "http://localhost:3000/v1/login";
-        return pRequest({method: "POST", url: loginStateUrl, body: {email: username, passhash: password}, json:true})
-            .then(function(res) {
-                if (200 !== res[0].statusCode) {
-                    throw Error("invalid credentials");
-                }
-                var rObj = JSON.parse(res[1]);
-                console.log("login success!");
-            });
+        this.props.onLogIn(username, password);
     },
     render: function () {
         var display = this.props.topState.showLoginPrompt ? "block" : "none",
             style = {display: display};
         return (
-            <form onSubmit={this.handleSubmit}>
+            <form onSubmit={this.handleLogIn}>
             <div>Login</div>
             <input ref="username" type="text"/>
             <input ref="password" type="password"/>
@@ -428,7 +474,7 @@ var GlobalLangPicker = React.createClass({
             <select ref="globalLang" onChange={this.handleChange} defaultValue={this.props.topState.globalLang}>
                 <option value="en-US">U.S. - English</option>
                 <option value="fr-FR">France - Français</option>
-                <option value="es-MX">Mexico - Spanish</option>
+                <option value="es-MX">México - Español</option>
             </select>
         );
     }
@@ -449,7 +495,7 @@ var PhraseSearchResults = React.createClass({
                 <div className="phraseSearchResultsList">
                     {phraseSearchResults}
                 </div>
-                <AddPhraseForm/>
+                <AddPhraseForm onSubmitAddPhrase={this.props.onSubmitAddPhrase}/>
             </div>
         );
     }
@@ -497,12 +543,17 @@ var Definition = React.createClass({
 });
 
 var AddPhraseForm = React.createClass({
+    handleSubmit: function (e) {
+        var newPhrase = this.refs.newPhrase.getDOMNode().value;
+        e.preventDefault();
+        this.props.onSubmitAddPhrase(newPhrase);
+    },
     render: function () {
         return (
             <div>
-                <form>
+                <form onSubmit={this.handleSubmit}>
                     <span>Add phrase</span>
-                    <textarea placeholder="enter a new phrase here"/>
+                    <textarea placeholder="enter a new phrase here" ref="newPhrase"/>
                     <input type="submit" name="submit"/>
                 </form>
             </div>
