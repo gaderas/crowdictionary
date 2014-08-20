@@ -349,12 +349,18 @@ var CrowDictionary = React.createClass({
                 console.error("got an error: " + JSON.stringify(err, ' ', 4));
             });
     },
+    handleSelectPhrase: function (phraseData) {
+    },
     render: function () {
         var mainContent;
         if (this.state.showLoginPrompt) {
             mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn}/>;
         } else {
-            mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase}/>;
+            if (shownPhraseData) {
+                mainContent = <PhraseDetails topState={this.state} />;
+            } else {
+                mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase} onSelectPhrase={this.handleSelectPhrase}/>;
+            }
         }
         return (
             <html>
@@ -371,6 +377,13 @@ var CrowDictionary = React.createClass({
             <script src="/static/js/app.js" />
             </body>
             </html>
+        );
+    }
+});
+
+var PhraseDetails = React.createClass({
+    render: function () {
+        return (
         );
     }
 });
@@ -486,7 +499,7 @@ var PhraseSearchResults = React.createClass({
         _.forEach(this.props.topState.searchResults, function (result) {
             //phrase topDefinition
             phraseSearchResults.push(
-                <PhraseSearchResult searchResult={result} key={result.key} />
+                <PhraseSearchResult searchResult={result} key={result.key} onSelectPhrase={this.props.onSelectPhrase}/>
             );
         });
         return (
@@ -515,8 +528,8 @@ var PhraseSearchResult = React.createClass({
     render: function () {
         return (
             <div>
-                <Phrase searchResult={this.props.searchResult} />
-                <Definition searchResult={this.props.searchResult} />
+                <Phrase searchResult={this.props.searchResult} onSelectPhrase={this.props.onSelectPhrase}/>
+                <Definition searchResult={this.props.searchResult} show="top"/>
             </div>
         );
     }
@@ -525,6 +538,8 @@ var PhraseSearchResult = React.createClass({
 var Phrase = React.createClass({
     handleClick: function () {
         console.log("clicked on phrase: " + this.props.searchResult.phrase);
+        var phraseData = this.props.searchResult.phrase;
+        this.props.onSelectPhrase(phraseData);
     },
     render: function () {
         return (
@@ -537,9 +552,13 @@ var Phrase = React.createClass({
 
 var Definition = React.createClass({
     render: function () {
+        var definition;
+        if ('top' === this.props.show) {
+            definition = this.props.searchResult.topDefinition.definition;
+        }
         return (
             <div>
-                {this.props.searchResult.topDefinition.definition}
+                {this.definition}
             </div>
         );
     }
