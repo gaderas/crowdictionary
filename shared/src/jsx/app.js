@@ -1,6 +1,7 @@
 /** @jsx React.DOM */
 
 var Q = require('q');
+var appUtil = require('./util.js');
 var React = require('react');
 var bs = require('./bootstrap.js');
 var _ = require('lodash');
@@ -350,14 +351,20 @@ var CrowDictionary = React.createClass({
             });
     },
     handleSelectPhrase: function (phraseData) {
+        this.setState({
+            shownPhraseData: phraseData
+        });
+    },
+    handleClosePhraseDetails: function () {
+        this.replaceState(appUtil.getObjectWithoutProps(this.state, ['shownPhraseData']));
     },
     render: function () {
         var mainContent;
         if (this.state.showLoginPrompt) {
             mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn}/>;
         } else {
-            if (shownPhraseData) {
-                mainContent = <PhraseDetails topState={this.state} />;
+            if (this.state.shownPhraseData) {
+                mainContent = <PhraseDetails topState={this.state} onClosePhraseDetails={this.handleClosePhraseDetails}/>;
             } else {
                 mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase} onSelectPhrase={this.handleSelectPhrase}/>;
             }
@@ -382,8 +389,48 @@ var CrowDictionary = React.createClass({
 });
 
 var PhraseDetails = React.createClass({
+    handleBack: function () {
+        console.log("closing PhraseDetails...");
+        this.props.onClosePhraseDetails();
+    },
     render: function () {
         return (
+            <div>
+                phrase: <PhraseInDetails topState={this.props.topState} />
+                definitions: <DefinitionsInDetails topState={this.props.topState}/>
+                <div>
+                    <a onClick={this.handleBack}>Back</a>
+                </div>
+            </div>
+        );
+    }
+});
+
+var PhraseInDetails = React.createClass({
+    render: function () {
+        return (
+            <div>{this.props.topState.shownPhraseData.phrase}</div>
+        );
+    }
+});
+
+var DefinitionsInDetails = React.createClass({
+    render: function () {
+        var definitionElements = _.map(this.props.topState.shownPhraseData.definitions, (function (definitionData, idx) {
+            return (
+                <DefinitionInDetails topState={this.props.topState} key={idx}/>
+            );
+        }).bind(this))
+        return (
+            <div>{definitionElements}</div>
+        );
+    }
+});
+
+var DefinitionInDetails = React.createClass({
+    render: function () {
+        return (
+            <div>{this.props.topState.shownPhraseData.definitions[this.props.key].definition}</div>
         );
     }
 });
@@ -496,12 +543,12 @@ var GlobalLangPicker = React.createClass({
 var PhraseSearchResults = React.createClass({
     render: function () {
         var phraseSearchResults = [];
-        _.forEach(this.props.topState.searchResults, function (result) {
+        _.forEach(this.props.topState.searchResults, (function (result) {
             //phrase topDefinition
             phraseSearchResults.push(
                 <PhraseSearchResult searchResult={result} key={result.key} onSelectPhrase={this.props.onSelectPhrase}/>
             );
-        });
+        }).bind(this));
         return (
             <div>
                 <TopSearchCaption topState={this.props.topState}/>
@@ -528,17 +575,17 @@ var PhraseSearchResult = React.createClass({
     render: function () {
         return (
             <div>
-                <Phrase searchResult={this.props.searchResult} onSelectPhrase={this.props.onSelectPhrase}/>
-                <Definition searchResult={this.props.searchResult} show="top"/>
+                <PhraseInList searchResult={this.props.searchResult} onSelectPhrase={this.props.onSelectPhrase}/>
+                <DefinitionInList searchResult={this.props.searchResult}/>
             </div>
         );
     }
 });
 
-var Phrase = React.createClass({
+var PhraseInList = React.createClass({
     handleClick: function () {
         console.log("clicked on phrase: " + this.props.searchResult.phrase);
-        var phraseData = this.props.searchResult.phrase;
+        var phraseData = this.props.searchResult;
         this.props.onSelectPhrase(phraseData);
     },
     render: function () {
@@ -550,15 +597,12 @@ var Phrase = React.createClass({
     }
 });
 
-var Definition = React.createClass({
+var DefinitionInList = React.createClass({
     render: function () {
-        var definition;
-        if ('top' === this.props.show) {
-            definition = this.props.searchResult.topDefinition.definition;
-        }
+        var definition = this.props.searchResult.topDefinition.definition;
         return (
             <div>
-                {this.definition}
+                {definition}
             </div>
         );
     }
