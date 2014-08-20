@@ -515,18 +515,21 @@ var PhraseSearchResult = React.createClass({
     render: function () {
         return (
             <div>
-                <Phrase phrase={this.props.searchResult.phrase} />
-                <Definition definition={this.props.searchResult.topDefinition} />
+                <Phrase searchResult={this.props.searchResult} />
+                <Definition searchResult={this.props.searchResult} />
             </div>
         );
     }
 });
 
 var Phrase = React.createClass({
+    handleClick: function () {
+        console.log("clicked on phrase: " + this.props.searchResult.phrase);
+    },
     render: function () {
         return (
-            <div>
-                {this.props.phrase}
+            <div onClick={this.handleClick}>
+                {this.props.searchResult.phrase}
             </div>
         );
     }
@@ -536,7 +539,7 @@ var Definition = React.createClass({
     render: function () {
         return (
             <div>
-                {this.props.definition.definition}
+                {this.props.searchResult.topDefinition.definition}
             </div>
         );
     }

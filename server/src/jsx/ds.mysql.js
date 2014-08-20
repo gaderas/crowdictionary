@@ -99,9 +99,12 @@ Data.prototype.searchPhrase = function (params) {
     if (!actualParams.lang) {
         throw Error("error. tried to query phrases without specifying 'lang'");
     }
-    return pQuery("select * from phrase where phrase = ? " +
-                  " UNION select * from phrase where phrase like ? and phrase != ? " +
-                  " UNION select * from phrase where phrase like ? and phrase not like ?", [actualParams.search, actualParams.search+'%', actualParams.search, '%'+actualParams.search+'%', actualParams.search+'%']);
+    return pQuery("select * from phrase where phrase = ? and lang = ?" +
+                  " UNION select * from phrase where phrase like ? and phrase != ?  and lang = ?" +
+                  " UNION select * from phrase where phrase like ? and phrase not like ? and lang = ?",
+                  [actualParams.search, actualParams.lang,
+                   actualParams.search+'%', actualParams.search, actualParams.lang,
+                   '%'+actualParams.search+'%', actualParams.search+'%', actualParams.lang]);
 };
 
 Data.prototype.putPhrase = function (payload) {
