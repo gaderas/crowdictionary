@@ -420,8 +420,13 @@ _.forEach(routesInfo, function (routeInfo) {
 
         yield Q(routeInfo.calculateStateFunc())
             .then((function (state) {
-                setInitialState(state);
-                return;
+                return l10n.pL10n
+                    .then(function (l10nData) {
+                        console.log("all l10nData: " + JSON.stringify(l10nData));
+                        state.l10nData = l10nData;
+                        state.lang = appUtil.getLangBasedOnHostname(hostname, _.map(l10nData, function (l10nData, lang) { return lang; }));
+                        setInitialState(state);
+                    });
             }))
             .then((function () {
                 return l10n.pL10n;

@@ -50,21 +50,21 @@ var splitObject = function (obj, specialProps) {
     ];
 };
 
-var getL10nDataBasedOnHostname = function (hostname, l10nData) {
+var getLangBasedOnHostname = function (hostname, supportedLangs) {
     var matches = hostname.match(/^([^\.]+)\..*$/),
         firstComponentOfHostname = matches && matches[1],
         activeLang,
-        activeLangCodes = _(l10nData)
-            .map(function (l10nEntry, langCode) {
+        activeLangCodes = _(supportedLangs)
+            .map(function (langCode) {
                 return {lang: langCode, lcLang: langCode.toLocaleLowerCase()};
             })
             .filter({lcLang: firstComponentOfHostname})
             .valueOf();
-        activeLang = (!_.isEmpty(activeLangCodes) && activeLangCodes.lang) || 'en-US';
-        return l10nData[activeLang];
+        activeLang = (!_.isEmpty(activeLangCodes) && !_.isEmpty(activeLangCodes[0]) && activeLangCodes[0].lang) || 'en-US';
+        return activeLang;
 };
 
 module.exports.getObjectWithProps = getObjectWithProps;
 module.exports.getObjectWithoutProps = getObjectWithoutProps;
 module.exports.splitObject = splitObject;
-module.exports.getL10nDataBasedOnHostname = getL10nDataBasedOnHostname;
+module.exports.getLangBasedOnHostname = getLangBasedOnHostname;

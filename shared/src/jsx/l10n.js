@@ -5,7 +5,8 @@ var fs = require('fs');
 var pReaddir = Q.denodeify(fs.readdir);
 var pReadFile = Q.denodeify(fs.readFile);
 
-var l10nPath = './l10n';
+var l10nPath = 'shared/src/jsx/l10n',
+    shortL10nPath = './l10n';
 
 console.log("start");
 var pL10n = pReaddir(l10nPath)
@@ -22,7 +23,7 @@ var pL10n = pReaddir(l10nPath)
             if (!matches) {
                 return;
             } else {
-                langL10n = require(l10nPath + "/" + filenameWithoutExtension);
+                langL10n = require(shortL10nPath + "/" + filenameWithoutExtension);
             }
             console.log("lang: " + lang);
             console.log("langL10n: " + JSON.stringify(langL10n));
