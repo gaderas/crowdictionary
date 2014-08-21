@@ -3,6 +3,7 @@
 var Q = require('q');
 var appUtil = require('./util.js');
 var React = require('react');
+var ReactIntlMixin = require('react-intl');
 var bs = require('./bootstrap.js');
 var _ = require('lodash');
 var util = require('util');
@@ -56,19 +57,6 @@ var clientRouterFunc = function (routeInfo) {
     console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
     console.log('args: ' + JSON.stringify(args, ' ', 4));
     console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
-    /*Q($.ajax({url: 'http://localhost:3000/v1/lang/es-MX/phrases', type: 'GET'}))
-        .then(function (data) {
-            console.log('on client with a body of length: ' + data.length);
-            console.log('on client with body (data): ' + JSON.stringify(data));
-            //setInitialState({
-                //searchTerm: 'beginning of boday: "'  + '"'
-            //});
-            React.renderComponent(
-                <CrowDictionary/>,
-                document
-            );
-        });*/
-    //Q($.ajax({url: 'http://localhost:3000/v1/lang/es-MX/phrases', type: 'GET'}))
     Q(routeInfo.calculateStateFunc())
         .then(function (state) {
             console.log('on client with state: ' + JSON.stringify(state));
@@ -78,12 +66,6 @@ var clientRouterFunc = function (routeInfo) {
                 document
             );
         });
-    /*setupRoute(getNormalizedRouteInfo('client', routeInfo.clientRoute, params), function (error, routeInfo) {
-        React.renderComponent(
-            <CrowDictionary/>,
-            document
-        );
-    });*/
 };
 
 var routesInfo = [
@@ -237,6 +219,7 @@ var ReactAsync = {
 };
 
 var CrowDictionary = React.createClass({
+    mixins: [ReactIntlMixin],
     componentWillMount: function () {
         //this.setState({searchTerm: 'success-ish'});
         /*request('http://www.google.com', (function (error, response, body) {
@@ -398,9 +381,29 @@ var PhraseDetails = React.createClass({
             <div>
                 phrase: <PhraseInDetails topState={this.props.topState} />
                 definitions: <DefinitionsInDetails topState={this.props.topState}/>
+                <AddDefinitionForm topState={this.props.topState} />
                 <div>
                     <a onClick={this.handleBack}>Back</a>
                 </div>
+            </div>
+        );
+    }
+});
+
+var AddDefinitionForm = React.createClass({
+    handleSubmit: function (e) {
+        var newPhrase = this.refs.newPhrase.getDOMNode().value;
+        e.preventDefault();
+        //this.props.onSubmitAddPhrase(newPhrase);
+    },
+    render: function () {
+        return (
+            <div>
+                <form onSubmit={this.handleSubmit}>
+                    <span>Add phrase</span>
+                    <textarea placeholder="enter a new definition for phrase '' here" ref="newPhrase"/>
+                    <input type="submit" name="submit"/>
+                </form>
             </div>
         );
     }

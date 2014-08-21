@@ -19,6 +19,7 @@ var nconf = require('nconf');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var appUtil = require('../../../shared/build/js/util.js');
+var l10n = require('../../../shared/build/js/l10n.js');
 var Keygrip = require('keygrip');
 var crypto = require('crypto');
 
@@ -389,6 +390,8 @@ var requestSome = Q.denodeify(requestSomething);
 _.forEach(routesInfo, function (routeInfo) {
     console.log('adding server route ' + routeInfo.serverRoute + '?');
     appReact.get(routeInfo.serverRoute, function *(next) {
+        var hostname = this.request.hostname;
+        console.log("das hostname: " + hostname);
         //yield next;
         /*yield requestSome()
             .then((function (body) {
@@ -418,6 +421,12 @@ _.forEach(routesInfo, function (routeInfo) {
         yield Q(routeInfo.calculateStateFunc())
             .then((function (state) {
                 setInitialState(state);
+                return;
+            }))
+            .then((function () {
+                return l10n.pL10n;
+            }))
+            .then((function (l10nData) {
                 var markup = React.renderComponentToString(
                     <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />
                 );
