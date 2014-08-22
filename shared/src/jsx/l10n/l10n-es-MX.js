@@ -3,7 +3,10 @@ var l10n = {
     formats: {number: {}, date: {}, time: {}},
     messages: {
         top: {
-            greeting: '¡Hola {username}!'
+            greeting: {
+                loggedIn: '¡Hola {username}!',
+                notLoggedIn: '¡entrá!'
+            }
         }
     }
 };

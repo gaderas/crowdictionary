@@ -1,6 +1,16 @@
 Crowdsourced Dictionary
 ====
 
+Building
+----
+
+`grunt clean default`
+
+Running a development instance
+----
+
+`export NODE_ENV=development; node --harmony server/build/js/app.js --cookies.user.secrets="blah" --data.dbConfig.user="root"`
+
 TODO Performance Improvements
 ----
 

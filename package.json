@@ -25,6 +25,7 @@
   "dependencies": {
     "browser-request": "^0.3.2",
     "intl": "^0.1.4",
+    "intl-messageformat": "^1.0.0-rc-2",
     "keygrip": "^1.0.1",
     "koa": "^0.6.1",
     "koa-body-parser": "^1.1.0",
@@ -39,7 +40,6 @@
     "nopt": "^3.0.0",
     "q": "^1.0.1",
     "react": "^0.10.0",
-    "react-intl": "^1.0.0-rc-1",
     "request": "^2.40.0"
   }
 }

@@ -3,7 +3,8 @@
 var Q = require('q');
 var appUtil = require('./util.js');
 var React = require('react');
-var ReactIntlMixin = require('react-intl');
+var Intl = global.Intl || require('intl');
+var IntlMessageFormat = require('intl-messageformat');
 var bs = require('./bootstrap.js');
 var _ = require('lodash');
 var util = require('util');
@@ -211,15 +212,22 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, data) {
 };
 
 
-/*var AsyncMixin = {
-    asyncRenderComponentToString = function (component, ) {
+var I18nMixin = {
+    messages: null,
+    loadMessages: function () {
+        this.messages = this.props.topState.l10nData[this.props.topState.lang].messages;
+    },
+    msg: function (messageStr) {
+        return new IntlMessageFormat(messageStr, this.props.topState.lang);
+    },
+    fmt: function (messageObj, values) {
+        return messageObj.format(values);
     }
-};*/
-var ReactAsync = {
 };
 
+
 var CrowDictionary = React.createClass({
-    mixins: [ReactIntlMixin],
+
     componentWillMount: function () {
         //this.setState({searchTerm: 'success-ish'});
         /*request('http://www.google.com', (function (error, response, body) {
@@ -482,6 +490,7 @@ var NavBar = React.createClass({
 });
 
 var LoginStatus = React.createClass({
+    mixins: [I18nMixin],
     handleClick: function () {
         console.log('on handleClick');
         this.props.onToggleLoginPrompt();
@@ -490,11 +499,15 @@ var LoginStatus = React.createClass({
         this.props.onLogOut();
     },
     render: function () {
+        this.loadMessages();
         var loginInfo = this.props.topState.loginInfo;
         console.log("loginInfo...: " + JSON.stringify(loginInfo, ' ', 4));
         if (undefined === loginInfo) {
+            console.log("tutti: " + JSON.stringify(this.messages));
+            console.log("il posto: " + this.messages.top.greeting.notLoggedIn);
+            var greeting = this.fmt(this.msg(this.messages.top.greeting.notLoggedIn));
             return (
-                <span onClick={this.handleClick}>login / sign up.</span>
+                <span onClick={this.handleClick}>{greeting}</span>
             );
         } else {
             return (
