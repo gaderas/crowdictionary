@@ -19,7 +19,6 @@ var nconf = require('nconf');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var appUtil = require('../../../shared/build/js/util.js');
-var l10n = require('../../../shared/build/js/l10n.js');
 var Keygrip = require('keygrip');
 var crypto = require('crypto');
 
@@ -46,18 +45,23 @@ var CrowDictionary = shared.CrowDictionary,
     setupRoute = shared.setupRoute,
     asyncRenderComponentToString = shared.asyncRenderComponentToString,
     setInitialState = shared.setInitialState,
-    setPRequest = shared.setPRequest;
+    setPRequest = shared.setPRequest,
+    l10n = shared.l10n;
 
 var request = require('request');
 var jar = request.jar();
 var requestWithIncomingCookies = function (urlOrOpts, done) {
     var opts;
+    if (_.isEmpty(urlOrOpts)) {
+        throw Error("called requestWithIncomingCookies() with no url string or options object");
+    }
     if ("string" === typeof urlOrOpts) {
         opts = {
             url: urlOrOpts,
             jar: jar
         };
     } else {
+        opts = urlOrOpts;
         opts.jar = jar;
     }
     return request(opts, done);
@@ -420,23 +424,25 @@ _.forEach(routesInfo, function (routeInfo) {
 
         yield Q(routeInfo.calculateStateFunc())
             .then((function (state) {
-                return l10n.pL10n
+                return l10n.getAvailableLangs()
+                    .then(function (langs) {
+                        console.log("available langs: " + JSON.stringify(langs));
+                        state.lang = appUtil.getLangBasedOnHostname(hostname, langs);
+                        return l10n.getL10nForLang(state.lang);
+                    })
                     .then(function (l10nData) {
-                        console.log("all l10nData: " + JSON.stringify(l10nData));
                         state.l10nData = l10nData;
-                        state.lang = appUtil.getLangBasedOnHostname(hostname, _.map(l10nData, function (l10nData, lang) { return lang; }));
+                        console.log("state (including l10nData): " + JSON.stringify(state));
                         setInitialState(state);
-                    });
-            }))
-            .then((function () {
-                return l10n.pL10n;
-            }))
-            .then((function (l10nData) {
-                var markup = React.renderComponentToString(
-                    <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />
-                );
-                this.body = markup;
-            }).bind(this));
+                        return;
+                    })
+                    .then((function () {
+                        var markup = React.renderComponentToString(
+                            <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />
+                        );
+                        this.body = markup;
+                    }).bind(this));
+            }).bind(this))
     });
 });
 

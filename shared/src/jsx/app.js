@@ -3,6 +3,7 @@
 var Q = require('q');
 var appUtil = require('./util.js');
 var React = require('react');
+var l10n = require('./l10n.js');
 var Intl = global.Intl || require('intl');
 var IntlMessageFormat = require('intl-messageformat');
 var bs = require('./bootstrap.js');
@@ -12,6 +13,7 @@ var EventEmitter = require('events').EventEmitter;
 var pRequest,
     setPRequest = function (incoming) {
         pRequest = incoming;
+        l10n.setPRequest(pRequest);
     };
 
 var Layout = bs.Layout;
@@ -52,21 +54,36 @@ var clientRouterFunc = function (routeInfo) {
         }),
         fake1 = console.log('on clientRouterFunc(), routeInfo: ' + JSON.stringify(routeInfo)),
         fake2 = console.log('on clientRouterFunc(), params: ' + JSON.stringify(params)),
-        nRouteInfo = getNormalizedRouteInfo('client', routeInfo, params);
+        nRouteInfo = getNormalizedRouteInfo('client', routeInfo, params),
+        hostname = window.location.hostname;
 
 
+    console.log('hostname: ' + hostname);
     console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
     console.log('args: ' + JSON.stringify(args, ' ', 4));
     console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
     Q(routeInfo.calculateStateFunc())
-        .then(function (state) {
-            console.log('on client with state: ' + JSON.stringify(state));
-            setInitialState(state);
-            React.renderComponent(
-                <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />,
-                document
-            );
-        });
+        .then((function (state) {
+            console.log("state so far: " + state);
+            return l10n.getAvailableLangs()
+                .then(function (langs) {
+                    console.log("available langs: " + JSON.stringify(langs));
+                    state.lang = appUtil.getLangBasedOnHostname(hostname, langs);
+                    return l10n.getL10nForLang(state.lang);
+                })
+                .then(function (l10nData) {
+                    console.log("gonna set state.l10nData to : " + JSON.stringify(l10nData));
+                    state.l10nData = l10nData;
+                    setInitialState(state);
+                })
+                .then((function () {
+                    console.log("lang is: " + state.lang + ", and l10nData: " + JSON.stringify(state.l10nData));
+                    return React.renderComponent(
+                        <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />,
+                        document
+                    );
+                }.bind(this)));
+        }).bind(this));
 };
 
 var routesInfo = [
@@ -215,7 +232,7 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, data) {
 var I18nMixin = {
     messages: null,
     loadMessages: function () {
-        this.messages = this.props.topState.l10nData[this.props.topState.lang].messages;
+        this.messages = this.props.topState.l10nData.messages;
     },
     msg: function (messageStr) {
         return new IntlMessageFormat(messageStr, this.props.topState.lang);
@@ -697,3 +714,6 @@ module.exports.setupRoute = setupRoute;
 module.exports.CrowDictionary = CrowDictionary;
 module.exports.setInitialState = setInitialState;
 module.exports.setPRequest = setPRequest;
+module.exports.l10n = {};
+module.exports.l10n.getAvailableLangs = l10n.getAvailableLangs;
+module.exports.l10n.getL10nForLang = l10n.getL10nForLang;

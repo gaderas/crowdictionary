@@ -1,44 +1,43 @@
 var _ = require('lodash');
 var Q = require('q');
-var fs = require('fs');
+var util = require('util');
 
-var pReaddir = Q.denodeify(fs.readdir);
-var pReadFile = Q.denodeify(fs.readFile);
+var pRequest;
 
-var l10nPath = 'shared/src/jsx/l10n',
-    shortL10nPath = './l10n';
+var setPRequest = function (incoming) {
+    pRequest = incoming;
+};
 
-console.log("start");
-var pL10n = pReaddir(l10nPath)
-    .then(function (filenames) {
-        console.log("first den");
-        console.log("filenames: " + JSON.stringify(filenames));
-        return _(filenames).map(function (filename) {
-            console.log("filename: " + filename);
-            var matches = filename.match(/^(.*l10n-(.*)).js$/),
-                lang = matches && matches[2],
-                filenameWithoutExtension = matches && matches[1],
-                fake = console.log(filenameWithoutExtension),
-                langL10n;
-            if (!matches) {
-                return;
-            } else {
-                langL10n = require(shortL10nPath + "/" + filenameWithoutExtension);
+var getAvailableLangs = function () {
+    var url = "http://localhost:3000/static/l10n/langs.json";
+    console.log("about to request");
+    console.log("pRequest: " + pRequest);
+    return pRequest({method: "GET", url: url, json: true})
+        .then(function (res) {
+            console.log("got res");
+            if (200 !== res[0].statusCode) {
+                throw Error("error, got status code: '" + res[0].statusCode + "' while trying to fetch a list of available l10n langs");
             }
-            console.log("lang: " + lang);
-            console.log("langL10n: " + JSON.stringify(langL10n));
-            if (null === lang) {
-                return;
+            return res[1];
+        });
+};
+
+var getL10nForLang = function (lang) {
+    console.log(":)");
+    var url = util.format("http://localhost:3000/static/l10n/l10n-%s.json", lang);
+    return pRequest({method: "GET", url: url, json: true})
+        .then(function (res) {
+            if (200 !== res[0].statusCode) {
+                throw Error("error, got status code: '" + res[0].statusCode + "' while trying to fetch l10n data");
             }
-            console.log('about to return');
-            return [lang, langL10n];
+            console.log(":-*");
+            return res[1];
         })
-        .filter()
-        .zipObject()
-        .valueOf();
-    })
-    .fail(function (err) {
-        console.error("got this error: " + err.message);
-    });
+        .fail(function (err) {
+            return "error: " + err.message;
+        });
+};
 
-module.exports.pL10n = pL10n;
+module.exports.setPRequest = setPRequest;
+module.exports.getAvailableLangs = getAvailableLangs;
+module.exports.getL10nForLang = getL10nForLang;

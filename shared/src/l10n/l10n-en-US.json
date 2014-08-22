@@ -1,0 +1,12 @@
+{
+    "locales": ["en-US"],
+    "formats": {"number": {}, "date": {}, "time": {}},
+    "messages": {
+        "top": {
+            "greeting": {
+                "loggedIn": "Hello, {username}!",
+                "notLoggedIn": "login!!!"
+            }
+        }
+    }
+}

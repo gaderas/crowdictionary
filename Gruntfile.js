@@ -28,6 +28,18 @@ module.exports = function(grunt) {
                 dest: 'client/build/',
                 filter: 'isFile',
                 expand: true
+            },
+            l10n: {
+                cwd: 'shared/src/l10n/',
+                src: '**',
+                dest: 'client/build/l10n/',
+                filter: 'isFile',
+                expand: true
+            }
+        },
+        jsonlint: {
+            l10n: {
+                src: ['shared/src/l10n/*.json']
             }
         },
         concat: {
@@ -76,11 +88,13 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     // Load clean
     grunt.loadNpmTasks('grunt-contrib-clean');
+    // Load jsonlint
+    grunt.loadNpmTasks('grunt-jsonlint');
 
     grunt.registerTask('bower', ['bower-install-simple', 'concat']);
     grunt.registerTask('jsx', ['shell:jsx-shared', 'shell:jsx-server', 'shell:jsx-client']);
     // Default task(s).
-    grunt.registerTask('default', ['uglify', 'sass', 'copy', 'bower', 'jsx', 'browserify']);
+    grunt.registerTask('default', ['jsonlint', 'uglify', 'sass', 'copy', 'bower', 'jsx', 'browserify']);
 };
 
 /* vim: expandtab:tabstop=4:softtabstop=4:shiftwidth=4:set filetype=javascript: */
