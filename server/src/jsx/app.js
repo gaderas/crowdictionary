@@ -24,16 +24,9 @@ var crypto = require('crypto');
 
 var NODE_ENV = process.env.NODE_ENV;
 
-//console.log('nconf.NODE_ENV: ' + nconf.get('NODE_ENV'));
-
 nconf.argv().env().file({file: './config/'+NODE_ENV+'.config.json'});
 
 console.log('nconf.get("NODE_ENV"): ' + nconf.get('NODE_ENV'));
-
-//console.log(nconf.get('data'));
-//console.log(nconf.get('data:source'));
-//console.log(nconf.get('secret'));
-//process.exit();
 
 var mockData = dsFactory(nconf);
 
@@ -69,11 +62,8 @@ var requestWithIncomingCookies = function (urlOrOpts, done) {
 
 var pRequest = Q.denodeify(requestWithIncomingCookies);
 
-//setRequest(requestWithIncomingCookies);
 setPRequest(pRequest);
 
-
-//app.use(serve('./client/build'));
 
 appReact.use(router(appReact));
 app.keys = nconf.get("cookies:user:secrets").split(',');
@@ -396,19 +386,6 @@ _.forEach(routesInfo, function (routeInfo) {
     appReact.get(routeInfo.serverRoute, function *(next) {
         var hostname = this.request.hostname;
         console.log("das hostname: " + hostname);
-        //yield next;
-        /*yield requestSome()
-            .then((function (body) {
-                var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params);
-                console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
-                //setInitialState({
-                    //searchTerm: 'beginning of boday: "' +  '"'
-                //});
-                var markup = React.renderComponentToString(
-                    <CrowDictionary/>
-                );
-                this.body = markup;
-            }).bind(this));*/
         var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params);
         console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
 

@@ -246,43 +246,7 @@ var I18nMixin = {
 var CrowDictionary = React.createClass({
 
     componentWillMount: function () {
-        //this.setState({searchTerm: 'success-ish'});
-        /*request('http://www.google.com', (function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                //callback(null, body); // Print the google web page.
-                this.setState({searchTerm: 'i like'});
-                return;
-            } else {
-                console.log("error fetching googoogoog.el.com!!");
-                //callback(error);
-                return;
-            }
-        }).bind(this));*/
     },
-    /*asyncRenderComponentToString: function (callback) {
-        this.type.asyncGetInitialState(function (err, resp) {
-            if (err) {
-                console.log('errerus');
-            }
-            this.type.setState({
-                searchTerm: 'got google page with length: ' + resp.length
-            });
-        });
-        var markup = React.renderComponentToString(this);
-        callback(null, markup);
-    },*/
-    /*asyncGetInitialState: function (callback) {
-        request('http://www.google.com', function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                callback(null, body); // Print the google web page.
-                return;
-            } else {
-                console.log("error fetching googoogoog.el.com!!");
-                callback(error);
-                return;
-            }
-        });
-    },*/
     getInitialState: function () {
         return initialState;
     },

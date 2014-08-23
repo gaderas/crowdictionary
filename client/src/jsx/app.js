@@ -33,19 +33,6 @@ var Router = Backbone.Router.extend(
     )
 
 );
-    /*home: function () {
-        console.log('home!');
-        React.renderComponent(
-            <CrowDictionary/>,
-            document
-        );
-    },
-
-    fake: function () {
-        console.log('fake');
-    }*/
-
-//console.log("Router: " + Router);
 
 var router = new Router();
 
