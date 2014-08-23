@@ -380,17 +380,20 @@ var PhraseDetails = React.createClass({
 });
 
 var AddDefinitionForm = React.createClass({
+    mixins: [I18nMixin],
     handleSubmit: function (e) {
         var newPhrase = this.refs.newPhrase.getDOMNode().value;
         e.preventDefault();
         //this.props.onSubmitAddPhrase(newPhrase);
     },
     render: function () {
+        this.loadMessages();
+        var placeholder = this.fmt(this.msg(this.messages.forms.newDefinition.placeHolder), {phrase: this.props.topState.shownPhraseData.phrase});
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
                     <span>Add phrase</span>
-                    <textarea placeholder="enter a new definition for phrase '' here" ref="newPhrase"/>
+                    <textarea placeholder={placeholder} ref="newPhrase"/>
                     <input type="submit" name="submit"/>
                 </form>
             </div>
@@ -552,7 +555,7 @@ var PhraseSearchResults = React.createClass({
                 <div className="phraseSearchResultsList">
                     {phraseSearchResults}
                 </div>
-                <AddPhraseForm onSubmitAddPhrase={this.props.onSubmitAddPhrase}/>
+                <AddPhraseForm onSubmitAddPhrase={this.props.onSubmitAddPhrase} topState={this.props.topState}/>
             </div>
         );
     }
@@ -606,18 +609,20 @@ var DefinitionInList = React.createClass({
 });
 
 var AddPhraseForm = React.createClass({
+    mixins: [I18nMixin],
     handleSubmit: function (e) {
         var newPhrase = this.refs.newPhrase.getDOMNode().value;
         e.preventDefault();
         this.props.onSubmitAddPhrase(newPhrase);
     },
     render: function () {
+        this.loadMessages();
         var placeholder = this.fmt(this.msg(this.messages.forms.newPhrase.placeHolder));
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
                     <span>Add phrase</span>
-                    <textarea placeholder="{placeholder}" ref="newPhrase"/>
+                    <textarea placeholder={placeholder} ref="newPhrase"/>
                     <input type="submit" name="submit"/>
                 </form>
             </div>
