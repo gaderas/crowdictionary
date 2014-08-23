@@ -7,6 +7,14 @@
                 "loggedIn": "Hello, {username}!",
                 "notLoggedIn": "login!!!"
             }
+        },
+        "forms": {
+            "newPhrase": {
+                "placeHolder": "enter a new phrase here"
+            },
+            "newDefinition": {
+                "placeHolder": "enter a new definition for phrase '{phrase}' here"
+            }
         }
     }
 }

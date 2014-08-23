@@ -612,11 +612,12 @@ var AddPhraseForm = React.createClass({
         this.props.onSubmitAddPhrase(newPhrase);
     },
     render: function () {
+        var placeholder = this.fmt(this.msg(this.messages.forms.newPhrase.placeHolder));
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
                     <span>Add phrase</span>
-                    <textarea placeholder="enter a new phrase here" ref="newPhrase"/>
+                    <textarea placeholder="{placeholder}" ref="newPhrase"/>
                     <input type="submit" name="submit"/>
                 </form>
             </div>
