@@ -68,8 +68,8 @@ var clientRouterFunc = function (routeInfo) {
             return l10n.getAvailableLangs()
                 .then(function (langs) {
                     console.log("available langs: " + JSON.stringify(langs));
-                    state.lang = appUtil.getLangBasedOnHostname(hostname, langs);
-                    return l10n.getL10nForLang(state.lang);
+                    state.globalLang = appUtil.getLangBasedOnHostname(hostname, langs);
+                    return l10n.getL10nForLang(state.globalLang);
                 })
                 .then(function (l10nData) {
                     console.log("gonna set state.l10nData to : " + JSON.stringify(l10nData));
@@ -77,7 +77,7 @@ var clientRouterFunc = function (routeInfo) {
                     setInitialState(state);
                 })
                 .then((function () {
-                    console.log("lang is: " + state.lang + ", and l10nData: " + JSON.stringify(state.l10nData));
+                    console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
                     return React.renderComponent(
                         <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />,
                         document
@@ -235,7 +235,7 @@ var I18nMixin = {
         this.messages = this.props.topState.l10nData.messages;
     },
     msg: function (messageStr) {
-        return new IntlMessageFormat(messageStr, this.props.topState.lang);
+        return new IntlMessageFormat(messageStr, this.props.topState.globalLang);
     },
     fmt: function (messageObj, values) {
         return messageObj.format(values);
