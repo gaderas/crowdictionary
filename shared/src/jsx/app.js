@@ -62,28 +62,48 @@ var clientRouterFunc = function (routeInfo) {
     console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
     console.log('args: ' + JSON.stringify(args, ' ', 4));
     console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
-    Q(routeInfo.calculateStateFunc())
+
+    pGenericCalculateState(hostname, {}, routeInfo.calculateStateFunc)
         .then((function (state) {
-            console.log("state so far: " + state);
-            return l10n.getAvailableLangs()
-                .then(function (langs) {
-                    console.log("available langs: " + JSON.stringify(langs));
-                    state.globalLang = appUtil.getLangBasedOnHostname(hostname, langs);
-                    return l10n.getL10nForLang(state.globalLang);
-                })
-                .then(function (l10nData) {
-                    console.log("gonna set state.l10nData to : " + JSON.stringify(l10nData));
-                    state.l10nData = l10nData;
-                    setInitialState(state);
-                })
-                .then((function () {
-                    console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
-                    return React.renderComponent(
-                        <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />,
-                        document
-                    );
-                }.bind(this)));
-        }).bind(this));
+            console.log("state: " + state);
+            console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
+            setInitialState(state);
+            React.renderComponent(
+                <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />,
+                document
+            );
+            return;
+        }).bind(this))
+        .fail(function (err) {
+            console.error("error: " + (err));
+        });
+};
+
+var pGenericCalculateState = function (hostname, stateOverrides, calculateStateFunc) {
+    stateOverrides = (!_.isEmpty(stateOverrides) && stateOverrides) || {};
+    if (stateOverrides.globalLang) {
+        return l10n.getL10nForLang(stateOverrides.globalLang)
+            .then(function (l10nData) {
+                console.log("gonna set stateOverrides.l10nData to : " + JSON.stringify(l10nData));
+                stateOverrides.l10nData = l10nData;
+                return;
+            })
+            .then(function () {
+                return Q(calculateStateFunc(stateOverrides));
+            });
+    } else {
+        return l10n.getAvailableLangs()
+            .then(function (langs) {
+                console.log("available langs: " + JSON.stringify(langs));
+                stateOverrides.globalLang = appUtil.getLangBasedOnHostname(hostname, langs);
+                return l10n.getL10nForLang(stateOverrides.globalLang);
+            })
+            .then(function (l10nData) {
+                console.log("gonna set stateOverrides.l10nData to : " + JSON.stringify(l10nData));
+                stateOverrides.l10nData = l10nData;
+                return Q(calculateStateFunc(stateOverrides));
+            })
+    }
 };
 
 var routesInfo = [
@@ -93,10 +113,11 @@ var routesInfo = [
         clientRoute: '',
         clientRouterFunc: clientRouterFunc,
         clientRouterFuncName: '/',
-        calculateStateFunc: function (lang, term) {
-            lang = lang || 'es-MX';
-            term = term || '';
-            var phrasesUrl,
+        calculateStateFunc: function (overrides) {
+            var lang = (overrides && overrides.globalLang) || 'es-MX',
+                term = (overrides && overrides.searchTerm) || '',
+                l10nData = (overrides && overrides.l10nData) || {},
+                phrasesUrl,
                 loginStateUrl = "http://localhost:3000/v1/login";
             if (!term) {
                 phrasesUrl = "http://localhost:3000/v1/lang/"+lang+"/phrases";
@@ -113,6 +134,7 @@ var routesInfo = [
                     var rObj = JSON.parse(phrasesRes[1]),
                         reactState = {
                             globalLang: lang,
+                            l10nData: l10nData,
                             searchTerm: term,
                             searchResults: []
                         };
@@ -251,14 +273,14 @@ var CrowDictionary = React.createClass({
         return initialState;
     },
     handleUserInput: function (searchTerm) {
-        this.props.calculateStateFunc(this.state.globalLang, searchTerm)
+        this.props.calculateStateFunc({globalLang: this.state.globalLang, searchTerm: searchTerm})
             .then((function (newState) {
                 this.setState(newState);
                 console.log("newState: " + JSON.stringify(newState, ' ', 4));
             }).bind(this));
     },
     handleGlobalLangChange: function (newLang) {
-        this.props.calculateStateFunc(newLang, this.state.searchTerm)
+        this.props.calculateStateFunc({globalLang: newLang, searchTerm: this.state.searchTerm})
             .then((function (newState) {
                 this.setState(newState);
                 console.log("newState: " + JSON.stringify(newState, ' ', 4));
@@ -282,7 +304,7 @@ var CrowDictionary = React.createClass({
                 console.log("res is: " + JSON.stringify(res, ' ', 4));
                 var rObj = res[1]; // it's already json because we called `pRequest` with `{json:true}`
                 console.log("rObj: " + JSON.stringify(rObj, ' ', 4));
-                return this.props.calculateStateFunc(this.state.globalLang, this.state.searchTerm);
+                return this.props.calculateStateFunc({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm});
             }).bind(this))
             .then((function (newState) {
                 newState.showLoginPrompt = false;
@@ -297,7 +319,7 @@ var CrowDictionary = React.createClass({
         var logOutUrl = "http://localhost:3000/v1/logout";
         return pRequest(logOutUrl)
             .then((function (res) {
-                return this.props.calculateStateFunc(this.state.globalLang, this.state.searchTerm);
+                return this.props.calculateStateFunc({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm});
             }).bind(this))
             .then((function (newState) {
                 this.replaceState(newState);
@@ -313,7 +335,7 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to add a new phrase...");
                 }
-                return this.props.calculateStateFunc(this.state.globalLang, this.state.searchTerm);
+                return this.props.calculateStateFunc({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm});
             }).bind(this))
             .then((function (newState) {
                 this.replaceState(newState);
@@ -684,6 +706,7 @@ module.exports.setupRoute = setupRoute;
 module.exports.CrowDictionary = CrowDictionary;
 module.exports.setInitialState = setInitialState;
 module.exports.setPRequest = setPRequest;
+module.exports.pGenericCalculateState = pGenericCalculateState;
 module.exports.l10n = {};
 module.exports.l10n.getAvailableLangs = l10n.getAvailableLangs;
 module.exports.l10n.getL10nForLang = l10n.getL10nForLang;

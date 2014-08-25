@@ -40,6 +40,7 @@ var CrowDictionary = shared.CrowDictionary,
     setInitialState = shared.setInitialState,
     setPRequest = shared.setPRequest,
     l10n = shared.l10n;
+    pGenericCalculateState = shared.pGenericCalculateState;
 
 var request = require('request');
 var jar = request.jar();
@@ -399,27 +400,20 @@ _.forEach(routesInfo, function (routeInfo) {
             jar.setCookie(outgoingCookie, "http://localhost:3000");
         }).bind(this));
 
-        yield Q(routeInfo.calculateStateFunc())
+        yield pGenericCalculateState(hostname, {}, routeInfo.calculateStateFunc)
             .then((function (state) {
-                return l10n.getAvailableLangs()
-                    .then(function (langs) {
-                        console.log("available langs: " + JSON.stringify(langs));
-                        state.lang = appUtil.getLangBasedOnHostname(hostname, langs);
-                        return l10n.getL10nForLang(state.lang);
-                    })
-                    .then(function (l10nData) {
-                        state.l10nData = l10nData;
-                        console.log("state (including l10nData): " + JSON.stringify(state));
-                        setInitialState(state);
-                        return;
-                    })
-                    .then((function () {
-                        var markup = React.renderComponentToString(
-                            <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />
-                        );
-                        this.body = markup;
-                    }).bind(this));
+                console.log("state: " + state);
+                console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
+                setInitialState(state);
+                var markup = React.renderComponentToString(
+                    <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />
+                );
+                this.body = markup;
+                return;
             }).bind(this))
+            .fail(function (err) {
+                console.error("error: " + (err));
+            });
     });
 });
 
