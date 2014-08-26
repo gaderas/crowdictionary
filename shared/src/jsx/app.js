@@ -11,9 +11,14 @@ var _ = require('lodash');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var pRequest,
+    selfRoot,
     setPRequest = function (incoming) {
         pRequest = incoming;
         l10n.setPRequest(pRequest);
+    },
+    setSelfRoot = function (incoming) {
+        selfRoot = incoming;
+        l10n.setSelfRoot(incoming);
     };
 
 var Layout = bs.Layout;
@@ -55,15 +60,17 @@ var clientRouterFunc = function (routeInfo) {
         fake1 = console.log('on clientRouterFunc(), routeInfo: ' + JSON.stringify(routeInfo)),
         fake2 = console.log('on clientRouterFunc(), params: ' + JSON.stringify(params)),
         nRouteInfo = getNormalizedRouteInfo('client', routeInfo, params),
-        hostname = window.location.hostname;
+        hostname = window.location.hostname,
+        selfRoot = util.format("%s//%s", window.location.protocol, window.location.host);
 
+    setSelfRoot(selfRoot);
 
     console.log('hostname: ' + hostname);
     console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
     console.log('args: ' + JSON.stringify(args, ' ', 4));
     console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
 
-    pGenericCalculateState(hostname, {}, routeInfo.calculateStateFunc)
+    pGenericCalculateState({hostname: hostname, selfRoot: selfRoot}, routeInfo.calculateStateFunc)
         .then((function (state) {
             console.log("state: " + state);
             console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
@@ -79,16 +86,15 @@ var clientRouterFunc = function (routeInfo) {
         });
 };
 
-var pGenericCalculateState = function (hostname, stateOverrides, calculateStateFunc) {
+var pGenericCalculateState = function (stateOverrides, calculateStateFunc) {
     stateOverrides = (!_.isEmpty(stateOverrides) && stateOverrides) || {};
+    var hostname = stateOverrides.hostname,
+        selfRoot = stateOverrides.selfRoot;
     if (stateOverrides.globalLang) {
         return l10n.getL10nForLang(stateOverrides.globalLang)
             .then(function (l10nData) {
                 console.log("gonna set stateOverrides.l10nData to : " + JSON.stringify(l10nData));
                 stateOverrides.l10nData = l10nData;
-                return;
-            })
-            .then(function () {
                 return Q(calculateStateFunc(stateOverrides));
             });
     } else {
@@ -118,11 +124,11 @@ var routesInfo = [
                 term = (overrides && overrides.searchTerm) || '',
                 l10nData = (overrides && overrides.l10nData) || {},
                 phrasesUrl,
-                loginStateUrl = "http://localhost:3000/v1/login";
+                loginStateUrl = selfRoot + "/v1/login";
             if (!term) {
-                phrasesUrl = "http://localhost:3000/v1/lang/"+lang+"/phrases";
+                phrasesUrl = selfRoot + "/v1/lang/"+lang+"/phrases";
             } else {
-                phrasesUrl = "http://localhost:3000/v1/lang/"+lang+"/phrases?search="+term;
+                phrasesUrl = selfRoot + "/v1/lang/"+lang+"/phrases?search="+term;
             }
             return Q.all([pRequest(phrasesUrl), pRequest(loginStateUrl)])
                 .spread(function (phrasesRes, loginStateRes) {
@@ -157,7 +163,7 @@ var routesInfo = [
                     if (!phraseIds.length) {
                         return reactState;
                     }
-                    return pRequest("http://localhost:3000/v1/definitions?phraseIds="+phraseIds.join(','))
+                    return pRequest(selfRoot + "/v1/definitions?phraseIds="+phraseIds.join(','))
                         .then(function (res) {
                             if (200 !== res[0].statusCode) {
                                 throw Error("couldn't fetch definitions");
@@ -294,7 +300,7 @@ var CrowDictionary = React.createClass({
     },
     handleLogIn: function (username, password) {
         console.log("user: " + username + ", pass: " + password);
-        loginStateUrl = "http://localhost:3000/v1/login";
+        loginStateUrl = selfRoot + "/v1/login";
         return pRequest({method: "POST", url: loginStateUrl, body: {email: username, passhash: password}, json:true})
             .then((function(res) {
                 if (200 !== res[0].statusCode) {
@@ -316,7 +322,7 @@ var CrowDictionary = React.createClass({
             });
     },
     handleLogOut: function () {
-        var logOutUrl = "http://localhost:3000/v1/logout";
+        var logOutUrl = selfRoot + "/v1/logout";
         return pRequest(logOutUrl)
             .then((function (res) {
                 return this.props.calculateStateFunc({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm});
@@ -329,7 +335,7 @@ var CrowDictionary = React.createClass({
         console.log("got a new phrase: " + phrase);
         var lang = this.state.globalLang,
             crumb = this.state.loginInfo.crumb,
-            addPhraseUrl = util.format("http://localhost:3000/v1/lang/%s/phrases/%s", lang, phrase);
+            addPhraseUrl = util.format(selfRoot + "/v1/lang/%s/phrases/%s", lang, phrase);
         return pRequest({method: "PUT", url: addPhraseUrl, body: {phrase: phrase, lang: lang, crumb: crumb}, json: true})
             .then((function (res) {
                 if (200 !== res[0].statusCode) {
@@ -706,6 +712,7 @@ module.exports.setupRoute = setupRoute;
 module.exports.CrowDictionary = CrowDictionary;
 module.exports.setInitialState = setInitialState;
 module.exports.setPRequest = setPRequest;
+module.exports.setSelfRoot = setSelfRoot;
 module.exports.pGenericCalculateState = pGenericCalculateState;
 module.exports.l10n = {};
 module.exports.l10n.getAvailableLangs = l10n.getAvailableLangs;

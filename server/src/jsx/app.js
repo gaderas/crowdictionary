@@ -365,30 +365,16 @@ appWs.put('/definitions/:definition_id/vote', function *(next) {
         }).bind(this));
 });
 
-
-var requestSomething = function (callback) {
-    request('http://localhost:3000/v1/lang/es-MX/phrases', function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            callback(null, body); // Print the google web page.
-            return;
-        } else {
-            console.log("error fetching googoogoog.el.com!!");
-            callback(error);
-            return;
-        }
-    });
-};
-
-var requestSome = Q.denodeify(requestSomething);
-
-
 _.forEach(routesInfo, function (routeInfo) {
     console.log('adding server route ' + routeInfo.serverRoute + '?');
     appReact.get(routeInfo.serverRoute, function *(next) {
-        var hostname = this.request.hostname;
+        var hostname = this.request.hostname,
+            selfRoot = util.format("%s://%s", this.request.protocol, this.request.host);
         console.log("das hostname: " + hostname);
         var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params);
         console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
+
+        shared.setSelfRoot(selfRoot);
 
         // this is for forwarding these relevant app cookies to api calls to work. api is solely responsible for handling authorization.
         _.forEach(['browserId', 'contributor', 'browserId.sig', 'contributor.sig'], (function (cookieName) {
@@ -397,10 +383,10 @@ _.forEach(routesInfo, function (routeInfo) {
                 outgoingCookie = request.cookie(cookie);
 
             console.log(util.format("cookieName: %s, incomingCookie: %s", cookieName, incomingCookie));
-            jar.setCookie(outgoingCookie, "http://localhost:3000");
+            jar.setCookie(outgoingCookie, selfRoot);
         }).bind(this));
 
-        yield pGenericCalculateState(hostname, {}, routeInfo.calculateStateFunc)
+        yield pGenericCalculateState({hostname: hostname, selfRoot: selfRoot}, routeInfo.calculateStateFunc)
             .then((function (state) {
                 console.log("state: " + state);
                 console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));

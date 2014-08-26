@@ -2,14 +2,19 @@ var _ = require('lodash');
 var Q = require('q');
 var util = require('util');
 
-var pRequest;
+var pRequest,
+    selfRoot;
 
 var setPRequest = function (incoming) {
     pRequest = incoming;
 };
 
+var setSelfRoot = function (incoming) {
+    selfRoot = incoming;
+};
+
 var getAvailableLangs = function () {
-    var url = "http://localhost:3000/static/l10n/langs.json";
+    var url = selfRoot + "/static/l10n/langs.json";
     console.log("about to request");
     console.log("pRequest: " + pRequest);
     return pRequest({method: "GET", url: url, json: true})
@@ -24,7 +29,7 @@ var getAvailableLangs = function () {
 
 var getL10nForLang = function (lang) {
     console.log(":)");
-    var url = util.format("http://localhost:3000/static/l10n/l10n-%s.json", lang);
+    var url = util.format(selfRoot + "/static/l10n/l10n-%s.json", lang);
     return pRequest({method: "GET", url: url, json: true})
         .then(function (res) {
             if (200 !== res[0].statusCode) {
@@ -39,5 +44,6 @@ var getL10nForLang = function (lang) {
 };
 
 module.exports.setPRequest = setPRequest;
+module.exports.setSelfRoot = setSelfRoot;
 module.exports.getAvailableLangs = getAvailableLangs;
 module.exports.getL10nForLang = getL10nForLang;
