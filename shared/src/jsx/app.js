@@ -351,6 +351,9 @@ var CrowDictionary = React.createClass({
                 console.error("got an error: " + JSON.stringify(err, ' ', 4));
             });
     },
+    handleSubmitAddDefinition: function (phraseId, definition) {
+        //var;
+    },
     handleSelectPhrase: function (phraseData) {
         this.setState({
             shownPhraseData: phraseData
@@ -474,6 +477,7 @@ var TopBar = React.createClass({
 });
 
 var SearchBar = React.createClass({
+    mixins: [I18nMixin],
     handleChange: function () {
         console.log('in SearchBar::handleChange()');
         var searchTerm = this.refs.searchInput.getDOMNode().value;
@@ -482,9 +486,11 @@ var SearchBar = React.createClass({
     },
     render: function () {
         console.log("this.handleChange: " + this.handleChange);
+        this.loadMessages();
+        var placeholder = this.fmt(this.msg(this.messages.SearchBar.placeHolder));
         return (
             <form>
-            <input type="text" defaultValue={this.props.topState.searchTerm} placeholder="enter search term" ref="searchInput" onChange={this.handleChange}/>
+            <input type="text" defaultValue={this.props.topState.searchTerm} placeholder={placeholder} ref="searchInput" onChange={this.handleChange}/>
             </form>
         );
     }

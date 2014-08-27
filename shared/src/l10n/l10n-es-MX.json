@@ -2,6 +2,9 @@
     "locales": ["es-MX"],
     "formats": {"number": {}, "date": {}, "time": {}},
     "messages": {
+        "SearchBar": {
+            "placeHolder": "busca..."
+        },
         "LoginStatus": {
             "loggedInGreeting": "¡Hola {username}!",
             "notLoggedInGreeting": "¡entrá!",
