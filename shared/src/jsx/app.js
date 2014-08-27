@@ -351,8 +351,23 @@ var CrowDictionary = React.createClass({
                 console.error("got an error: " + JSON.stringify(err, ' ', 4));
             });
     },
-    handleSubmitAddDefinition: function (phraseId, definition) {
-        //var;
+    handleSubmitAddDefinition: function (phrase, definition) {
+        var lang = this.state.globalLang,
+            crumb = this.state.loginInfo.crumb,
+            addDefinitionUrl = util.format(selfRoot + "/v1/lang/%s/phrases/%s/definitions", lang, phrase);
+        return pRequest({method: "POST", url: addDefinitionUrl, body: {phrase: phrase, definition: definition, lang: lang, crumb: crumb}, json: true})
+            .then((function (res) {
+                if (200 !== res[0].statusCode) {
+                    throw Error("failed to add a new definition...");
+                }
+                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.calculateStateFunc)
+            }).bind(this))
+            .then((function (newState) {
+                this.replaceState(newState);
+            }).bind(this))
+            .fail(function (err) {
+                console.error("got an error: " + JSON.stringify(err, ' ', 4));
+            });
     },
     handleSelectPhrase: function (phraseData) {
         this.setState({
@@ -368,7 +383,7 @@ var CrowDictionary = React.createClass({
             mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn}/>;
         } else {
             if (this.state.shownPhraseData) {
-                mainContent = <PhraseDetails topState={this.state} onClosePhraseDetails={this.handleClosePhraseDetails}/>;
+                mainContent = <PhraseDetails topState={this.state} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition}/>;
             } else {
                 mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase} onSelectPhrase={this.handleSelectPhrase}/>;
             }
@@ -402,7 +417,7 @@ var PhraseDetails = React.createClass({
             <div>
                 phrase: <PhraseInDetails topState={this.props.topState} />
                 definitions: <DefinitionsInDetails topState={this.props.topState}/>
-                <AddDefinitionForm topState={this.props.topState} />
+                <AddDefinitionForm topState={this.props.topState} onSubmitAddDefinition={this.props.onSubmitAddDefinition}/>
                 <div>
                     <a onClick={this.handleBack}>Back</a>
                 </div>
@@ -414,9 +429,9 @@ var PhraseDetails = React.createClass({
 var AddDefinitionForm = React.createClass({
     mixins: [I18nMixin],
     handleSubmit: function (e) {
-        var newPhrase = this.refs.newPhrase.getDOMNode().value;
+        var newDefinition = this.refs.newDefinition.getDOMNode().value;
         e.preventDefault();
-        //this.props.onSubmitAddPhrase(newPhrase);
+        this.props.onSubmitAddDefinition(this.props.topState.shownPhraseData.phrase, newDefinition);
     },
     render: function () {
         this.loadMessages();
@@ -427,7 +442,7 @@ var AddDefinitionForm = React.createClass({
             <div>
                 <form onSubmit={this.handleSubmit}>
                     <span>{addDefinition}</span>
-                    <textarea placeholder={placeholder} ref="newPhrase"/>
+                    <textarea placeholder={placeholder} ref="newDefinition"/>
                     <input type="submit" value={submit}/>
                 </form>
             </div>
