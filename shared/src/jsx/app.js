@@ -59,18 +59,14 @@ var clientRouterFunc = function (routeInfo) {
         }),
         fake1 = console.log('on clientRouterFunc(), routeInfo: ' + JSON.stringify(routeInfo)),
         fake2 = console.log('on clientRouterFunc(), params: ' + JSON.stringify(params)),
-        nRouteInfo = getNormalizedRouteInfo('client', routeInfo, params),
-        hostname = window.location.hostname,
-        selfRoot = util.format("%s//%s", window.location.protocol, window.location.host);
+        nRouteInfo = getNormalizedRouteInfo('client', routeInfo, params);
 
-    setSelfRoot(selfRoot);
 
-    console.log('hostname: ' + hostname);
     console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
     console.log('args: ' + JSON.stringify(args, ' ', 4));
     console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
 
-    pGenericCalculateState({hostname: hostname, selfRoot: selfRoot}, routeInfo.calculateStateFunc)
+    pGenericCalculateState({}, routeInfo.calculateStateFunc)
         .then((function (state) {
             console.log("state: " + state);
             console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
@@ -88,8 +84,10 @@ var clientRouterFunc = function (routeInfo) {
 
 var pGenericCalculateState = function (stateOverrides, calculateStateFunc) {
     stateOverrides = (!_.isEmpty(stateOverrides) && stateOverrides) || {};
-    var hostname = stateOverrides.hostname,
-        selfRoot = stateOverrides.selfRoot;
+    // `hostname` and `selfRoot` passed in server mode, otherwise we get values from `window`
+    var hostname = (stateOverrides && stateOverrides.hostname) || window.location.hostname,
+        selfRoot = (stateOverrides && stateOverrides.selfRoot) || util.format("%s//%s", window.location.protocol, window.location.host);
+    setSelfRoot(selfRoot);
     if (stateOverrides.globalLang) {
         return l10n.getL10nForLang(stateOverrides.globalLang)
             .then(function (l10nData) {
@@ -260,6 +258,9 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, data) {
 var I18nMixin = {
     messages: null,
     loadMessages: function () {
+        if (undefined === this.props.topState.l10nData.messages) {
+            throw Error("this.props.topState.l10nData.messages is undefined...");
+        }
         this.messages = this.props.topState.l10nData.messages;
     },
     msg: function (messageStr) {
@@ -279,14 +280,14 @@ var CrowDictionary = React.createClass({
         return initialState;
     },
     handleUserInput: function (searchTerm) {
-        this.props.calculateStateFunc({globalLang: this.state.globalLang, searchTerm: searchTerm})
+        pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: searchTerm}, this.props.calculateStateFunc)
             .then((function (newState) {
                 this.setState(newState);
                 console.log("newState: " + JSON.stringify(newState, ' ', 4));
             }).bind(this));
     },
     handleGlobalLangChange: function (newLang) {
-        this.props.calculateStateFunc({globalLang: newLang, searchTerm: this.state.searchTerm})
+        pGenericCalculateState({globalLang: newLang, searchTerm: this.state.searchTerm}, this.props.calculateStateFunc)
             .then((function (newState) {
                 this.setState(newState);
                 console.log("newState: " + JSON.stringify(newState, ' ', 4));
@@ -310,7 +311,7 @@ var CrowDictionary = React.createClass({
                 console.log("res is: " + JSON.stringify(res, ' ', 4));
                 var rObj = res[1]; // it's already json because we called `pRequest` with `{json:true}`
                 console.log("rObj: " + JSON.stringify(rObj, ' ', 4));
-                return this.props.calculateStateFunc({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm});
+                return pGenericCalculateState({searchTerm: this.state.searchTerm}, this.props.calculateStateFunc)
             }).bind(this))
             .then((function (newState) {
                 newState.showLoginPrompt = false;
@@ -318,14 +319,14 @@ var CrowDictionary = React.createClass({
                 this.forceUpdate();
             }).bind(this))
             .fail(function (err) {
-                console.error("failed with error: " + JSON.stringify(err));
+                console.error("failed with error: " + err);
             });
     },
     handleLogOut: function () {
         var logOutUrl = selfRoot + "/v1/logout";
         return pRequest(logOutUrl)
             .then((function (res) {
-                return this.props.calculateStateFunc({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm});
+                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.calculateStateFunc)
             }).bind(this))
             .then((function (newState) {
                 this.replaceState(newState);
@@ -341,7 +342,7 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to add a new phrase...");
                 }
-                return this.props.calculateStateFunc({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm});
+                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.calculateStateFunc)
             }).bind(this))
             .then((function (newState) {
                 this.replaceState(newState);
@@ -416,13 +417,15 @@ var AddDefinitionForm = React.createClass({
     },
     render: function () {
         this.loadMessages();
-        var placeholder = this.fmt(this.msg(this.messages.forms.newDefinition.placeHolder), {phrase: this.props.topState.shownPhraseData.phrase});
+        var addDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinition)),
+            placeholder = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionPlaceHolder), {phrase: this.props.topState.shownPhraseData.phrase}),
+            submit = this.fmt(this.msg(this.messages.AddDefinitionForm.submitDefinition));
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
-                    <span>Add phrase</span>
+                    <span>{addDefinition}</span>
                     <textarea placeholder={placeholder} ref="newPhrase"/>
-                    <input type="submit" name="submit"/>
+                    <input type="submit" value={submit}/>
                 </form>
             </div>
         );
@@ -488,12 +491,17 @@ var SearchBar = React.createClass({
 });
 
 var NavBar = React.createClass({
+    mixins: [I18nMixin],
     render: function () {
+        this.loadMessages();
+        var home = this.fmt(this.msg(this.messages.NavBar.home)),
+            about = this.fmt(this.msg(this.messages.NavBar.about)),
+            jobs = this.fmt(this.msg(this.messages.NavBar.jobs));
         return (
             <div>
-                <span>Home</span>
-                <span>About</span>
-                <span>Jobs</span>
+                <span>{home}</span>
+                <span>{about}</span>
+                <span>{jobs}</span>
                 <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut}/>
                 <GlobalLangPicker onGlobalLangChange={this.props.onGlobalLangChange} topState={this.props.topState}/>
             </div>
@@ -515,17 +523,23 @@ var LoginStatus = React.createClass({
         var loginInfo = this.props.topState.loginInfo;
         console.log("loginInfo...: " + JSON.stringify(loginInfo, ' ', 4));
         if (undefined === loginInfo) {
+            console.log("auch");
+            console.log("mesagems: " + this.messages);
             console.log("tutti: " + JSON.stringify(this.messages));
             console.log("il posto: " + this.messages.top.greeting.notLoggedIn);
-            var greeting = this.fmt(this.msg(this.messages.top.greeting.notLoggedIn));
+            var greeting = this.fmt(this.msg(this.messages.LoginStatus.notLoggedInGreeting));
             return (
                 <span onClick={this.handleClick}>{greeting}</span>
             );
         } else {
+            console.log("on else");
+            var greeting = this.fmt(this.msg(this.messages.LoginStatus.loggedInGreeting), {username: loginInfo.email}),
+                logOutMessage = this.fmt(this.msg(this.messages.LoginStatus.logOutMessage));;
             return (
-                <span>Welcome '{loginInfo.email}'! <a onClick={this.handleLogOut}>Log out</a></span>
+                <span>{greeting} <a onClick={this.handleLogOut}>{logOutMessage}</a></span>
             );
         }
+        console.log("in LoginStatus, after all...");
     }
 });
 
@@ -590,10 +604,13 @@ var PhraseSearchResults = React.createClass({
 });
 
 var TopSearchCaption = React.createClass({
+    mixins: [I18nMixin],
     render: function () {
+        this.loadMessages();
+        var showingResultsForSearchTerm = this.fmt(this.msg(this.messages.TopSearchCaption.showingResultsForSearchTerm), {searchTerm: this.props.topState.searchTerm});
         return (
             <div>
-                showing results for '{this.props.topState.searchTerm}'
+                {showingResultsForSearchTerm}
             </div>
         );
     }
@@ -645,13 +662,15 @@ var AddPhraseForm = React.createClass({
     },
     render: function () {
         this.loadMessages();
-        var placeholder = this.fmt(this.msg(this.messages.forms.newPhrase.placeHolder));
+        var addPhrase = this.fmt(this.msg(this.messages.AddPhraseForm.addPhrase)),
+            placeholder = this.fmt(this.msg(this.messages.AddPhraseForm.newPhrasePlaceHolder)),
+            submit = this.fmt(this.msg(this.messages.AddPhraseForm.submitPhrase));
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
-                    <span>Add phrase</span>
+                    <span>{addPhrase}</span>
                     <textarea placeholder={placeholder} ref="newPhrase"/>
-                    <input type="submit" name="submit"/>
+                    <input type="submit" value={submit}/>
                 </form>
             </div>
         );

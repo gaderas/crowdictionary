@@ -2,11 +2,28 @@
     "locales": ["es-MX"],
     "formats": {"number": {}, "date": {}, "time": {}},
     "messages": {
-        "top": {
-            "greeting": {
-                "loggedIn": "¡Hola {username}!",
-                "notLoggedIn": "¡entrá!"
-            }
+        "LoginStatus": {
+            "loggedInGreeting": "¡Hola {username}!",
+            "notLoggedInGreeting": "¡entrá!",
+            "logOutMessage": "Salir"
+        },
+        "AddPhraseForm": {
+            "addPhrase": "Introduce una frase",
+            "newPhrasePlaceHolder": "introduce una nueva frase aquí",
+            "submitPhrase": "enviar"
+        },
+        "AddDefinitionForm": {
+            "addDefinition": "Agrega una definición",
+            "addDefinitionPlaceHolder": "introduce un nuevo significado o definición para \"{phrase}\" aquí",
+            "submitDefinition": "enviar"
+        },
+        "NavBar": {
+            "home": "Inicio",
+            "about": "Acerca de",
+            "jobs": "Empleos"
+        },
+        "TopSearchCaption": {
+            "showingResultsForSearchTerm": "mostrando resultados para la búsqueda de \"{searchTerm}\""
         }
     }
 }
