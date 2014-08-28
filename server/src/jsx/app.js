@@ -371,7 +371,7 @@ _.forEach(routesInfo, function (routeInfo) {
         var hostname = this.request.hostname,
             selfRoot = util.format("%s://%s", this.request.protocol, this.request.host);
         console.log("das hostname: " + hostname);
-        var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params);
+        var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params, this.query);
         console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
 
         shared.setSelfRoot(selfRoot);

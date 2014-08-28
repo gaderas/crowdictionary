@@ -31,6 +31,18 @@ var Router = Backbone.Router.extend(
             return routeInfo.clientRouterFunc.bind(this, routeInfo)
         }))
     )
+    /**
+     * sample object:
+     * {
+     *      routes: {
+     *          '/': 'rootFunc',
+     *          '/sub': 'subFunc'
+     *      },
+     *      'rootFunc': someFunction,
+     *      'subFunc': someOtherFunction
+     * }
+     * ... where someFunction and someOtherFunction are bound to the router and passed routeInfo
+     */
 
 );
 

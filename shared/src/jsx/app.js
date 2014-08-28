@@ -9,6 +9,7 @@ var IntlMessageFormat = require('intl-messageformat');
 var bs = require('./bootstrap.js');
 var _ = require('lodash');
 var util = require('util');
+var querystring = require('querystring');
 var EventEmitter = require('events').EventEmitter;
 var pRequest,
     selfRoot,
@@ -36,11 +37,11 @@ var nRouteInfo,
         initialState = state;
     };
 
-var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams) {
+var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, query) {
     console.log('on getNormalizedRouteInfo(), routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
     console.log('on getNormalizedRouteInfo(), routeParams: ' + JSON.stringify(routeParams, ' ', 4));
     return _.merge(
-        normalizeRouteInfo(clientOrServer, routeInfo, routeParams),
+        normalizeRouteInfo(clientOrServer, routeInfo, routeParams, query),
         {clientOrServer: clientOrServer}
     );
 };
@@ -48,18 +49,23 @@ var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams) {
 
 
 /**
- * was bound to `this` of Backbone router
+ * this receives arguments from Backbone.Router in the following order:
+ * *   routeInfo (passed via bind on the client code)
+ * *   a number of arguments, each corresponding to a matched route path parameter
+ * *   a query string, in string form (empty when none is present) is *always* the last argument
  */
 var clientRouterFunc = function (routeInfo) {
     console.log('on clientRouterFunc() begin');
     var args = _(arguments).toArray().slice(1).value(),
         fake3 = console.log('on clientRouterFunc(), args: ' + JSON.stringify(args)),
+        queryString = args.pop(),
+        query = querystring.parse(queryString),
         params = _.map(routeInfo.serverParamNames, function (paramName) {
             return args.shift();
         }),
         fake1 = console.log('on clientRouterFunc(), routeInfo: ' + JSON.stringify(routeInfo)),
         fake2 = console.log('on clientRouterFunc(), params: ' + JSON.stringify(params)),
-        nRouteInfo = getNormalizedRouteInfo('client', routeInfo, params);
+        nRouteInfo = getNormalizedRouteInfo('client', routeInfo, params, query);
 
 
     console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
@@ -82,32 +88,40 @@ var clientRouterFunc = function (routeInfo) {
         });
 };
 
+var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
+};
+
 var pGenericCalculateState = function (stateOverrides, calculateStateFunc) {
     stateOverrides = (!_.isEmpty(stateOverrides) && stateOverrides) || {};
     // `hostname` and `selfRoot` passed in server mode, otherwise we get values from `window`
     var hostname = (stateOverrides && stateOverrides.hostname) || window.location.hostname,
         selfRoot = (stateOverrides && stateOverrides.selfRoot) || util.format("%s//%s", window.location.protocol, window.location.host);
     setSelfRoot(selfRoot);
+    var pL10nForLang;
     if (stateOverrides.globalLang) {
-        return l10n.getL10nForLang(stateOverrides.globalLang)
-            .then(function (l10nData) {
-                console.log("gonna set stateOverrides.l10nData to : " + JSON.stringify(l10nData));
-                stateOverrides.l10nData = l10nData;
-                return Q(calculateStateFunc(stateOverrides));
-            });
+        pL10nForLang = l10n.getL10nForLang(stateOverrides.globalLang);
     } else {
-        return l10n.getAvailableLangs()
+        pL10nForLang = l10n.getAvailableLangs()
             .then(function (langs) {
                 console.log("available langs: " + JSON.stringify(langs));
                 stateOverrides.globalLang = appUtil.getLangBasedOnHostname(hostname, langs);
                 return l10n.getL10nForLang(stateOverrides.globalLang);
-            })
-            .then(function (l10nData) {
-                console.log("gonna set stateOverrides.l10nData to : " + JSON.stringify(l10nData));
-                stateOverrides.l10nData = l10nData;
-                return Q(calculateStateFunc(stateOverrides));
-            })
+            });
     }
+    if (!_.isEmpty(stateOverrides.shownPhraseData)) {
+    }
+    return pL10nForLang
+        .then(function (l10nData) {
+            console.log("gonna set stateOverrides.l10nData to : " + JSON.stringify(l10nData));
+            stateOverrides.l10nData = l10nData;
+            return Q(calculateStateFunc(stateOverrides));
+        })
+        .then(function (reactState) {
+            _.forEach(stateOverrides, function (val, key) {
+                reactState[key] = val;
+            })
+            return reactState;
+        });
 };
 
 var routesInfo = [
@@ -188,15 +202,69 @@ var routesInfo = [
         clientRoute: 'phrases/:phrase',
         clientRouterFunc: clientRouterFunc,
         clientRouterFuncName: '/phrases/:phrase',
-        calculateStateFunc: function () {
-            return {
-                viewing: 'PhraseSearchResults',
-                searchTerm: 'hijazo de mi vidaza',
-                searchResults: [
-                    {phrase: 'hijazo de mi vidaza', topDefinition: 'asi le dicen al muñecón', key: 1},
-                    {phrase: 'hijo del mal dormir', topDefinition: 'cuando alguien te cae mal', key: 2}
-                ]
-            };
+        calculateStateFunc: function (overrides) {
+            var lang = (overrides && overrides.globalLang) || 'es-MX',
+                term = (overrides && overrides.searchTerm) || '',
+                l10nData = (overrides && overrides.l10nData) || {},
+                phrasesUrl,
+                loginStateUrl = selfRoot + "/v1/login";
+            if (!term) {
+                phrasesUrl = selfRoot + "/v1/lang/"+lang+"/phrases";
+            } else {
+                phrasesUrl = selfRoot + "/v1/lang/"+lang+"/phrases?search="+term;
+            }
+            return Q.all([pRequest(phrasesUrl), pRequest(loginStateUrl)])
+                .spread(function (phrasesRes, loginStateRes) {
+                    console.log("login state reponse:" + JSON.stringify(loginStateRes, ' ', 4));
+                    console.log("phrases reponse:" + JSON.stringify(phrasesRes, ' ', 4));
+                    if (200 !== phrasesRes[0].statusCode) {
+                        throw Error("couldn't fetch phrases");
+                    }
+                    var rObj = JSON.parse(phrasesRes[1]),
+                        reactState = {
+                            globalLang: lang,
+                            l10nData: l10nData,
+                            searchTerm: term,
+                            searchResults: []
+                        };
+                    _.forEach(rObj, function (phraseObj) {
+                        reactState.searchResults.push({
+                            phrase: phraseObj.phrase,
+                            key: phraseObj.id
+                        });
+                    });
+                    // add login information if we got it
+                    if (200 === loginStateRes[0].statusCode) {
+                        reactState.loginInfo = JSON.parse(loginStateRes[1]);
+                    }
+                    return reactState;
+                })
+                .then(function (reactState) {
+                    var phraseIds = _.map(reactState.searchResults, function (searchResult) {
+                        return searchResult.key;
+                    });
+                    if (!phraseIds.length) {
+                        return reactState;
+                    }
+                    return pRequest(selfRoot + "/v1/definitions?phraseIds="+phraseIds.join(','))
+                        .then(function (res) {
+                            if (200 !== res[0].statusCode) {
+                                throw Error("couldn't fetch definitions");
+                            }
+                            var rObj = JSON.parse(res[1]);
+                            _.forEach(reactState.searchResults, function (searchResult) {
+                                var definitions = _.where(rObj, {phrase_id: searchResult.key});
+                                searchResult.definitions = definitions;
+                                console.log('definitionz: ' + JSON.stringify(definitions));
+                                searchResult.topDefinition = _.max(definitions, function (def) {
+                                    // this will return the one with the most votes, regardless if they're upvotes or downvotes...
+                                    return def.votes.length;
+                                });
+                                console.log('top definition: ' + JSON.stringify(searchResult.topDefinition));
+                            });
+                            return reactState;
+                        });
+                });
         }
     },
     {
@@ -218,7 +286,7 @@ var routesInfo = [
     }
 ];
 
-var normalizeRouteInfo = function (clientOrServer, routeInfo, data) {
+var normalizeRouteInfo = function (clientOrServer, routeInfo, routeParams, query) {
     if ('server' === clientOrServer) {
         //console.log('aveeee' + JSON.stringify(routeInfo));
         return {
@@ -228,14 +296,15 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, data) {
                     return paramName;
                 }),
                 _.map(routeInfo.serverParamNames, function (paramName) {
-                    return data[paramName];
+                    return routeParams[paramName];
                 })
-            )
+            ),
+            query: query
         };
     } else if ('client' === clientOrServer) {
         console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
-        console.log('data: ' + JSON.stringify(data, ' ', 4));
-        var args = data;
+        console.log('routeParams: ' + JSON.stringify(routeParams, ' ', 4));
+        var args = routeParams;
         console.log('on clientzz');
         console.log('on normalizeRouteInfo(), routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
         return {
@@ -247,7 +316,8 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, data) {
                 _.map(routeInfo.serverParamNames, function (paramName) {
                     return args.shift();
                 })
-            )
+            ),
+            query: query
         };
     } else {
         throw new Error("first argument (clientOrServer) should be 'client' or 'server'.");
@@ -360,7 +430,7 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to add a new definition...");
                 }
-                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.calculateStateFunc)
+                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm, shownPhraseData: this.state.shownPhraseData}, this.props.calculateStateFunc)
             }).bind(this))
             .then((function (newState) {
                 this.replaceState(newState);
