@@ -88,6 +88,20 @@ var clientRouterFunc = function (routeInfo) {
         });
 };
 
+/**
+ * sample nRouteInfo:
+ * "nRouteInfo: {
+ *     "route": "/phrases/:phrase",
+ *     "params": {
+ *         "phrase": "somephrase"
+ *     },
+ *     "query": {
+ *         "a": "b",
+ *         "c": "d"
+ *     },
+ *     "clientOrServer": "client"
+ * }"
+ */
 var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
 };
 
