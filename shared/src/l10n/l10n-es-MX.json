@@ -2,6 +2,11 @@
     "locales": ["es-MX"],
     "formats": {"number": {}, "date": {}, "time": {}},
     "messages": {
+        "top": {
+            "greeting": {
+                "notLoggedInGre": "d"
+            }
+        },
         "SearchBar": {
             "placeHolder": "busca..."
         },

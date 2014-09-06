@@ -392,7 +392,7 @@ _.forEach(routesInfo, function (routeInfo) {
                 console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
                 setInitialState(state);
                 var markup = React.renderComponentToString(
-                    <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />
+                    <CrowDictionary routeInfo={routeInfo} />
                 );
                 this.body = markup;
                 return;

@@ -78,7 +78,7 @@ var clientRouterFunc = function (routeInfo) {
             console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
             setInitialState(state);
             React.renderComponent(
-                <CrowDictionary calculateStateFunc={routeInfo.calculateStateFunc} />,
+                <CrowDictionary nRouteInfo={nRouteInfo} />,
                 document
             );
             return;
@@ -103,8 +103,21 @@ var clientRouterFunc = function (routeInfo) {
  * }"
  */
 var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
+    var hostname = (stateOverrides && stateOverrides.hostname) || window.location.hostname,
+        selfRoot = (stateOverrides && stateOverrides.selfRoot) || util.format("%s//%s", window.location.protocol, window.location.host);
+    setSelfRoot(selfRoot);
+    if ('/' === nRouteInfo.route) {
+        if (!nRouteInfo.query || !nRouteInfo.query.q) {
+            // "home page"
+        }
+    }
 };
 
+/**
+ * Takes in stateOverrides (a React State) and a calculateStateFunc,
+ * fetches l10nData, combines data from all 3 sources together
+ * and returns a new React State.
+ */
 var pGenericCalculateState = function (stateOverrides, calculateStateFunc) {
     stateOverrides = (!_.isEmpty(stateOverrides) && stateOverrides) || {};
     // `hostname` and `selfRoot` passed in server mode, otherwise we get values from `window`
@@ -158,8 +171,8 @@ var routesInfo = [
             }
             return Q.all([pRequest(phrasesUrl), pRequest(loginStateUrl)])
                 .spread(function (phrasesRes, loginStateRes) {
-                    console.log("login state reponse:" + JSON.stringify(loginStateRes, ' ', 4));
-                    console.log("phrases reponse:" + JSON.stringify(phrasesRes, ' ', 4));
+                    //console.log("login state reponse:" + JSON.stringify(loginStateRes, ' ', 4));
+                    //console.log("phrases reponse:" + JSON.stringify(phrasesRes, ' ', 4));
                     if (200 !== phrasesRes[0].statusCode) {
                         throw Error("couldn't fetch phrases");
                     }
@@ -313,7 +326,8 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, routeParams, query
                     return routeParams[paramName];
                 })
             ),
-            query: query
+            query: query,
+            calculateStateFunc: routeInfo.calculateStateFunc
         };
     } else if ('client' === clientOrServer) {
         console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
@@ -331,7 +345,8 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, routeParams, query
                     return args.shift();
                 })
             ),
-            query: query
+            query: query,
+            calculateStateFunc: routeInfo.calculateStateFunc
         };
     } else {
         throw new Error("first argument (clientOrServer) should be 'client' or 'server'.");
@@ -364,14 +379,14 @@ var CrowDictionary = React.createClass({
         return initialState;
     },
     handleUserInput: function (searchTerm) {
-        pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: searchTerm}, this.props.calculateStateFunc)
+        pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: searchTerm}, this.props.nRouteInfo.calculateStateFunc)
             .then((function (newState) {
                 this.setState(newState);
                 console.log("newState: " + JSON.stringify(newState, ' ', 4));
             }).bind(this));
     },
     handleGlobalLangChange: function (newLang) {
-        pGenericCalculateState({globalLang: newLang, searchTerm: this.state.searchTerm}, this.props.calculateStateFunc)
+        pGenericCalculateState({globalLang: newLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
             .then((function (newState) {
                 this.setState(newState);
                 console.log("newState: " + JSON.stringify(newState, ' ', 4));
@@ -395,7 +410,7 @@ var CrowDictionary = React.createClass({
                 console.log("res is: " + JSON.stringify(res, ' ', 4));
                 var rObj = res[1]; // it's already json because we called `pRequest` with `{json:true}`
                 console.log("rObj: " + JSON.stringify(rObj, ' ', 4));
-                return pGenericCalculateState({searchTerm: this.state.searchTerm}, this.props.calculateStateFunc)
+                return pGenericCalculateState({searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
             }).bind(this))
             .then((function (newState) {
                 newState.showLoginPrompt = false;
@@ -410,7 +425,7 @@ var CrowDictionary = React.createClass({
         var logOutUrl = selfRoot + "/v1/logout";
         return pRequest(logOutUrl)
             .then((function (res) {
-                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.calculateStateFunc)
+                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
             }).bind(this))
             .then((function (newState) {
                 this.replaceState(newState);
@@ -426,7 +441,7 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to add a new phrase...");
                 }
-                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.calculateStateFunc)
+                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
             }).bind(this))
             .then((function (newState) {
                 this.replaceState(newState);
@@ -444,7 +459,7 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to add a new definition...");
                 }
-                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm, shownPhraseData: this.state.shownPhraseData}, this.props.calculateStateFunc)
+                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm, shownPhraseData: this.state.shownPhraseData}, this.props.nRouteInfo.calculateStateFunc)
             }).bind(this))
             .then((function (newState) {
                 this.replaceState(newState);
@@ -631,7 +646,6 @@ var LoginStatus = React.createClass({
             console.log("auch");
             console.log("mesagems: " + this.messages);
             console.log("tutti: " + JSON.stringify(this.messages));
-            console.log("il posto: " + this.messages.top.greeting.notLoggedIn);
             var greeting = this.fmt(this.msg(this.messages.LoginStatus.notLoggedInGreeting));
             return (
                 <span onClick={this.handleClick}>{greeting}</span>
