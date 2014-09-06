@@ -72,7 +72,7 @@ var clientRouterFunc = function (routeInfo) {
     console.log('args: ' + JSON.stringify(args, ' ', 4));
     console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
 
-    pGenericCalculateState({}, routeInfo.calculateStateFunc)
+    pCalculateStateBasedOnNormalizedRouteInfo(nRouteInfo)
         .then((function (state) {
             console.log("state: " + state);
             console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
@@ -99,16 +99,27 @@ var clientRouterFunc = function (routeInfo) {
  *         "a": "b",
  *         "c": "d"
  *     },
- *     "clientOrServer": "client"
+ *     "clientOrServer": "client",
+ *     "calculateStateFunc": "calculateStateFunc"
  * }"
  */
 var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
     var hostname = (stateOverrides && stateOverrides.hostname) || window.location.hostname,
-        selfRoot = (stateOverrides && stateOverrides.selfRoot) || util.format("%s//%s", window.location.protocol, window.location.host);
+        selfRoot = (stateOverrides && stateOverrides.selfRoot) || util.format("%s//%s", window.location.protocol, window.location.host),
+        pL10nForLang = l10n.getAvailableLangs()
+            .then(function (langs) {
+                console.log("available langs: " + JSON.stringify(langs));
+                stateOverrides.globalLang = appUtil.getLangBasedOnHostname(hostname, langs);
+                return l10n.getL10nForLang(stateOverrides.globalLang);
+            });
     setSelfRoot(selfRoot);
     if ('/' === nRouteInfo.route) {
         if (!nRouteInfo.query || !nRouteInfo.query.q) {
             // "home page"
+            return pL10nForLang
+                .then(function (l10nData) {
+                    return Q(calculateStateFunc({l10nData: l10nData}));
+                });
         }
     }
 };
