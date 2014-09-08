@@ -40,7 +40,7 @@ var CrowDictionary = shared.CrowDictionary,
     setInitialState = shared.setInitialState,
     setPRequest = shared.setPRequest,
     l10n = shared.l10n;
-    pGenericCalculateState = shared.pGenericCalculateState;
+    pCalculateStateBasedOnNormalizedRouteInfo = shared.pCalculateStateBasedOnNormalizedRouteInfo;
 
 var request = require('request');
 var jar = request.jar();
@@ -371,7 +371,7 @@ _.forEach(routesInfo, function (routeInfo) {
         var hostname = this.request.hostname,
             selfRoot = util.format("%s://%s", this.request.protocol, this.request.host);
         console.log("das hostname: " + hostname);
-        var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params, this.query);
+        var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params, this.query, hostname, selfRoot);
         console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
 
         shared.setSelfRoot(selfRoot);
@@ -386,7 +386,7 @@ _.forEach(routesInfo, function (routeInfo) {
             jar.setCookie(outgoingCookie, selfRoot);
         }).bind(this));
 
-        yield pGenericCalculateState({hostname: hostname, selfRoot: selfRoot}, routeInfo.calculateStateFunc)
+        yield pCalculateStateBasedOnNormalizedRouteInfo(nRouteInfo)
             .then((function (state) {
                 console.log("state: " + state);
                 console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));

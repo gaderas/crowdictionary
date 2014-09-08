@@ -13,6 +13,7 @@ var querystring = require('querystring');
 var EventEmitter = require('events').EventEmitter;
 var pRequest,
     selfRoot,
+    Router,
     setPRequest = function (incoming) {
         pRequest = incoming;
         l10n.setPRequest(pRequest);
@@ -20,6 +21,10 @@ var pRequest,
     setSelfRoot = function (incoming) {
         selfRoot = incoming;
         l10n.setSelfRoot(incoming);
+    },
+    setRouter = function (incoming) {
+        console.log("setting Router to : " + incoming);
+        Router = incoming;
     };
 
 var Layout = bs.Layout;
@@ -37,12 +42,16 @@ var nRouteInfo,
         initialState = state;
     };
 
-var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, query) {
+var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, query, hostname, selfRoot) {
     console.log('on getNormalizedRouteInfo(), routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
     console.log('on getNormalizedRouteInfo(), routeParams: ' + JSON.stringify(routeParams, ' ', 4));
     return _.merge(
         normalizeRouteInfo(clientOrServer, routeInfo, routeParams, query),
-        {clientOrServer: clientOrServer}
+        {
+            clientOrServer: clientOrServer,
+            hostname: hostname,
+            selfRoot: selfRoot
+        }
     );
 };
 
@@ -65,7 +74,9 @@ var clientRouterFunc = function (routeInfo) {
         }),
         fake1 = console.log('on clientRouterFunc(), routeInfo: ' + JSON.stringify(routeInfo)),
         fake2 = console.log('on clientRouterFunc(), params: ' + JSON.stringify(params)),
-        nRouteInfo = getNormalizedRouteInfo('client', routeInfo, params, query);
+        hostname = window.location.hostname,
+        selfRoot = util.format("%s//%s", window.location.protocol, window.location.host),
+        nRouteInfo = getNormalizedRouteInfo('client', routeInfo, params, query, hostname, selfRoot);
 
 
     console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
@@ -104,21 +115,36 @@ var clientRouterFunc = function (routeInfo) {
  * }"
  */
 var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
-    var hostname = (stateOverrides && stateOverrides.hostname) || window.location.hostname,
-        selfRoot = (stateOverrides && stateOverrides.selfRoot) || util.format("%s//%s", window.location.protocol, window.location.host),
-        pL10nForLang = l10n.getAvailableLangs()
-            .then(function (langs) {
-                console.log("available langs: " + JSON.stringify(langs));
-                stateOverrides.globalLang = appUtil.getLangBasedOnHostname(hostname, langs);
-                return l10n.getL10nForLang(stateOverrides.globalLang);
-            });
+    /*var stateOverrides = {
+        hostname: 'es-mx.crowdictionary.com',
+        selfRoot: 'http://ex-mx.crowdictionary.com:3000',
+        globalLang: 'es-MX'
+    };*/
+    var stateOverrides = {};
+        //hostname = (stateOverrides && stateOverrides.hostname) || window.location.hostname,
+        //selfRoot = (stateOverrides && stateOverrides.selfRoot) || util.format("%s//%s", window.location.protocol, window.location.host),
+        hostname = nRouteInfo.hostname,
+        selfRoot = nRouteInfo.selfRoot,
+        pL10nForLang = null;
+
     setSelfRoot(selfRoot);
+    pL10nForLang = l10n.getAvailableLangs()
+        .then(function (langs) {
+            console.log("available langs: " + JSON.stringify(langs));
+            stateOverrides.globalLang = appUtil.getLangBasedOnHostname(hostname, langs);
+            return l10n.getL10nForLang(stateOverrides.globalLang);
+        });
     if ('/' === nRouteInfo.route) {
         if (!nRouteInfo.query || !nRouteInfo.query.q) {
             // "home page"
             return pL10nForLang
                 .then(function (l10nData) {
-                    return Q(calculateStateFunc({l10nData: l10nData}));
+                    return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData}));
+                });
+        } else if (nRouteInfo.query && nRouteInfo.query.q) {
+            return pL10nForLang
+                .then(function (l10nData) {
+                    return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData, searchTerm: nRouteInfo.query.q}));
                 });
         }
     }
@@ -394,6 +420,8 @@ var CrowDictionary = React.createClass({
             .then((function (newState) {
                 this.setState(newState);
                 console.log("newState: " + JSON.stringify(newState, ' ', 4));
+                console.log("Router: " + Router);
+                Router.navigate('?q=' + searchTerm);
             }).bind(this));
     },
     handleGlobalLangChange: function (newLang) {
@@ -862,7 +890,8 @@ module.exports.CrowDictionary = CrowDictionary;
 module.exports.setInitialState = setInitialState;
 module.exports.setPRequest = setPRequest;
 module.exports.setSelfRoot = setSelfRoot;
-module.exports.pGenericCalculateState = pGenericCalculateState;
+module.exports.setRouter = setRouter;
+module.exports.pCalculateStateBasedOnNormalizedRouteInfo = pCalculateStateBasedOnNormalizedRouteInfo;
 module.exports.l10n = {};
 module.exports.l10n.getAvailableLangs = l10n.getAvailableLangs;
 module.exports.l10n.getL10nForLang = l10n.getL10nForLang;

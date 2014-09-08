@@ -8,7 +8,8 @@ var shared = require('../../../../shared/build/js/app.js');
 
 var CrowDictionary = shared.CrowDictionary,
     routesInfo = shared.routesInfo,
-    setPRequest = shared.setPRequest;
+    setPRequest = shared.setPRequest,
+    setRouter = shared.setRouter;
 
 console.log('ehlos');
 
@@ -54,6 +55,8 @@ Backbone.history.start({
     hashChange: true
     // hashChange: Modernizr.history ? true : false
 });
+
+setRouter(router);
 
 //router.navigate('', {trigger: true});
 //router.navigate('home', {trigger: true});
