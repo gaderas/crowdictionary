@@ -407,9 +407,23 @@ var I18nMixin = {
     }
 };
 
+var LoggedInMixin = {
+    getLoggedInInfo: function (loginRequired) {
+        if (!this.state.loginInfo) {
+            if (loginRequired) {
+                throw Error("attempted to perform an operation that requires you to be logged in, without being logged in");
+            }
+            return;
+        }
+        _.forEach(this.state.loginInfo, function (loginInfoField, fieldName) {
+            this.state[fieldName] = loginInfoField;
+        });
+    }
+};
+
 
 var CrowDictionary = React.createClass({
-
+    mixins: [LoggedInMixin],
     componentWillMount: function () {
     },
     getInitialState: function () {
@@ -471,9 +485,17 @@ var CrowDictionary = React.createClass({
             }).bind(this));
     },
     handleSubmitAddPhrase: function (phrase) {
+        try {
+            this.getLoggedInInfo(true);
+        } catch (err) {
+            this.setState({
+                error: err
+            });
+            return;
+        }
         console.log("got a new phrase: " + phrase);
         var lang = this.state.globalLang,
-            crumb = this.state.loginInfo.crumb,
+            crumb = this.state.crumb,
             addPhraseUrl = util.format(selfRoot + "/v1/lang/%s/phrases/%s", lang, phrase);
         return pRequest({method: "PUT", url: addPhraseUrl, body: {phrase: phrase, lang: lang, crumb: crumb}, json: true})
             .then((function (res) {
@@ -490,8 +512,16 @@ var CrowDictionary = React.createClass({
             });
     },
     handleSubmitAddDefinition: function (phrase, definition) {
+        try {
+            this.getLoggedInInfo(true);
+        } catch (err) {
+            this.setState({
+                error: err
+            });
+            return;
+        }
         var lang = this.state.globalLang,
-            crumb = this.state.loginInfo.crumb,
+            crumb = this.state.crumb,
             addDefinitionUrl = util.format(selfRoot + "/v1/lang/%s/phrases/%s/definitions", lang, phrase);
         return pRequest({method: "POST", url: addDefinitionUrl, body: {phrase: phrase, definition: definition, lang: lang, crumb: crumb}, json: true})
             .then((function (res) {
@@ -515,9 +545,16 @@ var CrowDictionary = React.createClass({
     handleClosePhraseDetails: function () {
         this.replaceState(appUtil.getObjectWithoutProps(this.state, ['shownPhraseData']));
     },
+    handleClearError: function () {
+        this.setState({
+            error: null
+        });
+    },
     render: function () {
         var mainContent;
-        if (this.state.showLoginPrompt) {
+        if (this.state.error) {
+            mainContent = <ErrorMessage onClearError={this.handleClearError} topState={this.state}/>;
+        } else if (this.state.showLoginPrompt) {
             mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn}/>;
         } else {
             if (this.state.shownPhraseData) {
@@ -541,6 +578,17 @@ var CrowDictionary = React.createClass({
             <script src="/static/js/app.js" />
             </body>
             </html>
+        );
+    }
+});
+
+var ErrorMessage = React.createClass({
+    handleClearError: function () {
+        this.props.onClearError();
+    },
+    render: function () {
+        return (
+            <div onClick={this.handleClearError}>{this.props.topState.error.message}</div>
         );
     }
 });
