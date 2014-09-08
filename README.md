@@ -44,3 +44,4 @@ Sample requests
     `curl -d '{"crumb": "OF4iZigBP9Eb5pvuXY2bnSnyWR4", "phrase": "hola", "definition": "algo", "lang": "es-MX"}' -H "Content-Type: application/json" "http://localhost:3000/v1/lang/es-MX/phrases/hola/definitions" --cookie /tmp/cookiez -v`
 *   PUT vote - vote or change vote if definition_id/contributor_id already voted
     `curl -X PUT -d '{"crumb": "OF4iZigBP9Eb5pvuXY2bnSnyWR4", "vote": "neutral", "definition_id": 1}' -H "Content-Type: application/json" "http://localhost:3000/v1/definitions/1/vote" --cookie /tmp/cookiez -v`
+
