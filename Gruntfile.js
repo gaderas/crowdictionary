@@ -35,6 +35,12 @@ module.exports = function(grunt) {
                 dest: 'client/build/l10n/',
                 filter: 'isFile',
                 expand: true
+            },
+            assets: {
+                cwd: 'shared/src/assets/',
+                src: '**',
+                dest: 'client/build/assets/',
+                expand: true
             }
         },
         jsonlint: {

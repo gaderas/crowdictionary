@@ -393,14 +393,20 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, routeParams, query
 
 var I18nMixin = {
     messages: null,
-    loadMessages: function () {
-        console.log("loadMessages() start");
+    getEffectiveState: function () {
         var state;
-        if (this.props && undefined !== this.props.topState) {
+        if (this.props && this.props.topState) {
             state = this.props.topState;
         } else if (this.state) {
             state = this.state;
+        } else {
+            throw Error("module doesn't have a state to get l10n data from");
         }
+        return state;
+    },
+    loadMessages: function () {
+        console.log("loadMessages() start");
+        var state = this.getEffectiveState();
         if (!state.l10nData || !state.l10nData.messages) {
             throw Error("no messages found. module can't function correctly");
         }
@@ -408,7 +414,8 @@ var I18nMixin = {
         console.log("loadMessages() end");
     },
     msg: function (messageStr) {
-        return new IntlMessageFormat(messageStr, this.props.topState.globalLang);
+        var state = this.getEffectiveState();
+        return new IntlMessageFormat(messageStr, state.globalLang);
     },
     fmt: function (messageObj, values) {
         return messageObj.format(values);
@@ -428,7 +435,7 @@ var LoggedInMixin = {
         }
         _.forEach(this.state.loginInfo, function (loginInfoField, fieldName) {
             this.state[fieldName] = loginInfoField;
-        });
+        }, this);
     }
 };
 
@@ -602,7 +609,7 @@ var ErrorMessage = React.createClass({
         this.props.onClearError();
     },
     render: function () {
-        console.log("error message rendered by ErrorMessage: " + this.props.topState.error.message);
+        console.log("error message rendered by ErrorMessage: " + this.props.topState.error.message + ", stack: " + this.props.topState.error.stack);
         return (
             <div onClick={this.handleClearError}>{this.props.topState.error.message}</div>
         );
@@ -674,9 +681,19 @@ var DefinitionsInDetails = React.createClass({
 });
 
 var DefinitionInDetails = React.createClass({
+    componentDidMount: function () {
+        console.log("getDOMNode():" + this.refs.thumbsUp.getDOMNode());
+        this.refs.thumbsUp.getDOMNode().addEventListener('load', function () {
+            this.contentDocument.getElementById('like').setAttribute('stroke', 'blue');
+        });
+    },
     render: function () {
         return (
-            <div>{this.props.topState.shownPhraseData.definitions[this.props.key].definition}</div>
+            <div>
+                <div>{this.props.topState.shownPhraseData.definitions[this.props.key].definition}</div>
+                <object ref="thumbsUp" class="thumbs up" data="/static/assets/img/designmodo_linecons_free-like.svg" type="image/svg+xml"/>
+                <object ref="thumbsDown" class="thumbs down" data="/static/assets/img/designmodo_linecons_free-like.svg" type="image/svg+xml"/>
+            </div>
         );
     }
 });
