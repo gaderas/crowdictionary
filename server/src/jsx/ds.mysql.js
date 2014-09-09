@@ -167,7 +167,7 @@ Data.prototype.putDefinition = function (payload) {
 Data.prototype.getVotes = function (params) {
     var pQuery = this.pQuery;
 
-    return pQuery("SELECT * FROM `vote` WHERE definition_id IN (?)", params.definition_ids);
+    return pQuery("SELECT * FROM `vote` WHERE definition_id IN (?)", [params.definition_ids]);
 };
 
 Data.prototype.putVote = function (payload) {
