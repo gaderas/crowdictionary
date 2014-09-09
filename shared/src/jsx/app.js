@@ -394,16 +394,27 @@ var normalizeRouteInfo = function (clientOrServer, routeInfo, routeParams, query
 var I18nMixin = {
     messages: null,
     loadMessages: function () {
-        if (undefined === this.props.topState.l10nData.messages) {
-            throw Error("this.props.topState.l10nData.messages is undefined...");
+        console.log("loadMessages() start");
+        var state;
+        if (this.props && undefined !== this.props.topState) {
+            state = this.props.topState;
+        } else if (this.state) {
+            state = this.state;
         }
-        this.messages = this.props.topState.l10nData.messages;
+        if (!state.l10nData || !state.l10nData.messages) {
+            throw Error("no messages found. module can't function correctly");
+        }
+        this.messages = state.l10nData.messages;
+        console.log("loadMessages() end");
     },
     msg: function (messageStr) {
         return new IntlMessageFormat(messageStr, this.props.topState.globalLang);
     },
     fmt: function (messageObj, values) {
         return messageObj.format(values);
+    },
+    componentWillMount: function () {
+        this.loadMessages();
     }
 };
 
@@ -411,7 +422,7 @@ var LoggedInMixin = {
     getLoggedInInfo: function (loginRequired) {
         if (!this.state.loginInfo) {
             if (loginRequired) {
-                throw Error("attempted to perform an operation that requires you to be logged in, without being logged in");
+                throw Error(this.fmt(this.msg(this.messages.LoggedInMixin.requiredLoginMissing)));
             }
             return;
         }
@@ -423,7 +434,7 @@ var LoggedInMixin = {
 
 
 var CrowDictionary = React.createClass({
-    mixins: [LoggedInMixin],
+    mixins: [I18nMixin, LoggedInMixin],
     componentWillMount: function () {
     },
     getInitialState: function () {
@@ -433,9 +444,13 @@ var CrowDictionary = React.createClass({
         pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: searchTerm}, this.props.nRouteInfo.calculateStateFunc)
             .then((function (newState) {
                 this.setState(newState);
-                console.log("newState: " + JSON.stringify(newState, ' ', 4));
-                console.log("Router: " + Router);
-                Router.navigate('?q=' + searchTerm);
+                //console.log("newState: " + JSON.stringify(newState, ' ', 4));
+                //console.log("Router: " + Router);
+                var fragment = '';
+                if ('' !== searchTerm) {
+                    fragment = '?q=' + searchTerm;
+                }
+                Router.navigate(fragment);
             }).bind(this));
     },
     handleGlobalLangChange: function (newLang) {
@@ -587,6 +602,7 @@ var ErrorMessage = React.createClass({
         this.props.onClearError();
     },
     render: function () {
+        console.log("error message rendered by ErrorMessage: " + this.props.topState.error.message);
         return (
             <div onClick={this.handleClearError}>{this.props.topState.error.message}</div>
         );

@@ -27,6 +27,9 @@
         },
         "TopSearchCaption": {
             "showingResultsForSearchTerm": "mostrando resultados para la búsqueda de \"{searchTerm}\""
+        },
+        "LoggedInMixin": {
+            "requiredLoginMissing": "se intentó realizar una operación para la cual es necesario haber entrado al sistema como usuario registrado, sin haberlo hecho"
         }
     }
 }

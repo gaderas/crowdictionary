@@ -15,6 +15,9 @@
             "newDefinition": {
                 "placeHolder": "enter a new definition for phrase '{phrase}' here"
             }
+        },
+        "LoggedInMixin": {
+            "requiredLoginMissing": "attempted to perform an operation that requires you to be logged in, without being logged in"
         }
     }
 }
