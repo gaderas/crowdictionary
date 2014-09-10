@@ -330,7 +330,7 @@ appWs.post('/lang/:lang/phrases/:phrase/definitions', function *(next) {
 });
 
 /**
- * @TODO: make sure there's only one vote per contributor
+ * there's only one vote per definition/contributor (as specified in `vote` table)
  */
 appWs.put('/definitions/:definition_id/vote', function *(next) {
     var requestBody = appUtil.getObjectWithoutProps(this.request.body, ['contributor_id']),
@@ -393,7 +393,7 @@ _.forEach(routesInfo, function (routeInfo) {
                 setInitialState(state);
                 var markup = "<!DOCTYPE html>\n" + React.renderComponentToString(
                     <CrowDictionary routeInfo={routeInfo} />
-                ).replace(/<html /, '<html manifest="/static/assets/global_cache.manifest"  ');
+                ).replace(/<html /, '<html manifest="/static/assets/global_cache.manifest" ');
                 this.body = markup;
                 return;
             }).bind(this))

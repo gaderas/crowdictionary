@@ -572,8 +572,25 @@ var CrowDictionary = React.createClass({
             error: null
         });
     },
-    handleDefinitionVote: function (vote) {
-        console.log("got a vote: " + vote);
+    handleDefinitionVote: function (voteInfo) {
+        try {
+            this.getLoggedInInfo(true);
+        } catch (err) {
+            this.setState({
+                error: err
+            });
+            return;
+        }
+        console.log("got a vote: " + JSON.stringify(voteInfo));
+        var crumb = this.state.crumb,
+            addVoteUrl = util.format(selfRoot + "/v1/definitions/%d/vote", voteInfo.definitionId);
+        return pRequest({method: "PUT", url: addVoteUrl, body: {vote: voteInfo.vote, definition_id: voteInfo.definitionId, crumb: crumb}, json: true})
+            .then((function (res) {
+                if (200 !== res[0].statusCode) {
+                    throw Error("failed to record vote...");
+                }
+                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
+            }).bind(this));
     },
     render: function () {
         var mainContent;
@@ -695,9 +712,10 @@ var DefinitionInDetails = React.createClass({
         console.log("annnd they voted...");
         console.log("on: " + e.target);
         console.log("is a: " + e.target.className);
-        var matches = e.target.className.match(/(up|down)/);
+        var matches = e.target.className.match(/(up|down)/),
+            definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key];
         if (matches) {
-            this.props.onVote(matches[1]);
+            this.props.onVote({vote: matches[1], definitionId: definitionObj.id});
         }
     },
     componentDidMount: function () {
