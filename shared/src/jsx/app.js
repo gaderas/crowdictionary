@@ -572,6 +572,9 @@ var CrowDictionary = React.createClass({
             error: null
         });
     },
+    handleDefinitionVote: function (vote) {
+        console.log("got a vote: " + vote);
+    },
     render: function () {
         var mainContent;
         if (this.state.error) {
@@ -580,17 +583,19 @@ var CrowDictionary = React.createClass({
             mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn}/>;
         } else {
             if (this.state.shownPhraseData) {
-                mainContent = <PhraseDetails topState={this.state} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition}/>;
+                mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition}/>;
             } else {
                 mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase} onSelectPhrase={this.handleSelectPhrase}/>;
             }
         }
         return (
-            <html>
+            <html lang="en-US" dir="ltr" manifest="/static/assets/global_cache.manifest">
             <head>
+              <meta charset="utf-8" />
               <script src="/static/js/dep/underscore.js" />
               <script src="/static/js/dep/jquery.js" />
               <script src="/static/js/dep/backbone.js" />
+              <link href="/static/css/main.css" rel="stylesheet" />
             </head>
             <body>
             <div>
@@ -625,7 +630,7 @@ var PhraseDetails = React.createClass({
         return (
             <div>
                 phrase: <PhraseInDetails topState={this.props.topState} />
-                definitions: <DefinitionsInDetails topState={this.props.topState}/>
+                definitions: <DefinitionsInDetails onVote={this.props.onVote} topState={this.props.topState}/>
                 <AddDefinitionForm topState={this.props.topState} onSubmitAddDefinition={this.props.onSubmitAddDefinition}/>
                 <div>
                     <a onClick={this.handleBack}>Back</a>
@@ -671,7 +676,7 @@ var DefinitionsInDetails = React.createClass({
     render: function () {
         var definitionElements = _.map(this.props.topState.shownPhraseData.definitions, (function (definitionData, idx) {
             return (
-                <DefinitionInDetails topState={this.props.topState} key={idx}/>
+                <DefinitionInDetails onVote={this.props.onVote} topState={this.props.topState} key={idx}/>
             );
         }).bind(this))
         return (
@@ -680,19 +685,65 @@ var DefinitionsInDetails = React.createClass({
     }
 });
 
+/**
+ * thumbs icon "designmodo_linecons_free-like.svg" native dimensions are 32x32,
+ * so all svg transformations (e.g.: rotation) have to take this into account.
+ */
 var DefinitionInDetails = React.createClass({
+    mixins: [I18nMixin],
+    handleVote: function (e) {
+        console.log("annnd they voted...");
+        console.log("on: " + e.target);
+        console.log("is a: " + e.target.className);
+        var matches = e.target.className.match(/(up|down)/);
+        if (matches) {
+            this.props.onVote(matches[1]);
+        }
+    },
     componentDidMount: function () {
-        console.log("getDOMNode():" + this.refs.thumbsUp.getDOMNode());
+        var loginInfo = this.props.topState.loginInfo,
+            definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
+            userVoteObjects = _.filter(definitionObj.votes, {contributor_id: loginInfo.id}),
+            userVote = '';
+        userVote = !_.isEmpty(loginInfo) && userVoteObjects && userVoteObjects[0] && userVoteObjects[0].vote; // 'up, 'down', or 'neutral'... or false
         this.refs.thumbsUp.getDOMNode().addEventListener('load', function () {
-            this.contentDocument.getElementById('like').setAttribute('stroke', 'blue');
+            var like = this.contentDocument.getElementById('like');
+            if ('up' === userVote) {
+                like.setAttribute('stroke', 'green');
+            }
         });
+        this.refs.thumbsDown.getDOMNode().addEventListener('load', function () {
+            var like = this.contentDocument.getElementById('like');
+            like.setAttribute('transform', 'rotate(180, 16, 16)');
+            if ('down' === userVote) {
+                like.setAttribute('stroke', 'red');
+            }
+        });
+        //this.refs.thumbsDown.addEventListener('click', this.handleVoteDown);
     },
     render: function () {
+        var definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
+            votesUpCount = _.filter(definitionObj.votes, {vote: "up"}).length,
+            votesDownCount = _.filter(definitionObj.votes, {vote: "down"}).length,
+            thumbsUpMessage = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsUpMessage), {numVotes: votesUpCount}),
+            thumbsDownMessage = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsDownMessage), {numVotes: votesDownCount});
         return (
             <div>
-                <div>{this.props.topState.shownPhraseData.definitions[this.props.key].definition}</div>
-                <object ref="thumbsUp" class="thumbs up" data="/static/assets/img/designmodo_linecons_free-like.svg" type="image/svg+xml"/>
-                <object ref="thumbsDown" class="thumbs down" data="/static/assets/img/designmodo_linecons_free-like.svg" type="image/svg+xml"/>
+                <div>{definitionObj.definition}</div>
+                <div className="votes up container">
+                    <div className="thumbs up container">
+                        <object ref="thumbsUp" data="/static/assets/img/designmodo_linecons_free-like.svg" type="image/svg+xml"/>
+                        <div className="thumbs up overlay" onClick={this.handleVote}> </div>
+                    </div>
+                    <div className="">{thumbsUpMessage}</div>
+                </div>
+                <div className="votes down container">
+                    <div className="thumbs down container">
+                        <object ref="thumbsDown" data="/static/assets/img/designmodo_linecons_free-like.svg" type="image/svg+xml"/>
+                        <div className="thumbs down overlay" onClick={this.handleVote}> </div>
+                    </div>
+                    <div className="">{thumbsDownMessage}</div>
+                </div>
             </div>
         );
     }

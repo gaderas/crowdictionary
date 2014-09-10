@@ -1,0 +1,21 @@
+.thumbs.container {
+    position: relative;
+}
+
+.thumbs.container * {
+    z-index: -1;
+}
+
+.thumbs.container .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    width: 20px;
+    height: 20px;
+}
+
+.thumbs.container object {
+    width: 20px;
+    height: 20px;
+}

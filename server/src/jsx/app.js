@@ -391,9 +391,9 @@ _.forEach(routesInfo, function (routeInfo) {
                 console.log("state: " + state);
                 console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
                 setInitialState(state);
-                var markup = React.renderComponentToString(
+                var markup = "<!DOCTYPE html>\n" + React.renderComponentToString(
                     <CrowDictionary routeInfo={routeInfo} />
-                );
+                ).replace(/<html /, '<html manifest="/static/assets/global_cache.manifest"  ');
                 this.body = markup;
                 return;
             }).bind(this))

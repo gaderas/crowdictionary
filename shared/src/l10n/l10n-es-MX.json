@@ -30,6 +30,10 @@
         },
         "LoggedInMixin": {
             "requiredLoginMissing": "se intentó realizar una operación para la cual es necesario haber entrado al sistema como usuario registrado, sin haberlo hecho"
+        },
+        "DefinitionInDetails": {
+            "thumbsUpMessage": "{numVotes, plural, =0 {no hay votos positivos} =1 {hay un voto positivo} other {hay # votos positivos}}",
+            "thumbsDownMessage": "{numVotes, plural, =0 {no hay votos negativos} =1 {hay un voto negativo} other {hay # votos negativos}}"
         }
     }
 }
