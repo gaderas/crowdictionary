@@ -388,7 +388,7 @@ _.forEach(routesInfo, function (routeInfo) {
 
         yield pCalculateStateBasedOnNormalizedRouteInfo(nRouteInfo)
             .then((function (state) {
-                console.log("state: " + state);
+                console.log("state: " + JSON.stringify(state));
                 console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
                 setInitialState(state);
                 var markup = "<!DOCTYPE html>\n" + React.renderComponentToString(

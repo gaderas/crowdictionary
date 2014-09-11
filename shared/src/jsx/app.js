@@ -85,7 +85,7 @@ var clientRouterFunc = function (routeInfo) {
 
     pCalculateStateBasedOnNormalizedRouteInfo(nRouteInfo)
         .then((function (state) {
-            console.log("state: " + state);
+            console.log("state: " + JSON.stringify(state));
             console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
             setInitialState(state);
             React.renderComponent(
@@ -111,7 +111,9 @@ var clientRouterFunc = function (routeInfo) {
  *         "c": "d"
  *     },
  *     "clientOrServer": "client",
- *     "calculateStateFunc": "calculateStateFunc"
+ *     "calculateStateFunc": "calculateStateFunc",
+ *     "hostname": "example.com",
+ *     "selfRoot": "http://example.com:8888"
  * }"
  */
 var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
@@ -139,14 +141,20 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
             // "home page"
             return pL10nForLang
                 .then(function (l10nData) {
-                    return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData}));
+                    return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData}, nRouteInfo));
                 });
         } else if (nRouteInfo.query && nRouteInfo.query.q) {
             return pL10nForLang
                 .then(function (l10nData) {
-                    return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData, searchTerm: nRouteInfo.query.q}));
+                    return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData, searchTerm: nRouteInfo.query.q}, nRouteInfo));
                 });
         }
+    } else if ('/phrases/:phrase' === nRouteInfo.route) {
+        // "phrase page"
+        return pL10nForLang
+            .then(function (l10nData) {
+                return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData}, nRouteInfo));
+            });
     }
 };
 
@@ -230,9 +238,7 @@ var routesInfo = [
                     if (200 === loginStateRes[0].statusCode) {
                         reactState.loginInfo = JSON.parse(loginStateRes[1]);
                     }
-                    return reactState;
-                })
-                .then(function (reactState) {
+
                     var phraseIds = _.map(reactState.searchResults, function (searchResult) {
                         return searchResult.key;
                     });
@@ -266,66 +272,41 @@ var routesInfo = [
         clientRoute: 'phrases/:phrase',
         clientRouterFunc: clientRouterFunc,
         clientRouterFuncName: '/phrases/:phrase',
-        calculateStateFunc: function (overrides) {
+        calculateStateFunc: function (overrides, nRouteInfo) {
             var lang = (overrides && overrides.globalLang) || 'es-MX',
-                term = (overrides && overrides.searchTerm) || '',
+                phrase = (nRouteInfo && nRouteInfo.params && nRouteInfo.params.phrase),
                 l10nData = (overrides && overrides.l10nData) || {},
-                phrasesUrl,
+                phraseUrl = selfRoot + util.format("/v1/lang/%s/phrases/%s", lang, phrase),
                 loginStateUrl = selfRoot + "/v1/login";
-            if (!term) {
-                phrasesUrl = selfRoot + "/v1/lang/"+lang+"/phrases";
-            } else {
-                phrasesUrl = selfRoot + "/v1/lang/"+lang+"/phrases?search="+term;
+            if ("string" !== typeof phrase || _.isEmpty(phrase)) {
+                throw Error("phrase not provided in URL");
             }
-            return Q.all([pRequest(phrasesUrl), pRequest(loginStateUrl)])
-                .spread(function (phrasesRes, loginStateRes) {
-                    console.log("login state reponse:" + JSON.stringify(loginStateRes, ' ', 4));
-                    console.log("phrases reponse:" + JSON.stringify(phrasesRes, ' ', 4));
-                    if (200 !== phrasesRes[0].statusCode) {
-                        throw Error("couldn't fetch phrases");
+            return Q.all([pRequest(phraseUrl), pRequest(loginStateUrl)])
+                .spread(function (phraseRes, loginStateRes) {
+                    if (200 !== phraseRes[0].statusCode) {
+                        throw Error("couldn't fetch phrase");
                     }
-                    var rObj = JSON.parse(phrasesRes[1]),
+                    var rObj = JSON.parse(phraseRes[1]),
                         reactState = {
                             globalLang: lang,
                             l10nData: l10nData,
-                            searchTerm: term,
-                            searchResults: []
+                            shownPhraseData: rObj[0]
                         };
-                    _.forEach(rObj, function (phraseObj) {
-                        reactState.searchResults.push({
-                            phrase: phraseObj.phrase,
-                            key: phraseObj.id
-                        });
-                    });
                     // add login information if we got it
                     if (200 === loginStateRes[0].statusCode) {
                         reactState.loginInfo = JSON.parse(loginStateRes[1]);
                     }
-                    return reactState;
-                })
-                .then(function (reactState) {
-                    var phraseIds = _.map(reactState.searchResults, function (searchResult) {
-                        return searchResult.key;
-                    });
-                    if (!phraseIds.length) {
-                        return reactState;
-                    }
-                    return pRequest(selfRoot + "/v1/definitions?phraseIds="+phraseIds.join(','))
+
+                    var phraseIds = [rObj[0].id];
+
+                    return pRequest(selfRoot + "/v1/definitions?phraseIds=" + phraseIds.join(','))
                         .then(function (res) {
                             if (200 !== res[0].statusCode) {
                                 throw Error("couldn't fetch definitions");
                             }
                             var rObj = JSON.parse(res[1]);
-                            _.forEach(reactState.searchResults, function (searchResult) {
-                                var definitions = _.where(rObj, {phrase_id: searchResult.key});
-                                searchResult.definitions = definitions;
-                                console.log('definitionz: ' + JSON.stringify(definitions));
-                                searchResult.topDefinition = _.max(definitions, function (def) {
-                                    // this will return the one with the most votes, regardless if they're upvotes or downvotes...
-                                    return def.votes.length;
-                                });
-                                console.log('top definition: ' + JSON.stringify(searchResult.topDefinition));
-                            });
+                            reactState.shownPhraseData.definitions = rObj;
+                            //reactState.shownPhraseData.definitions[].topDefinition
                             return reactState;
                         });
                 });
@@ -439,9 +420,46 @@ var LoggedInMixin = {
     }
 };
 
+var RouterMixin = {
+    componentWillMount: function () {
+        // since this only makes sense in the client (where we have a backbone Router), we check first...
+        if (_.isEmpty(Router)) {
+            return;
+        }
+        // the event is a string (the name of the routing function, a.k.a.: `clientRouterFuncName`)
+        var callback = (function (ev) {
+            console.log("on router callback...");
+            console.log("router event: " + ev);
+            var hostname = this.props.nRouteInfo.hostname,
+                selfRoot = this.props.nRouteInfo.selfRoot,
+                searchTerm = this.refs.topBar.getSearchTerm(),
+                filteredRoutesInfo = _.filter(routesInfo, {clientRouterFuncName: ev}),
+                routeInfo = filteredRoutesInfo[0],
+                newQuery = !_.isEmpty(searchTerm) ? {q: searchTerm} : {},
+                newNRouteInfo = getNormalizedRouteInfo('client', routeInfo, {}, newQuery, hostname, selfRoot);
+            pCalculateStateBasedOnNormalizedRouteInfo(newNRouteInfo)
+                .then((function (newState) {
+                    this.replaceState(newState, (function () {
+                        console.log("state supposedly replaced...");
+                        this.forceUpdate();
+                    }).bind(this));
+                }).bind(this))
+                .fail(function (err) {
+                    throw Error(err);
+                });
+        }).bind(this);
+
+        console.log("on componentWillMount() of the RouterMixin... and the Router is: " + Router);
+        Router.on('route', callback);
+    },
+    componentWillUnmount: function () {
+        Router.off('route');
+    },
+};
+
 
 var CrowDictionary = React.createClass({
-    mixins: [I18nMixin, LoggedInMixin],
+    mixins: [I18nMixin, LoggedInMixin, RouterMixin],
     componentWillMount: function () {
     },
     getInitialState: function () {
@@ -560,12 +578,37 @@ var CrowDictionary = React.createClass({
             });
     },
     handleSelectPhrase: function (phraseData) {
-        this.setState({
+        var fragment = "/phrases/"+phraseData.phrase;
+        /*this.setState({
             shownPhraseData: phraseData
-        });
+        });*/
+        Router.navigate(fragment, {trigger: true});
     },
     handleClosePhraseDetails: function () {
-        this.replaceState(appUtil.getObjectWithoutProps(this.state, ['shownPhraseData']));
+        // getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, query, hostname, selfRoot) {
+        var hostname = this.props.nRouteInfo.hostname,
+            selfRoot = this.props.nRouteInfo.selfRoot,
+            searchTerm = this.refs.topBar.getSearchTerm(),
+            filteredRoutesInfo = _.filter(routesInfo, {serverRoute: '/'}),
+            routeInfo = filteredRoutesInfo[0],
+            newQuery = !_.isEmpty(searchTerm) ? {q: searchTerm} : {},
+            newNRouteInfo = getNormalizedRouteInfo('client', routeInfo, {}, newQuery, hostname, selfRoot);
+        return pCalculateStateBasedOnNormalizedRouteInfo(newNRouteInfo)
+            .then((function (newState) {
+                var fragment = newNRouteInfo.route;
+                if (!_.isEmpty(newNRouteInfo.query)) {
+                    fragment += '?' + _.map(newNRouteInfo.query, function (val, key) {
+                        return key + "=" + val;
+                    }).join('&');
+                }
+                //this.replaceState(appUtil.getObjectWithoutProps(newState, ['shownPhraseData']));
+                this.replaceState(newState);
+                Router.navigate(fragment);
+            }).bind(this))
+            .fail((function (err) {
+                console.error("error: " + err);
+                throw Error(err);
+            }));
     },
     handleClearError: function () {
         this.setState({
@@ -616,7 +659,7 @@ var CrowDictionary = React.createClass({
             </head>
             <body>
             <div>
-                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} topState={this.state}/>
+                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} topState={this.state} ref="topBar" />
                 {mainContent}
             </div>
             <script src="/static/js/app.js" />
@@ -724,12 +767,19 @@ var DefinitionInDetails = React.createClass({
             userVoteObjects = _.filter(definitionObj.votes, {contributor_id: loginInfo.id}),
             userVote = '';
         userVote = !_.isEmpty(loginInfo) && userVoteObjects && userVoteObjects[0] && userVoteObjects[0].vote; // 'up, 'down', or 'neutral'... or false
-        this.refs.thumbsUp.getDOMNode().addEventListener('load', function () {
+
+        // need to call this inline, and also inside a 'load' event listener to
+        // handle both cases: when rendered on server, and when rendered on client...
+        var paintThumb = function () {
             var like = this.contentDocument.getElementById('like');
             if ('up' === userVote) {
                 like.setAttribute('stroke', 'green');
             }
+        };
+        this.refs.thumbsUp.getDOMNode().addEventListener('load', function () {
+            paintThumb.call(this);
         });
+        paintThumb.call(this.refs.thumbsUp.getDOMNode());
         this.refs.thumbsDown.getDOMNode().addEventListener('load', function () {
             var like = this.contentDocument.getElementById('like');
             like.setAttribute('transform', 'rotate(180, 16, 16)');
@@ -769,10 +819,13 @@ var DefinitionInDetails = React.createClass({
 
 
 var TopBar = React.createClass({
+    getSearchTerm: function () {
+        return this.refs.searchBar.getSearchTerm();
+    },
     render: function () {
         return (
             <div>
-                <SearchBar onUserInput={this.props.onUserInput} topState={this.props.topState}/>
+                <SearchBar onUserInput={this.props.onUserInput} topState={this.props.topState} ref="searchBar" />
                 <NavBar onGlobalLangChange={this.props.onGlobalLangChange} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} topState={this.props.topState}/>
             </div>
         );
@@ -781,6 +834,10 @@ var TopBar = React.createClass({
 
 var SearchBar = React.createClass({
     mixins: [I18nMixin],
+    getSearchTerm: function () {
+        console.log("getSearchTerm() called on component SearchBar. will return: " + this.refs.searchInput.getDOMNode().value);
+        return this.refs.searchInput.getDOMNode().value;
+    },
     handleChange: function () {
         console.log('in SearchBar::handleChange()');
         var searchTerm = this.refs.searchInput.getDOMNode().value;
