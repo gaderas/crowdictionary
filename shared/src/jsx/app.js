@@ -58,6 +58,7 @@ var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, q
 
 
 /**
+ * *Bootstrapping* on the client. for client route interactions later on, look elsewhere :-)
  * this receives arguments from Backbone.Router in the following order:
  * *   routeInfo (passed via bind on the client code)
  * *   a number of arguments, each corresponding to a matched route path parameter
@@ -151,6 +152,7 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
         }
     } else if ('/phrases/:phrase' === nRouteInfo.route) {
         // "phrase page"
+        console.log("nRouteInfo: " + JSON.stringify(nRouteInfo));
         return pL10nForLang
             .then(function (l10nData) {
                 return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData}, nRouteInfo));
@@ -386,13 +388,11 @@ var I18nMixin = {
         return state;
     },
     loadMessages: function () {
-        console.log("loadMessages() start");
         var state = this.getEffectiveState();
         if (!state.l10nData || !state.l10nData.messages) {
             throw Error("no messages found. module can't function correctly");
         }
         this.messages = state.l10nData.messages;
-        console.log("loadMessages() end");
     },
     msg: function (messageStr) {
         var state = this.getEffectiveState();
@@ -422,21 +422,32 @@ var LoggedInMixin = {
 
 var RouterMixin = {
     componentWillMount: function () {
-        // since this only makes sense in the client (where we have a backbone Router), we check first...
+        // since this only makes sense on the client (where we have a backbone Router), we check first...
         if (_.isEmpty(Router)) {
             return;
         }
         // the event is a string (the name of the routing function, a.k.a.: `clientRouterFuncName`)
         var callback = (function (ev) {
-            console.log("on router callback...");
+            /*Array.prototype.forEach.call(arguments, function (val, key) {
+                console.log("arg " + key + ", val: " + val);
+            });*/
+            var args = _(arguments).toArray().slice(1).value(),
+                filteredRoutesInfo = _.filter(routesInfo, {clientRouterFuncName: ev}),
+                routeInfo = filteredRoutesInfo[0],
+                queryString = args.pop(),
+                query = querystring.parse(queryString),
+                params = _.map(routeInfo.serverParamNames, function (paramName) {
+                    return args.shift();
+                });
+            console.log("on router callback....");
+            console.log("router event???????");
             console.log("router event: " + ev);
             var hostname = this.props.nRouteInfo.hostname,
                 selfRoot = this.props.nRouteInfo.selfRoot,
                 searchTerm = this.refs.topBar.getSearchTerm(),
-                filteredRoutesInfo = _.filter(routesInfo, {clientRouterFuncName: ev}),
-                routeInfo = filteredRoutesInfo[0],
-                newQuery = !_.isEmpty(searchTerm) ? {q: searchTerm} : {},
-                newNRouteInfo = getNormalizedRouteInfo('client', routeInfo, {}, newQuery, hostname, selfRoot);
+                //newQuery = !_.isEmpty(searchTerm) ? {q: searchTerm} : {},
+                newNRouteInfo = getNormalizedRouteInfo('client', routeInfo, params, query, hostname, selfRoot);
+            console.log("newNRouteInfo: " + JSON.stringify(newNRouteInfo));
             pCalculateStateBasedOnNormalizedRouteInfo(newNRouteInfo)
                 .then((function (newState) {
                     this.replaceState(newState, (function () {
@@ -445,6 +456,7 @@ var RouterMixin = {
                     }).bind(this));
                 }).bind(this))
                 .fail(function (err) {
+                    console.error("there was an error: " + err);
                     throw Error(err);
                 });
         }).bind(this);
@@ -592,7 +604,7 @@ var CrowDictionary = React.createClass({
             filteredRoutesInfo = _.filter(routesInfo, {serverRoute: '/'}),
             routeInfo = filteredRoutesInfo[0],
             newQuery = !_.isEmpty(searchTerm) ? {q: searchTerm} : {},
-            newNRouteInfo = getNormalizedRouteInfo('client', routeInfo, {}, newQuery, hostname, selfRoot);
+            newNRouteInfo = getNormalizedRouteInfo('client', routeInfo, [], newQuery, hostname, selfRoot);
         return pCalculateStateBasedOnNormalizedRouteInfo(newNRouteInfo)
             .then((function (newState) {
                 var fragment = newNRouteInfo.route;
