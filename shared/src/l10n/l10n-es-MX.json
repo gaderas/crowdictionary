@@ -36,7 +36,9 @@
         },
         "DefinitionInDetails": {
             "thumbsUpMessage": "{numVotes, plural, =0 {no hay votos positivos} =1 {hay un voto positivo} other {hay # votos positivos}}",
-            "thumbsDownMessage": "{numVotes, plural, =0 {no hay votos negativos} =1 {hay un voto negativo} other {hay # votos negativos}}"
+            "thumbsDownMessage": "{numVotes, plural, =0 {no hay votos negativos} =1 {hay un voto negativo} other {hay # votos negativos}}",
+            "thumbsUpTitle": "{currentVote, select, up {haz clic para eliminar tu voto anterior} other {vota a favor}}",
+            "thumbsDownTitle": "{currentVote, select, down {haz clic para eliminar tu voto anterior} other {vota en contra}}"
         }
     }
 }

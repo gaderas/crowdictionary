@@ -780,18 +780,30 @@ var DefinitionInDetails = React.createClass({
         console.log("on: " + e.target);
         console.log("is a: " + e.target.className);
         var matches = e.target.className.match(/(up|down)/),
-            definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key];
+            definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
+    
+            phrase = this.props.topState.shownPhraseData.phrase,
+            userVoteObjects = _.filter(definitionObj.votes, {contributor_id: loginInfo.id}),
+            userVote = !_.isEmpty(loginInfo) && userVoteObjects && userVoteObjects[0] && userVoteObjects[0].vote; // 'up, 'down', or 'neutral'... or false
+            apparentVote = matches[1],
+            effectiveVote;
+        if (('up' === userVote && 'up' === apparentVote) || ('down' === userVote && 'down' === apparentVote)) {
+            effectiveVote = 'neutral'
+        }
         if (matches) {
-            this.props.onVote({vote: matches[1], definitionId: definitionObj.id, phrase: this.props.topState.shownPhraseData.phrase});
+            this.props.onVote({vote: effectiveVote, definitionId: definitionObj.id, phrase: phrase});
         }
     },
-    setupThumbs: function (initialSetup) {
+    setupThumbsData: function () {
         var loginInfo = this.props.topState.loginInfo,
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
             userVoteObjects = _.filter(definitionObj.votes, {contributor_id: loginInfo.id}),
-            userVote = '';
-        userVote = !_.isEmpty(loginInfo) && userVoteObjects && userVoteObjects[0] && userVoteObjects[0].vote; // 'up, 'down', or 'neutral'... or false
+            userVote = !_.isEmpty(loginInfo) && userVoteObjects && userVoteObjects[0] && userVoteObjects[0].vote; // 'up, 'down', or 'neutral'... or false
 
+        this.userVote = userVote; // set this so we can use it in render() to adjust the 'title' a.k.a. 'tooltip'
+    },
+    setupThumbsDOM: function (initialSetup) {
+        var userVote = this.userVote;
         // need to call this inline, and also inside a 'load' event listener to
         // handle both cases: when rendered on server, and when rendered on client...
         var paintThumb = function (upOrDown) {
@@ -827,32 +839,40 @@ var DefinitionInDetails = React.createClass({
         }
         //this.refs.thumbsDown.addEventListener('click', this.handleVoteDown);
     },
+    componentWillMount: function () {
+        this.setupThumbsData();
+    },
+    compomentWillUpdate: function () {
+        this.setupThumbsData();
+    },
     componentDidMount: function () {
-        this.setupThumbs(true);
+        this.setupThumbsDOM(true);
     },
     componentDidUpdate: function () {
-        this.setupThumbs(false);
+        this.setupThumbsDOM(false);
     },
     render: function () {
         var definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
             votesUpCount = _.filter(definitionObj.votes, {vote: "up"}).length,
             votesDownCount = _.filter(definitionObj.votes, {vote: "down"}).length,
             thumbsUpMessage = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsUpMessage), {numVotes: votesUpCount}),
-            thumbsDownMessage = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsDownMessage), {numVotes: votesDownCount});
+            thumbsDownMessage = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsDownMessage), {numVotes: votesDownCount}),
+            thumbsUpTitle = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsUpTitle), {currentVote: this.userVote}),
+            thumbsDownTitle = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsDownTitle), {currentVote: this.userVote});
         return (
             <div>
                 <div>{definitionObj.definition}</div>
                 <div className="votes up container">
                     <div className="thumbs up container">
                         <object ref="thumbsUp" data="/static/assets/img/designmodo_linecons_free-like.svg" type="image/svg+xml"/>
-                        <div className="thumbs up overlay" onClick={this.handleVote}> </div>
+                        <div className="thumbs up overlay" onClick={this.handleVote} title={thumbsUpTitle}> </div>
                     </div>
                     <div className="">{thumbsUpMessage}</div>
                 </div>
                 <div className="votes down container">
                     <div className="thumbs down container">
                         <object ref="thumbsDown" data="/static/assets/img/designmodo_linecons_free-like.svg" type="image/svg+xml"/>
-                        <div className="thumbs down overlay" onClick={this.handleVote}> </div>
+                        <div className="thumbs down overlay" onClick={this.handleVote} title={thumbsDownTitle}> </div>
                     </div>
                     <div className="">{thumbsDownMessage}</div>
                 </div>
