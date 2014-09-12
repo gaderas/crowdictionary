@@ -29,6 +29,7 @@ var pRequest,
 
 var Layout = bs.Layout;
 var Widget = bs.Widget;
+var mainReactComponentMounted = false;
 
 
 var nRouteInfo,
@@ -41,6 +42,33 @@ var nRouteInfo,
     setInitialState = function (state) {
         initialState = state;
     };
+
+var RouteNotifier = function () {
+    EventEmitter.call(this);
+};
+
+util.inherits(RouteNotifier, EventEmitter);
+
+RouteNotifier.prototype.triggerStateChange = function (state) {
+    console.log("RouteNotifier emitting" + JSON.stringify(state));
+    this.emit('routenotifier-state-change-trigger', state);
+};
+
+RouteNotifier.prototype.listener = function (callback, state) {
+    console.log("RouteNotifier catching: " + JSON.stringify(state));
+    callback(state);
+};
+
+RouteNotifier.prototype.onStateChange = function (callback) {
+    this.on('routenotifier-state-change-trigger', this.listener.bind(this, callback));
+};
+
+RouteNotifier.prototype.removeStateChangeListener = function () {
+    console.log("RouteNotifier removing listener");
+    this.removeListener('routenotifier-state-change-trigger', this.listener);
+};
+
+var routeNotifier = new RouteNotifier();
 
 var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, query, hostname, selfRoot) {
     console.log('on getNormalizedRouteInfo(), routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
@@ -88,11 +116,16 @@ var clientRouterFunc = function (routeInfo) {
         .then((function (state) {
             console.log("state: " + JSON.stringify(state));
             console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
-            setInitialState(state);
-            React.renderComponent(
-                <CrowDictionary nRouteInfo={nRouteInfo} />,
-                document
-            );
+            if (!mainReactComponentMounted) {
+                setInitialState(state);
+                React.renderComponent(
+                    <CrowDictionary nRouteInfo={nRouteInfo} />,
+                    document
+                );
+            } else {
+                // here we emit an event that our RouterMixin will catch and use as an indicator for updating React state
+                routeNotifier.triggerStateChange(state);
+            }
             return;
         }).bind(this))
         .fail(function (err) {
@@ -426,46 +459,14 @@ var RouterMixin = {
         if (_.isEmpty(Router)) {
             return;
         }
-        // the event is a string (the name of the routing function, a.k.a.: `clientRouterFuncName`)
-        var callback = (function (ev) {
-            /*Array.prototype.forEach.call(arguments, function (val, key) {
-                console.log("arg " + key + ", val: " + val);
-            });*/
-            var args = _(arguments).toArray().slice(1).value(),
-                filteredRoutesInfo = _.filter(routesInfo, {clientRouterFuncName: ev}),
-                routeInfo = filteredRoutesInfo[0],
-                queryString = args.pop(),
-                query = querystring.parse(queryString),
-                params = _.map(routeInfo.serverParamNames, function (paramName) {
-                    return args.shift();
-                });
-            console.log("on router callback....");
-            console.log("router event???????");
-            console.log("router event: " + ev);
-            var hostname = this.props.nRouteInfo.hostname,
-                selfRoot = this.props.nRouteInfo.selfRoot,
-                searchTerm = this.refs.topBar.getSearchTerm(),
-                //newQuery = !_.isEmpty(searchTerm) ? {q: searchTerm} : {},
-                newNRouteInfo = getNormalizedRouteInfo('client', routeInfo, params, query, hostname, selfRoot);
-            console.log("newNRouteInfo: " + JSON.stringify(newNRouteInfo));
-            pCalculateStateBasedOnNormalizedRouteInfo(newNRouteInfo)
-                .then((function (newState) {
-                    this.replaceState(newState, (function () {
-                        console.log("state supposedly replaced...");
-                        this.forceUpdate();
-                    }).bind(this));
-                }).bind(this))
-                .fail(function (err) {
-                    console.error("there was an error: " + err);
-                    throw Error(err);
-                });
-        }).bind(this);
 
-        console.log("on componentWillMount() of the RouterMixin... and the Router is: " + Router);
-        Router.on('route', callback);
+        routeNotifier.onStateChange((function (state) {
+            this.replaceState(state);
+        }).bind(this));
     },
     componentWillUnmount: function () {
-        Router.off('route');
+        //Router.off('route');
+        routeNotifier.removeStateChangeListener();
     },
 };
 
@@ -473,6 +474,9 @@ var RouterMixin = {
 var CrowDictionary = React.createClass({
     mixins: [I18nMixin, LoggedInMixin, RouterMixin],
     componentWillMount: function () {
+    },
+    componentDidMount: function () {
+        mainReactComponentMounted = true;
     },
     getInitialState: function () {
         return initialState;
