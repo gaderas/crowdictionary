@@ -2,6 +2,9 @@
     "locales": ["es-MX"],
     "formats": {"number": {}, "date": {}, "time": {}},
     "messages": {
+        "Errors": {
+            "generic": "algo ha salido mal, lo sentimos..."
+        },
         "SearchBar": {
             "placeHolder": "busca..."
         },

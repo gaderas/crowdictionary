@@ -86,7 +86,6 @@ var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, q
 
 
 /**
- * *Bootstrapping* on the client. for client route interactions later on, look elsewhere :-)
  * this receives arguments from Backbone.Router in the following order:
  * *   routeInfo (passed via bind on the client code)
  * *   a number of arguments, each corresponding to a matched route path parameter
@@ -584,12 +583,17 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to add a new definition...");
                 }
+                console.log("res: " + JSON.stringify(res));
+                var definitionId = res[1].last_id;
                 return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm, shownPhraseData: this.state.shownPhraseData}, this.props.nRouteInfo.calculateStateFunc)
             }).bind(this))
             .then((function (newState) {
                 this.replaceState(newState);
             }).bind(this))
             .fail(function (err) {
+                this.setState({
+                    error: this.fmt(this.msg(this.messages.Errors.generic))
+                });
                 console.error("got an error: " + JSON.stringify(err, ' ', 4));
             });
     },
@@ -664,8 +668,9 @@ var CrowDictionary = React.createClass({
                 mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase} onSelectPhrase={this.handleSelectPhrase}/>;
             }
         }
+        //manifest="/static/assets/global_cache.manifest"
         return (
-            <html lang="en-US" dir="ltr" manifest="/static/assets/global_cache.manifest">
+            <html lang="en-US" dir="ltr" >
             <head>
               <meta charset="utf-8" />
               <script src="/static/js/dep/underscore.js" />
@@ -786,23 +791,35 @@ var DefinitionInDetails = React.createClass({
 
         // need to call this inline, and also inside a 'load' event listener to
         // handle both cases: when rendered on server, and when rendered on client...
-        var paintThumb = function () {
+        var paintThumb = function (upOrDown) {
+            console.log("paintThumb(), this: " + this);
             var like = this.contentDocument.getElementById('like');
-            if ('up' === userVote) {
+            if ('down' === upOrDown) {
+                like.setAttribute('transform', 'rotate(180, 16, 16)');
+            }
+            if ('up' === userVote && 'up' === upOrDown) {
                 like.setAttribute('stroke', 'green');
+            }
+            if ('down' === userVote && 'down' === upOrDown) {
+                like.setAttribute('stroke', 'red');
             }
         };
         this.refs.thumbsUp.getDOMNode().addEventListener('load', function () {
-            paintThumb.call(this);
+            // for when page is reached via dynamic navigation
+            paintThumb.call(this, 'up');
         });
-        paintThumb.call(this.refs.thumbsUp.getDOMNode());
+        if (this.refs.thumbsUp.getDOMNode().contentDocument) {
+            // for when page is accessed directly
+            paintThumb.call(this.refs.thumbsUp.getDOMNode(), 'up');
+        }
         this.refs.thumbsDown.getDOMNode().addEventListener('load', function () {
-            var like = this.contentDocument.getElementById('like');
-            like.setAttribute('transform', 'rotate(180, 16, 16)');
-            if ('down' === userVote) {
-                like.setAttribute('stroke', 'red');
-            }
+            // for when page is reached via dynamic navigation
+            paintThumb.call(this, 'down');
         });
+        if (this.refs.thumbsDown.getDOMNode().contentDocument) {
+            // for when page is accessed directly
+            paintThumb.call(this.refs.thumbsDown.getDOMNode(), 'down');
+        }
         //this.refs.thumbsDown.addEventListener('click', this.handleVoteDown);
     },
     render: function () {

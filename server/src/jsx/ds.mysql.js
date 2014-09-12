@@ -161,7 +161,10 @@ Data.prototype.putDefinition = function (payload) {
     if (!payload || !payload.lang || !payload.phrase_id || !payload.definition) {
         throw Error("no payload (HTTP body) or no 'lang', 'phrase' or 'definition' in it");
     }
-    return pQuery("INSERT INTO `definition` SET ? ON DUPLICATE KEY UPDATE ?", [payload, payload]);
+    return pQuery("INSERT INTO `definition` SET ? ON DUPLICATE KEY UPDATE ?, id=LAST_INSERT_ID(id)", [payload, payload])
+        .then(function () {
+            return pQuery("SELECT LAST_INSERT_ID() AS last_id;")
+        });
 };
 
 Data.prototype.getVotes = function (params) {

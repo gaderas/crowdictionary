@@ -319,7 +319,8 @@ appWs.post('/lang/:lang/phrases/:phrase/definitions', function *(next) {
         })
         .then((function (res) {
             this.status = 200;
-            this.body = {message: "definition created/updated"};
+            console.log("definition create/update res: " + JSON.stringify(res));
+            this.body = {message: "definition created/updated", last_id: res[0].last_id};
             return;
         }).bind(this))
         .fail((function (err) {
@@ -392,7 +393,7 @@ _.forEach(routesInfo, function (routeInfo) {
                 console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
                 setInitialState(state);
                 var markup = "<!DOCTYPE html>\n" + React.renderComponentToString(
-                    <CrowDictionary routeInfo={routeInfo} />
+                    <CrowDictionary nRouteInfo={nRouteInfo} />
                 ).replace(/<html /, '<html manifest="/static/assets/global_cache.manifest" ');
                 this.body = markup;
                 return;
