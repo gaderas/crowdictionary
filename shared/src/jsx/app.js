@@ -481,17 +481,11 @@ var CrowDictionary = React.createClass({
         return initialState;
     },
     handleUserInput: function (searchTerm) {
-        pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: searchTerm}, this.props.nRouteInfo.calculateStateFunc)
-            .then((function (newState) {
-                this.setState(newState);
-                //console.log("newState: " + JSON.stringify(newState, ' ', 4));
-                //console.log("Router: " + Router);
-                var fragment = '';
-                if ('' !== searchTerm) {
-                    fragment = '?q=' + searchTerm;
-                }
-                Router.navigate(fragment);
-            }).bind(this));
+        var fragment = '';
+        if ('' !== searchTerm) {
+            fragment = '?q=' + searchTerm;
+        }
+        Router.navigate(fragment, {trigger: true, replace: true});
     },
     handleGlobalLangChange: function (newLang) {
         pGenericCalculateState({globalLang: newLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
@@ -557,12 +551,17 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to add a new phrase...");
                 }
-                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
+                //return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
+                var fragment = "/phrases/"+phrase+"?updated="+Date.now();
+                Router.navigate(fragment, {trigger: true, replace: false});
             }).bind(this))
-            .then((function (newState) {
+            /*.then((function (newState) {
                 this.replaceState(newState);
-            }).bind(this))
+            }).bind(this))*/
             .fail(function (err) {
+                this.setState({
+                    error: this.fmt(this.msg(this.messages.Errors.generic))
+                });
                 console.error("got an error: " + JSON.stringify(err, ' ', 4));
             });
     },
@@ -584,12 +583,14 @@ var CrowDictionary = React.createClass({
                     throw Error("failed to add a new definition...");
                 }
                 console.log("res: " + JSON.stringify(res));
-                var definitionId = res[1].last_id;
-                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm, shownPhraseData: this.state.shownPhraseData}, this.props.nRouteInfo.calculateStateFunc)
+                var definitionId = res[1].last_id,
+                    fragment = "/phrases/"+phrase+"?updated="+Date.now();
+                //return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm, shownPhraseData: this.state.shownPhraseData}, this.props.nRouteInfo.calculateStateFunc)
+                Router.navigate(fragment, {trigger: true, replace: true});
             }).bind(this))
-            .then((function (newState) {
+            /*.then((function (newState) {
                 this.replaceState(newState);
-            }).bind(this))
+            }).bind(this))*/
             .fail(function (err) {
                 this.setState({
                     error: this.fmt(this.msg(this.messages.Errors.generic))
@@ -652,7 +653,9 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to record vote...");
                 }
-                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
+                //return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
+                var fragment = "/phrases/"+voteInfo.phrase+"?update="+Date.now();
+                Router.navigate(fragment, {trigger: true, replace: true});
             }).bind(this));
     },
     render: function () {
@@ -779,10 +782,10 @@ var DefinitionInDetails = React.createClass({
         var matches = e.target.className.match(/(up|down)/),
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key];
         if (matches) {
-            this.props.onVote({vote: matches[1], definitionId: definitionObj.id});
+            this.props.onVote({vote: matches[1], definitionId: definitionObj.id, phrase: this.props.topState.shownPhraseData.phrase});
         }
     },
-    componentDidMount: function () {
+    setupThumbs: function (initialSetup) {
         var loginInfo = this.props.topState.loginInfo,
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
             userVoteObjects = _.filter(definitionObj.votes, {contributor_id: loginInfo.id}),
@@ -794,9 +797,11 @@ var DefinitionInDetails = React.createClass({
         var paintThumb = function (upOrDown) {
             console.log("paintThumb(), this: " + this);
             var like = this.contentDocument.getElementById('like');
-            if ('down' === upOrDown) {
+            if (initialSetup && 'down' === upOrDown) {
+                // we perform this rotation only once, on `componentDidMount()`...
                 like.setAttribute('transform', 'rotate(180, 16, 16)');
             }
+            like.setAttribute('stroke', 'black');
             if ('up' === userVote && 'up' === upOrDown) {
                 like.setAttribute('stroke', 'green');
             }
@@ -821,6 +826,12 @@ var DefinitionInDetails = React.createClass({
             paintThumb.call(this.refs.thumbsDown.getDOMNode(), 'down');
         }
         //this.refs.thumbsDown.addEventListener('click', this.handleVoteDown);
+    },
+    componentDidMount: function () {
+        this.setupThumbs(true);
+    },
+    componentDidUpdate: function () {
+        this.setupThumbs(false);
     },
     render: function () {
         var definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
