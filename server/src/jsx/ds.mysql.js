@@ -73,7 +73,8 @@ Data.prototype.getPhrases = function (params) {
         throw Error("error. tried to query phrases without specifying 'lang'");
     }
     if (actualParams.phrase) {
-        return pQuery("SELECT * FROM `phrase` WHERE ? AND ? ORDER BY lang, phrase ASC LIMIT ?, ?", [{lang: actualParams.lang}, {phrase: actualParams.phrase}, start, limit]);
+        // this is used to find exact matches, so no need for LIMIT clause
+        return pQuery("SELECT * FROM `phrase` WHERE ? AND ? ORDER BY lang, phrase ASC", [{lang: actualParams.lang}, {phrase: actualParams.phrase}]);
     } else {
         return pQuery("SELECT * FROM `phrase` WHERE ? ORDER BY lang, phrase ASC LIMIT ?, ?", [actualParams, start, limit]);
     }
@@ -97,16 +98,20 @@ Data.prototype.searchPhrase = function (params) {
         splitParams = appUtil.splitObject(existingParams, ['start', 'limit']),
         fake = console.log('splitParams: ' + JSON.stringify(splitParams)),
         actualParams = splitParams[0],
-        actualLimits = splitParams[1];
+        actualLimits = splitParams[1],
+        start = parseInt(actualLimits && actualLimits.start, 10) || 0,
+        limit = parseInt(actualLimits && actualLimits.limit, 10) || 2;
     if (!actualParams.lang) {
         throw Error("error. tried to query phrases without specifying 'lang'");
     }
     return pQuery("select * from phrase where phrase = ? and lang = ?" +
                   " UNION select * from phrase where phrase like ? and phrase != ?  and lang = ?" +
-                  " UNION select * from phrase where phrase like ? and phrase not like ? and lang = ?",
+                  " UNION select * from phrase where phrase like ? and phrase not like ? and lang = ?" +
+                  " LIMIT ?, ?",
                   [actualParams.search, actualParams.lang,
                    actualParams.search+'%', actualParams.search, actualParams.lang,
-                   '%'+actualParams.search+'%', actualParams.search+'%', actualParams.lang]);
+                   '%'+actualParams.search+'%', actualParams.search+'%', actualParams.lang,
+                   start, limit]);
 };
 
 Data.prototype.putPhrase = function (payload) {
