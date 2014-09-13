@@ -66,14 +66,16 @@ Data.prototype.getPhrases = function (params) {
         splitParams = appUtil.splitObject(existingParams, ['start', 'limit']),
         fake = console.log('splitParams: ' + JSON.stringify(splitParams)),
         actualParams = splitParams[0],
-        actualLimits = splitParams[1];
+        actualLimits = splitParams[1],
+        start = parseInt(actualLimits && actualLimits.start, 10) || 0,
+        limit = parseInt(actualLimits && actualLimits.limit, 10) || 2;
     if (!actualParams.lang) {
         throw Error("error. tried to query phrases without specifying 'lang'");
     }
     if (actualParams.phrase) {
-        return pQuery("SELECT * FROM `phrase` WHERE ? AND ? ORDER BY lang, phrase ASC", [{lang: actualParams.lang}, {phrase: actualParams.phrase}]);
+        return pQuery("SELECT * FROM `phrase` WHERE ? AND ? ORDER BY lang, phrase ASC LIMIT ?, ?", [{lang: actualParams.lang}, {phrase: actualParams.phrase}, start, limit]);
     } else {
-        return pQuery("SELECT * FROM `phrase` WHERE ? ORDER BY lang, phrase ASC", actualParams);
+        return pQuery("SELECT * FROM `phrase` WHERE ? ORDER BY lang, phrase ASC LIMIT ?, ?", [actualParams, start, limit]);
     }
 };
 
