@@ -14,7 +14,19 @@ Running a development instance
 TODO Performance Improvements
 ----
 
-*   Don't query the /v1/login endpoint on every state change
+*   Don't query the /v1/login endpoint on nearly every state change
+
+TODO Features
+----
+
+*   Add 'examples', 'tags' fields to definitions
+*   Don't let users overwrite phrases/definitions submitted by others
+*   Finish email account creation/verification flow
+*   Eliminate remaining pieces of code that still don't use route-based states
+*   Style (mobile first)
+*   Test on mobile
+*   Allow anonymous voting (guard by IP)
+*   Allow Google/Facebook/Twitter login
 
 Sample requests
 ----
