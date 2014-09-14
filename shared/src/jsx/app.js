@@ -3,6 +3,7 @@
 var Q = require('q');
 var appUtil = require('./util.js');
 var React = require('react');
+var InfiniteScroll = require('react-infinite-scroll')(React);
 var l10n = require('./l10n.js');
 var Intl = global.Intl || require('intl');
 var IntlMessageFormat = require('intl-messageformat');
@@ -30,6 +31,7 @@ var pRequest,
 var Layout = bs.Layout;
 var Widget = bs.Widget;
 var mainReactComponentMounted = false;
+var PHRASES_PAGE_SIZE = 2;
 
 
 var nRouteInfo,
@@ -192,42 +194,70 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
     }
 };
 
-/**
- * Takes in stateOverrides (a React State) and a calculateStateFunc,
- * fetches l10nData, combines data from all 3 sources together
- * and returns a new React State.
- */
-var pGenericCalculateState = function (stateOverrides, calculateStateFunc) {
-    stateOverrides = (!_.isEmpty(stateOverrides) && stateOverrides) || {};
-    // `hostname` and `selfRoot` passed in server mode, otherwise we get values from `window`
-    var hostname = (stateOverrides && stateOverrides.hostname) || window.location.hostname,
-        selfRoot = (stateOverrides && stateOverrides.selfRoot) || util.format("%s//%s", window.location.protocol, window.location.host);
-    setSelfRoot(selfRoot);
-    var pL10nForLang;
-    if (stateOverrides.globalLang) {
-        pL10nForLang = l10n.getL10nForLang(stateOverrides.globalLang);
+var getPhraseSearchReactState = function (params) {
+    var lang = params.lang,
+        term = params.term,
+        pageSize = params.pageSize,
+        page = params.page,
+        start = (page * pageSize),
+        l10nData = params.l10nData;
+    if (!term) {
+        phrasesUrl = selfRoot + "/v1/lang/"+lang+"/phrases?start="+start+"&limit="+pageSize;
     } else {
-        pL10nForLang = l10n.getAvailableLangs()
-            .then(function (langs) {
-                console.log("available langs: " + JSON.stringify(langs));
-                stateOverrides.globalLang = appUtil.getLangBasedOnHostname(hostname, langs);
-                return l10n.getL10nForLang(stateOverrides.globalLang);
+        phrasesUrl = selfRoot + "/v1/lang/"+lang+"/phrases?search="+term+"&start="+start+"&limit="+pageSize;
+    }
+    return pRequest({method: "GET", url: phrasesUrl, json: true})
+        .then(function (phrasesRes) {
+            if (200 !== phrasesRes[0].statusCode) {
+                throw Error("couldn't fetch phrases");
+            }
+
+            var rawSearchResults = phrasesRes[1],
+                reactState = {
+                    globalLang: lang,
+                    l10nData: l10nData,
+                    searchTerm: term,
+                    searchResults: getReactStateSearchResults(rawSearchResults)
+                };
+
+            var phraseIds = _.map(reactState.searchResults, function (searchResult) {
+                return searchResult.key;
             });
-    }
-    if (!_.isEmpty(stateOverrides.shownPhraseData)) {
-    }
-    return pL10nForLang
-        .then(function (l10nData) {
-            console.log("gonna set stateOverrides.l10nData to : " + JSON.stringify(l10nData));
-            stateOverrides.l10nData = l10nData;
-            return Q(calculateStateFunc(stateOverrides));
+
+            if (!phraseIds.length) {
+                return reactState;
+            }
+            definitionsUrl = selfRoot + "/v1/definitions?phraseIds="+phraseIds.join(',')
+            return pRequest({method: "GET", url: definitionsUrl, json: true})
+                .then(function (res) {
+                    if (200 !== res[0].statusCode) {
+                        throw Error("couldn't fetch definitions");
+                    }
+                    enrichReactStateSearchResults(reactState.searchResults, res[1]);
+                    return reactState;
+                });
         })
-        .then(function (reactState) {
-            _.forEach(stateOverrides, function (val, key) {
-                reactState[key] = val;
-            })
-            return reactState;
+};
+
+var getReactStateSearchResults = function (rawSearchResults) {
+    return _.map(rawSearchResults, function (phraseObj) {
+        return {
+            phrase: phraseObj.phrase,
+            key: phraseObj.id
+        };
+    });
+};
+
+var enrichReactStateSearchResults = function (searchResults, rawDefinitions) {
+    _.forEach(searchResults, function (searchResult) {
+        var definitions = _.where(rawDefinitions, {phrase_id: searchResult.key});
+        searchResult.definitions = definitions;
+        searchResult.topDefinition = _.max(definitions, function (def) {
+            // this will return the one with the most votes, regardless if they're upvotes or downvotes...
+            return def.votes.length;
         });
+    });
+    return;
 };
 
 var routesInfo = [
@@ -241,63 +271,55 @@ var routesInfo = [
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 term = (overrides && overrides.searchTerm) || '',
                 l10nData = (overrides && overrides.l10nData) || {},
-                phrasesUrl,
-                loginStateUrl = selfRoot + "/v1/login";
-            if (!term) {
-                phrasesUrl = selfRoot + "/v1/lang/"+lang+"/phrases";
-            } else {
-                phrasesUrl = selfRoot + "/v1/lang/"+lang+"/phrases?search="+term;
-            }
-            return Q.all([pRequest(phrasesUrl), pRequest(loginStateUrl)])
+                loginStateUrl = selfRoot + "/v1/login",
+                definitionsUrl,
+                phrasesUrl;
+            return Q.all([
+                getPhraseSearchReactState({l10nData: l10nData, lang: lang, term: term, pageSize: PHRASES_PAGE_SIZE, page: 0}),
+                pRequest({method: "GET", url: loginStateUrl, json: true})
+            ])
+                .spread(function (reactState, loginStateRes) {
+                    // add login information if we got it
+                    if (200 === loginStateRes[0].statusCode) {
+                        reactState.loginInfo = loginStateRes[1];
+                    }
+                    return reactState;
+                });
+            return Q.all([pRequest({method: "GET", url: phrasesUrl, json: true}), pRequest({method: "GET", url: loginStateUrl, json: true})])
                 .spread(function (phrasesRes, loginStateRes) {
-                    //console.log("login state reponse:" + JSON.stringify(loginStateRes, ' ', 4));
-                    //console.log("phrases reponse:" + JSON.stringify(phrasesRes, ' ', 4));
                     if (200 !== phrasesRes[0].statusCode) {
                         throw Error("couldn't fetch phrases");
                     }
-                    var rObj = JSON.parse(phrasesRes[1]),
+
+                    var rawSearchResults = phrasesRes[1],
                         reactState = {
                             globalLang: lang,
                             l10nData: l10nData,
                             searchTerm: term,
-                            searchResults: []
+                            searchResults: getReactStateSearchResults(rawSearchResults)
                         };
-                    _.forEach(rObj, function (phraseObj) {
-                        reactState.searchResults.push({
-                            phrase: phraseObj.phrase,
-                            key: phraseObj.id
-                        });
-                    });
                     // add login information if we got it
                     if (200 === loginStateRes[0].statusCode) {
-                        reactState.loginInfo = JSON.parse(loginStateRes[1]);
+                        reactState.loginInfo = loginStateRes[1];
                     }
 
                     var phraseIds = _.map(reactState.searchResults, function (searchResult) {
                         return searchResult.key;
                     });
+
                     if (!phraseIds.length) {
                         return reactState;
                     }
-                    return pRequest(selfRoot + "/v1/definitions?phraseIds="+phraseIds.join(','))
+                    definitionsUrl = selfRoot + "/v1/definitions?phraseIds="+phraseIds.join(',')
+                    return pRequest({method: "GET", url: definitionsUrl, json: true})
                         .then(function (res) {
                             if (200 !== res[0].statusCode) {
                                 throw Error("couldn't fetch definitions");
                             }
-                            var rObj = JSON.parse(res[1]);
-                            _.forEach(reactState.searchResults, function (searchResult) {
-                                var definitions = _.where(rObj, {phrase_id: searchResult.key});
-                                searchResult.definitions = definitions;
-                                console.log('definitionz: ' + JSON.stringify(definitions));
-                                searchResult.topDefinition = _.max(definitions, function (def) {
-                                    // this will return the one with the most votes, regardless if they're upvotes or downvotes...
-                                    return def.votes.length;
-                                });
-                                console.log('top definition: ' + JSON.stringify(searchResult.topDefinition));
-                            });
+                            enrichReactStateSearchResults(reactState.searchResults, res[1]);
                             return reactState;
                         });
-                });
+                })
         }
     },
     {
@@ -488,11 +510,11 @@ var CrowDictionary = React.createClass({
         Router.navigate(fragment, {trigger: true, replace: true});
     },
     handleGlobalLangChange: function (newLang) {
-        pGenericCalculateState({globalLang: newLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
+        /*pGenericCalculateState({globalLang: newLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
             .then((function (newState) {
                 this.setState(newState);
                 console.log("newState: " + JSON.stringify(newState, ' ', 4));
-            }).bind(this));
+            }).bind(this));*/
     },
     handleToggleLoginPrompt: function () {
         console.log('clicked on toggle login prompt...');
@@ -512,7 +534,13 @@ var CrowDictionary = React.createClass({
                 console.log("res is: " + JSON.stringify(res, ' ', 4));
                 var rObj = res[1]; // it's already json because we called `pRequest` with `{json:true}`
                 console.log("rObj: " + JSON.stringify(rObj, ' ', 4));
-                return pGenericCalculateState({searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
+                //return pGenericCalculateState({searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
+                var searchTerm = this.state.searchTerm || '';
+                var fragment = '';
+                if ('' !== searchTerm) {
+                    fragment = '?q=' + searchTerm;
+                }
+                Router.navigate(fragment, {trigger: true, replace: true});
             }).bind(this))
             .then((function (newState) {
                 newState.showLoginPrompt = false;
@@ -527,7 +555,13 @@ var CrowDictionary = React.createClass({
         var logOutUrl = selfRoot + "/v1/logout";
         return pRequest(logOutUrl)
             .then((function (res) {
-                return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
+                //return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
+                var searchTerm = this.state.searchTerm || '';
+                var fragment = '';
+                if ('' !== searchTerm) {
+                    fragment = '?q=' + searchTerm;
+                }
+                Router.navigate(fragment, {trigger: true, replace: true});
             }).bind(this))
             .then((function (newState) {
                 this.replaceState(newState);
@@ -1007,21 +1041,48 @@ var GlobalLangPicker = React.createClass({
 });
 
 var PhraseSearchResults = React.createClass({
+    getInitialState: function () {
+        return _.merge(this.props.topState, {hasMore: this.props.topState.searchResults.length >= PHRASES_PAGE_SIZE});
+    },
+    loadMore: function (page) {
+        // page is 0-index based
+        var term = this.state.searchTerm,
+            start = (page * PHRASES_PAGE_SIZE),
+            lang = this.state.globalLang;
+        console.log('load');
+        getPhraseSearchReactState({lang: lang, term: term, pageSize: PHRASES_PAGE_SIZE, page: page})
+            .then(function (reactState) {
+                // the only part of the newly computed reactState that we'll use is the searchResults array to append it to our current one...
+                this.setState({
+                    searchResults: _.union(this.state.searchResults, reactState.searchResults),
+                    hasMore: (reactState.searchResults.length >= PHRASES_PAGE_SIZE)
+                });
+            }.bind(this));
+    },
     render: function () {
+        console.log("rendering PhraseSearchResults, the state is: " + JSON.stringify(this.state));
         var phraseSearchResults = [];
-        _.forEach(this.props.topState.searchResults, (function (result) {
+        _.forEach(this.state.searchResults, (function (result) {
             //phrase topDefinition
             phraseSearchResults.push(
                 <PhraseSearchResult searchResult={result} key={result.key} onSelectPhrase={this.props.onSelectPhrase}/>
             );
         }).bind(this));
+        var infiniteScroll = <InfiniteScroll
+                loader={<div className="loader">loading...</div>}
+                loadMore={this.loadMore}
+                hasMore={this.state.hasMore}
+                key="somethin"
+            >
+                {phraseSearchResults}
+            </InfiniteScroll>
         return (
             <div>
-                <TopSearchCaption topState={this.props.topState}/>
+                <TopSearchCaption topState={this.state}/>
                 <div className="phraseSearchResultsList">
-                    {phraseSearchResults}
+                    {infiniteScroll}
                 </div>
-                <AddPhraseForm onSubmitAddPhrase={this.props.onSubmitAddPhrase} topState={this.props.topState}/>
+                <AddPhraseForm onSubmitAddPhrase={this.props.onSubmitAddPhrase} topState={this.state}/>
             </div>
         );
     }
