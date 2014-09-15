@@ -599,7 +599,7 @@ var CrowDictionary = React.createClass({
                 console.error("got an error: " + JSON.stringify(err, ' ', 4));
             });
     },
-    handleSubmitAddDefinition: function (phrase, definition) {
+    handleSubmitAddDefinition: function (phrase, definition, examples, tags) {
         try {
             this.getLoggedInInfo(true);
         } catch (err) {
@@ -611,7 +611,7 @@ var CrowDictionary = React.createClass({
         var lang = this.state.globalLang,
             crumb = this.state.crumb,
             addDefinitionUrl = util.format(selfRoot + "/v1/lang/%s/phrases/%s/definitions", lang, phrase);
-        return pRequest({method: "POST", url: addDefinitionUrl, body: {phrase: phrase, definition: definition, lang: lang, crumb: crumb}, json: true})
+        return pRequest({method: "POST", url: addDefinitionUrl, body: {phrase: phrase, definition: definition, examples: examples, tags: tags.join(','), lang: lang, crumb: crumb}, json: true})
             .then((function (res) {
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to add a new definition...");
@@ -761,20 +761,26 @@ var PhraseDetails = React.createClass({
 var AddDefinitionForm = React.createClass({
     mixins: [I18nMixin],
     handleSubmit: function (e) {
-        var newDefinition = this.refs.newDefinition.getDOMNode().value;
+        var newDefinition = this.refs.newDefinition.getDOMNode().value,
+            examples = this.refs.examples.getDOMNode().value,
+            tags = this.refs.tags.getDOMNode().value;
         e.preventDefault();
-        this.props.onSubmitAddDefinition(this.props.topState.shownPhraseData.phrase, newDefinition);
+        this.props.onSubmitAddDefinition(this.props.topState.shownPhraseData.phrase, newDefinition, examples, tags);
     },
     render: function () {
         this.loadMessages();
         var addDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinition)),
-            placeholder = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionPlaceHolder), {phrase: this.props.topState.shownPhraseData.phrase}),
+            placeholderDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionPlaceHolder), {phrase: this.props.topState.shownPhraseData.phrase}),
+            placeholderExamples = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionExamplesPlaceHolder), {phrase: this.props.topState.shownPhraseData.phrase}),
+            placeholderTags = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionTagsPlaceHolder), {phrase: this.props.topState.shownPhraseData.phrase}),
             submit = this.fmt(this.msg(this.messages.AddDefinitionForm.submitDefinition));
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
                     <span>{addDefinition}</span>
-                    <textarea placeholder={placeholder} ref="newDefinition"/>
+                    <textarea placeholder={placeholderDefinition} ref="newDefinition"/>
+                    <textarea placeholder={placeholderExamples} ref="examples"/>
+                    <textarea placeholder={placeholderTags} ref="tags"/>
                     <input type="submit" value={submit}/>
                 </form>
             </div>
@@ -882,6 +888,9 @@ var DefinitionInDetails = React.createClass({
     render: function () {
         var userVote = this.getCurrentUserVote(),
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
+            definition = definitionObj,definition,
+            examples = definitionObj.examples,
+            tags = definitionObj.tags,
             votesUpCount = _.filter(definitionObj.votes, {vote: "up"}).length,
             votesDownCount = _.filter(definitionObj.votes, {vote: "down"}).length,
             thumbsUpMessage = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsUpMessage), {numVotes: votesUpCount}),
@@ -890,7 +899,9 @@ var DefinitionInDetails = React.createClass({
             thumbsDownTitle = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsDownTitle), {currentVote: userVote});
         return (
             <div>
-                <div>{definitionObj.definition}</div>
+                <div class="definition">{definition}</div>
+                <div class="examples">{examples}</div>
+                <div class="tags">{tags}</div>
                 <div className="votes up container">
                     <div className="thumbs up container">
                         <object ref="thumbsUp" data="/static/assets/img/designmodo_linecons_free-like.svg" type="image/svg+xml"/>

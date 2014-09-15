@@ -21,6 +21,8 @@
         "AddDefinitionForm": {
             "addDefinition": "Agrega una definición",
             "addDefinitionPlaceHolder": "introduce un nuevo significado o definición para \"{phrase}\" aquí",
+            "addDefinitionExamplesPlaceHolder": "introduce ejemplos de cómo usar la frase \"{phrase}\" aquí",
+            "addDefinitionTagsPlaceHolder": "introduce \"etiquetas\" o \"palabras clave\" que creas que están relacionadas con la frase \"{phrase}\" aquí",
             "submitDefinition": "enviar"
         },
         "NavBar": {
