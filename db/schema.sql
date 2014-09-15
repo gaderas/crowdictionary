@@ -21,6 +21,8 @@ CREATE TABLE `definition` (
     `phrase_id` int NOT NULL,
     `contributor_id` int NOT NULL,
     `definition` varchar(2048) NOT NULL,
+    `examples` varchar(2048) NOT NULL,
+    `tags` varchar(256) NOT NULL,
     `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated` TIMESTAMP DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),

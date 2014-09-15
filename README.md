@@ -22,7 +22,9 @@ TODO Features
 *   Add 'examples', 'tags' fields to definitions
 *   Don't let users overwrite phrases/definitions submitted by others
 *   Finish email account creation/verification flow
-*   Eliminate remaining pieces of code that still don't use route-based states
+*   User page
+*   Users leaderboard
+*   Eliminate remaining pieces of code that still don't use route-based states (except infinite scrolling ones)
 *   Style (mobile first)
 *   Test on mobile
 *   Allow anonymous voting (guard by IP)
