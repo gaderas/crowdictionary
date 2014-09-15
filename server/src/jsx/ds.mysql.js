@@ -114,6 +114,11 @@ Data.prototype.searchPhrase = function (params) {
                    start, limit]);
 };
 
+/**
+ * since the table's UNIQUE INDEX doesn't contain `contributor_id`, we
+ * must perform a check here to see if the phrase previously existed, and
+ * allow overwriting only if performed by the same contributor.
+ */
 Data.prototype.putPhrase = function (payload) {
     var pQuery = this.pQuery,
         insertBy;
@@ -123,7 +128,13 @@ Data.prototype.putPhrase = function (payload) {
     if (!payload || !payload.lang || !payload.phrase) {
         throw Error("no payload (HTTP body) or no 'lang' or 'phrase' in it");
     }
-    return pQuery("INSERT INTO `phrase` SET ? ON DUPLICATE KEY UPDATE ?", [payload, payload]);
+    return pQuery("SELECT * FROM `phrase` WHERE `phrase` = ?", payload.phrase)
+        .then(function (phrases) {
+            if (!_.isEmpty(phrases) && phrases[0].contributor_id !== payload.contributor_id) {
+                throw Error("phrase already exists and is owned by a different contributor. can't update it.");
+            }
+            return pQuery("INSERT INTO `phrase` SET ? ON DUPLICATE KEY UPDATE ?", [payload, payload]);
+        });
 };
 
 Data.prototype.getDefinitions = function (params) {

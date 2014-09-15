@@ -583,21 +583,22 @@ var CrowDictionary = React.createClass({
         return pRequest({method: "PUT", url: addPhraseUrl, body: {phrase: phrase, lang: lang, crumb: crumb}, json: true})
             .then((function (res) {
                 if (200 !== res[0].statusCode) {
+                    console.log("gonna throw");
                     throw Error("failed to add a new phrase...");
                 }
                 //return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
                 var fragment = "/phrases/"+phrase+"?updated="+Date.now();
                 Router.navigate(fragment, {trigger: true, replace: false});
             }).bind(this))
-            /*.then((function (newState) {
-                this.replaceState(newState);
-            }).bind(this))*/
-            .fail(function (err) {
+            .then(function () {
+                // do nothing, we'll just use the fail block of this promise
+            })
+            .fail((function (err) {
+                console.error("got an error: " + err);
                 this.setState({
                     error: this.fmt(this.msg(this.messages.Errors.generic))
                 });
-                console.error("got an error: " + JSON.stringify(err, ' ', 4));
-            });
+            }).bind(this));
     },
     handleSubmitAddDefinition: function (phrase, definition, examples, tags) {
         try {
@@ -728,13 +729,22 @@ var CrowDictionary = React.createClass({
 });
 
 var ErrorMessage = React.createClass({
+    mixins: [I18nMixin],
+    componentWillMount: function () {
+        this.loadMessages();
+    },
     handleClearError: function () {
         this.props.onClearError();
     },
     render: function () {
-        console.log("error message rendered by ErrorMessage: " + this.props.topState.error.message + ", stack: " + this.props.topState.error.stack);
+        console.log("error message rendered by ErrorMessage: " + this.props.topState.error);
+        var error = this.props.topState.error,
+            OK = this.fmt(this.msg(this.messages.Errors.OK));
         return (
-            <div onClick={this.handleClearError}>{this.props.topState.error.message}</div>
+            <div>
+                <div>{error}</div>
+                <div onClick={this.handleClearError}>{OK}</div>
+            </div>
         );
     }
 });

@@ -19,8 +19,8 @@ TODO Performance Improvements
 TODO Features
 ----
 
-*   Add 'examples', 'tags' fields to definitions
-*   Don't let users overwrite phrases/definitions submitted by others
+*   ~~Add 'examples', 'tags' fields to definitions~~
+*   ~~Don't let users overwrite phrases/definitions submitted by others~~
 *   Finish email account creation/verification flow
 *   User page
 *   Users leaderboard
