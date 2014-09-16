@@ -3,7 +3,8 @@
 var Q = require('q');
 var appUtil = require('./util.js');
 var React = require('react');
-var InfiniteScroll = require('react-infinite-scroll')(React);
+var LifecycleDebug = require('react-lifecycle-debug');
+var InfiniteScroll = require('react-infinite-scroll')(React, [LifecycleDebug({displayName: 'InfiniteScroll'})]);
 var l10n = require('./l10n.js');
 var Intl = global.Intl || require('intl');
 var IntlMessageFormat = require('intl-messageformat');
@@ -590,9 +591,6 @@ var CrowDictionary = React.createClass({
                 var fragment = "/phrases/"+phrase+"?updated="+Date.now();
                 Router.navigate(fragment, {trigger: true, replace: false});
             }).bind(this))
-            .then(function () {
-                // do nothing, we'll just use the fail block of this promise
-            })
             .fail((function (err) {
                 console.error("got an error: " + err);
                 this.setState({
@@ -626,12 +624,12 @@ var CrowDictionary = React.createClass({
             /*.then((function (newState) {
                 this.replaceState(newState);
             }).bind(this))*/
-            .fail(function (err) {
+            .fail((function (err) {
+                console.error("got an error: " + JSON.stringify(err, ' ', 4));
                 this.setState({
                     error: this.fmt(this.msg(this.messages.Errors.generic))
                 });
-                console.error("got an error: " + JSON.stringify(err, ' ', 4));
-            });
+            }).bind(this));
     },
     handleSelectPhrase: function (phraseData) {
         var fragment = "/phrases/"+phraseData.phrase;
@@ -1062,8 +1060,27 @@ var GlobalLangPicker = React.createClass({
 });
 
 var PhraseSearchResults = React.createClass({
+    mixins: [LifecycleDebug({displayName: 'PhraseSearchResults'})],
+    hasMore: function (state) {
+        return state.searchResults.length >= PHRASES_PAGE_SIZE;
+    },
     getInitialState: function () {
-        return _.merge(this.props.topState, {hasMore: this.props.topState.searchResults.length >= PHRASES_PAGE_SIZE});
+        return _.merge(this.props.topState, {
+            hasMore: this.hasMore(this.props.topState),
+            resetPageStart: false
+        });
+    },
+    componentWillReceiveProps: function (nextProps) {
+        // we're rendering page 0 when this component receives props
+        this.setState(_.merge(nextProps.topState, {
+            hasMore: this.hasMore(nextProps.topState),
+            resetPageStart: true
+        }));
+    },
+    componentDidUpdate: function () {
+        /*this.setState({
+            resetPageStart: false
+        });*/
     },
     loadMore: function (page) {
         // page is 0-index based
@@ -1076,7 +1093,8 @@ var PhraseSearchResults = React.createClass({
                 // the only part of the newly computed reactState that we'll use is the searchResults array to append it to our current one...
                 this.setState({
                     searchResults: _.union(this.state.searchResults, reactState.searchResults),
-                    hasMore: (reactState.searchResults.length >= PHRASES_PAGE_SIZE)
+                    hasMore: this.hasMore(reactState),
+                    resetPageStart: false
                 });
             }.bind(this));
     },
@@ -1094,6 +1112,7 @@ var PhraseSearchResults = React.createClass({
                 loadMore={this.loadMore}
                 hasMore={this.state.hasMore}
                 key="somethin"
+                resetPageStart={this.state.resetPageStart}
             >
                 {phraseSearchResults}
             </InfiniteScroll>
