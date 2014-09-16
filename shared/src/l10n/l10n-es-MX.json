@@ -42,6 +42,12 @@
             "thumbsDownMessage": "{numVotes, plural, =0 {no hay votos negativos} =1 {hay un voto negativo} other {hay # votos negativos}}",
             "thumbsUpTitle": "{currentVote, select, up {haz clic para eliminar tu voto anterior} other {vota a favor}}",
             "thumbsDownTitle": "{currentVote, select, down {haz clic para eliminar tu voto anterior} other {vota en contra}}"
+        },
+        "ContributorActivityItem": {
+            "goToPhraseLink": "Ir",
+            "phraseActivityEntry": "Contribuíste la frase o palabra \"{phrase}\"",
+            "definitionActivityEntry": "Contribuíste una definición para la frase o palabra \"{phrase}\"",
+            "voteActivityEntry": "{vote, select, up {Votaste a favor de una definición para la frase o palabra \"{phrase}\"} down {Votaste en contra de una definición para la frase o palabra \"{phrase}\"} other {Votaste y luego anulaste tu voto por una definición para la frase o palabra \"{phrase}\"}}"
         }
     }
 }

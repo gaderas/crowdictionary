@@ -156,6 +156,18 @@ appWs.get('/contributors', function *(next) {
     this.body = yield mockData.getContributors(this.query);
 });
 
+appWs.get('/contributors/:contributor_id/activity', function *(next) {
+    this.body = yield Q.fcall(mockData.getContributorActivity.bind(mockData, _.merge(this.query, {contributor_id: this.params.contributor_id})))
+        .then(function (res) {
+            return res;
+        })
+        .fail(function (err) {
+            console.log("on fail with err: " + err);
+            this.status = 500;
+            return {message: "couldn't get contributor's activity. error: " + err};
+        }.bind(this));
+});
+
 appWs.put('/contributors', function *(next) {
     var requestBody = appUtil.getObjectWithoutProps(this.request.body, ['status', 'verified', 'verification_code', 'verification_retries']);
     console.log('put /contributors incoming body: ' + JSON.stringify(this.request.body));

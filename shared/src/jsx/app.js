@@ -192,6 +192,13 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
             .then(function (l10nData) {
                 return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData}, nRouteInfo));
             });
+    } else if ('/contributors/:contributor_id/activity' === nRouteInfo.route) {
+        // "contributor activity page"
+        console.log("nRouteInfo: " + JSON.stringify(nRouteInfo));
+        return pL10nForLang
+            .then(function (l10nData) {
+                return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData}, nRouteInfo));
+            });
     }
 };
 
@@ -218,7 +225,7 @@ var getPhraseSearchReactState = function (params) {
                     globalLang: lang,
                     l10nData: l10nData,
                     searchTerm: term,
-                    searchResults: getReactStateSearchResults(rawSearchResults)
+                    searchResults: getReactStatePhraseSearchResults(rawSearchResults)
                 };
 
             var phraseIds = _.map(reactState.searchResults, function (searchResult) {
@@ -240,7 +247,32 @@ var getPhraseSearchReactState = function (params) {
         })
 };
 
-var getReactStateSearchResults = function (rawSearchResults) {
+var getContributorActivityReactState = function (params) {
+    var lang = params.lang,
+        contributor_id = params.contributor_id,
+        pageSize = params.pageSize,
+        page = params.page,
+        start = (page * pageSize),
+        l10nData = params.l10nData,
+        activityUrl = selfRoot + util.format("/v1/contributors/%d/activity?lang=%s&start=%d&limit=%d", contributor_id, lang, start, pageSize);
+
+        return pRequest({url: activityUrl, json: true})
+            .then(function (activityRes) {
+                if (200 !== activityRes[0].statusCode) {
+                    throw Error("couldn't fetch activity");
+                }
+                var rObj = activityRes[1],
+                    reactState = {
+                        globalLang: lang,
+                        l10nData: l10nData,
+                        contributorActivity: rObj
+                    };
+
+                return reactState;
+            });
+};
+
+var getReactStatePhraseSearchResults = function (rawSearchResults) {
     return _.map(rawSearchResults, function (phraseObj) {
         return {
             phrase: phraseObj.phrase,
@@ -286,41 +318,6 @@ var routesInfo = [
                     }
                     return reactState;
                 });
-            return Q.all([pRequest({method: "GET", url: phrasesUrl, json: true}), pRequest({method: "GET", url: loginStateUrl, json: true})])
-                .spread(function (phrasesRes, loginStateRes) {
-                    if (200 !== phrasesRes[0].statusCode) {
-                        throw Error("couldn't fetch phrases");
-                    }
-
-                    var rawSearchResults = phrasesRes[1],
-                        reactState = {
-                            globalLang: lang,
-                            l10nData: l10nData,
-                            searchTerm: term,
-                            searchResults: getReactStateSearchResults(rawSearchResults)
-                        };
-                    // add login information if we got it
-                    if (200 === loginStateRes[0].statusCode) {
-                        reactState.loginInfo = loginStateRes[1];
-                    }
-
-                    var phraseIds = _.map(reactState.searchResults, function (searchResult) {
-                        return searchResult.key;
-                    });
-
-                    if (!phraseIds.length) {
-                        return reactState;
-                    }
-                    definitionsUrl = selfRoot + "/v1/definitions?phraseIds="+phraseIds.join(',')
-                    return pRequest({method: "GET", url: definitionsUrl, json: true})
-                        .then(function (res) {
-                            if (200 !== res[0].statusCode) {
-                                throw Error("couldn't fetch definitions");
-                            }
-                            enrichReactStateSearchResults(reactState.searchResults, res[1]);
-                            return reactState;
-                        });
-                })
         }
     },
     {
@@ -370,20 +367,31 @@ var routesInfo = [
         }
     },
     {
-        serverRoute: '/searchPhrase/:searchTerm',
-        serverParamNames: ['searchTerm'],
-        clientRoute: 'searchPhrase/:searchTerm',
+        serverRoute: '/contributors/:contributor_id/activity',
+        serverParamNames: ['contributor_id'],
+        clientRoute: 'contributors/:contributor_id/activity',
         clientRouterFunc: clientRouterFunc,
-        clientRouterFuncName: '/searchPhrase/:searchTerm',
-        calculateStateFunc: function () {
-            return {
-                viewing: 'PhraseSearchResults',
-                searchTerm: 'hijazo de mi vidaza',
-                searchResults: [
-                    {phrase: 'hijazo de mi vidaza', topDefinition: 'asi le dicen al muñecón', key: 1},
-                    {phrase: 'hijo del mal dormir', topDefinition: 'cuando alguien te cae mal', key: 2}
-                ]
-            };
+        clientRouterFuncName: '/contributors/:contributor_id/activity',
+        calculateStateFunc: function (overrides, nRouteInfo) {
+            var lang = (overrides && overrides.globalLang) || 'es-MX',
+                contributor_id = parseInt(nRouteInfo && nRouteInfo.params && nRouteInfo.params.contributor_id, 10),
+                l10nData = (overrides && overrides.l10nData) || {},
+                loginStateUrl = selfRoot + "/v1/login";
+            if (!contributor_id) {
+                throw Error("contributor_id not provided in URL");
+            }
+
+            return Q.all([
+                getContributorActivityReactState({l10nData: l10nData, lang: lang, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: 0}),
+                pRequest({method: "GET", url: loginStateUrl, json: true})
+            ])
+                .spread(function (reactState, loginStateRes) {
+                    // add login information if we got it
+                    if (200 === loginStateRes[0].statusCode) {
+                        reactState.loginInfo = loginStateRes[1];
+                    }
+                    return reactState;
+                });
         }
     }
 ];
@@ -700,6 +708,8 @@ var CrowDictionary = React.createClass({
         } else {
             if (this.state.shownPhraseData) {
                 mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition}/>;
+            } else if (!_.isEmpty(this.state.contributorActivity)) {
+                mainContent = <ContributorActivity topState={this.state} onClickActivityItem={this.handleSelectPhrase}/>;
             } else {
                 mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase} onSelectPhrase={this.handleSelectPhrase}/>;
             }
@@ -729,7 +739,7 @@ var CrowDictionary = React.createClass({
 var ErrorMessage = React.createClass({
     mixins: [I18nMixin],
     componentWillMount: function () {
-        this.loadMessages();
+        //this.loadMessages();
     },
     handleClearError: function () {
         this.props.onClearError();
@@ -776,7 +786,7 @@ var AddDefinitionForm = React.createClass({
         this.props.onSubmitAddDefinition(this.props.topState.shownPhraseData.phrase, newDefinition, examples, tags);
     },
     render: function () {
-        this.loadMessages();
+        //this.loadMessages();
         var addDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinition)),
             placeholderDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionPlaceHolder), {phrase: this.props.topState.shownPhraseData.phrase}),
             placeholderExamples = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionExamplesPlaceHolder), {phrase: this.props.topState.shownPhraseData.phrase}),
@@ -958,7 +968,7 @@ var SearchBar = React.createClass({
     },
     render: function () {
         console.log("this.handleChange: " + this.handleChange);
-        this.loadMessages();
+        //this.loadMessages();
         var placeholder = this.fmt(this.msg(this.messages.SearchBar.placeHolder));
         return (
             <form>
@@ -971,7 +981,7 @@ var SearchBar = React.createClass({
 var NavBar = React.createClass({
     mixins: [I18nMixin],
     render: function () {
-        this.loadMessages();
+        //this.loadMessages();
         var home = this.fmt(this.msg(this.messages.NavBar.home)),
             about = this.fmt(this.msg(this.messages.NavBar.about)),
             jobs = this.fmt(this.msg(this.messages.NavBar.jobs));
@@ -997,7 +1007,7 @@ var LoginStatus = React.createClass({
         this.props.onLogOut();
     },
     render: function () {
-        this.loadMessages();
+        //this.loadMessages();
         var loginInfo = this.props.topState.loginInfo;
         console.log("loginInfo...: " + JSON.stringify(loginInfo, ' ', 4));
         if (undefined === loginInfo) {
@@ -1128,10 +1138,116 @@ var PhraseSearchResults = React.createClass({
     }
 });
 
+var ContributorActivity = React.createClass({
+    mixins: [LifecycleDebug({displayName: 'ContributorActivity'})],
+    hasMore: function (state) {
+        return state.contributorActivity.phrases.length >= PHRASES_PAGE_SIZE ||
+            state.contributorActivity.definitions.length >= PHRASES_PAGE_SIZE ||
+            state.contributorActivity.votes.length >= PHRASES_PAGE_SIZE;
+    },
+    getInitialState: function () {
+        return _.merge(this.props.topState, {
+            hasMore: this.hasMore(this.props.topState),
+            resetPageStart: false
+        });
+    },
+    componentWillReceiveProps: function (nextProps) {
+        // we're rendering page 0 when this component receives props
+        this.setState(_.merge(nextProps.topState, {
+            hasMore: this.hasMore(nextProps.topState),
+            resetPageStart: true
+        }));
+    },
+    componentDidUpdate: function () {
+        /*this.setState({
+            resetPageStart: false
+        });*/
+    },
+    loadMore: function (page) {
+        // page is 0-index based
+        var start = (page * PHRASES_PAGE_SIZE),
+            lang = this.props.topState.globalLang,
+            contributor_id = this.props.topState.loginInfo.id;
+        console.log('load');
+        getContributorActivityReactState({lang: lang, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: page})
+            .then(function (reactState) {
+                var newContributorActivity = {
+                    phrases: _.union(this.state.contributorActivity.phrases, reactState.contributorActivity.phrases),
+                    definitions: _.union(this.state.contributorActivity.definitions, reactState.contributorActivity.definitions),
+                    votes: _.union(this.state.contributorActivity.votes, reactState.contributorActivity.votes)
+                };
+                this.setState({
+                    contributorActivity: newContributorActivity,
+                    hasMore: this.hasMore(reactState),
+                    resetPageStart: false
+                });
+            }.bind(this));
+    },
+    render: function () {
+        console.log("rendering ContributorActivity, the state is: " + JSON.stringify(this.state));
+        var activityEntries = [];
+        _.forEach(['phrases', 'definitions', 'votes'], function (activityType) {
+            _.forEach(this.state.contributorActivity[activityType], (function (activityObject) {
+                var key = "activity_type:" + activityType +
+                    "phrase_id:" + activityObject.phrase_id +
+                    "definition_id:" + activityObject.definition_id +
+                    "vote_id:" + activityObject.vote_id;
+                activityObject.activityType = activityType;
+                activityEntries.push(
+                    <ContributorActivityItem topState={this.props.topState} activityObject={activityObject} onClickActivityItem={this.props.onClickActivityItem} key={key}/>
+                );
+            }).bind(this));
+        }.bind(this));
+        var infiniteScroll = <InfiniteScroll
+                loader={<div className="loader">loading...</div>}
+                loadMore={this.loadMore}
+                hasMore={this.state.hasMore}
+                key="somethin"
+                resetPageStart={this.state.resetPageStart}
+            >
+                {activityEntries}
+            </InfiniteScroll>
+        return (
+            <div>
+                <div className="contributorActivity">
+                    {infiniteScroll}
+                </div>
+            </div>
+        );
+    }
+});
+
+var ContributorActivityItem = React.createClass({
+    mixins: [I18nMixin],
+    handleClickActivityItem: function () {
+        this.props.onClickActivityItem({phrase: this.props.activityObject.phrase});
+    },
+    render: function () {
+        var phraseId = this.props.activityObject.phrase_id,
+            phrase = this.props.activityObject.phrase,
+            activityType = this.props.activityObject.activityType,
+            vote = this.props.activityObject.vote,
+            goToPhraseLinkMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.goToPhraseLink)),
+            activityMessage = "meh";
+        if ('phrases' === activityType) {
+            activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.phraseActivityEntry), {phrase: phrase});
+        } else if ('definitions' === activityType) {
+            activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.definitionActivityEntry), {phrase: phrase});
+        } else if ('votes' === activityType) {
+            activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.voteActivityEntry), {phrase: phrase, vote: vote});
+        }
+        return (
+            <div className="activity-item {activityType}">
+                <div>{activityMessage}</div><div onClick={this.handleClickActivityItem}>{goToPhraseLinkMessage}</div>
+            </div>
+        );
+    }
+});
+
 var TopSearchCaption = React.createClass({
     mixins: [I18nMixin],
     render: function () {
-        this.loadMessages();
+        //this.loadMessages();
         var showingResultsForSearchTerm = this.fmt(this.msg(this.messages.TopSearchCaption.showingResultsForSearchTerm), {searchTerm: this.props.topState.searchTerm});
         return (
             <div>
@@ -1186,7 +1302,7 @@ var AddPhraseForm = React.createClass({
         this.props.onSubmitAddPhrase(newPhrase);
     },
     render: function () {
-        this.loadMessages();
+        //this.loadMessages();
         var addPhrase = this.fmt(this.msg(this.messages.AddPhraseForm.addPhrase)),
             placeholder = this.fmt(this.msg(this.messages.AddPhraseForm.newPhrasePlaceHolder)),
             submit = this.fmt(this.msg(this.messages.AddPhraseForm.submitPhrase));

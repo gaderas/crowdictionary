@@ -4,6 +4,28 @@ var _ = require('lodash');
 var util = require('util');
 var appUtil = require('../../../shared/build/js/util.js');
 
+_.mixin({
+    isUndefined: function (value) {
+        return (undefined === value);
+    },
+    isNotUndefined: function (value) {
+        return (undefined !== value);
+    },
+    filterObject: function (obj, callback) {
+        /*if (this.isObject(callback)) {
+            // _.where style callback should be used
+        } else if (this.isString(callback)) {
+            // _.pluck style callback should be used
+        }*/
+        return this.reduce(obj, function (acc, val, key) {
+            if (callback(val)) {
+                acc[key] = val;
+            }
+            return acc;
+        }, {});
+    }
+});
+
 var Data = function (dbConfig) {
     console.log('using mysql ds with config: ' + JSON.stringify(dbConfig, ' ', 4));
     this.pool = mysql.createPool(dbConfig);
@@ -166,6 +188,40 @@ Data.prototype.getDefinitions = function (params) {
     }
 };
 
+Data.prototype.getContributorActivity = function (params) {
+    var pQuery = this.pQuery,
+        existingParams = _.filterObject(params, _.isNotUndefined),
+        splitParams = appUtil.splitObject(existingParams, ['start', 'limit']),
+        actualParams = splitParams[0],
+        actualLimits = splitParams[1],
+        phrasesQuery,
+        definitionsQuery,
+        votesQuery,
+        start = parseInt(actualLimits && actualLimits.start, 10) || 0,
+        limit = parseInt(actualLimits && actualLimits.limit, 10) || 2;
+    if (!actualParams.contributor_id) {
+        throw Error("error. tried to get a contributor's activity without specifying the 'contributor_id'");
+    }
+    if (!actualParams.lang) {
+        throw Error("error. tried to get contributor's activity without specifying 'lang'");
+    }
+    phrasesQuery = "select *, id as phrase_id from phrase p where contributor_id = ? and p.lang = ? LIMIT ?, ?";
+    definitionsQuery = "select d.*, d.id as definition_id, p.phrase from definition d LEFT JOIN phrase p ON d.phrase_id = p.id where d.contributor_id = ? and d.lang = ? LIMIT ?, ?";
+    votesQuery = "select v.*, v.id as vote_id, d.definition, p.phrase, p.id as phrase_id from vote v LEFT JOIN definition d ON v.definition_id = d.id LEFT JOIN phrase p ON d.phrase_id = p.id where v.contributor_id = ? and d.lang = ? LIMIT ?, ?";
+    return Q.all([
+        pQuery(phrasesQuery, [actualParams.contributor_id, actualParams.lang, start, limit]),
+        pQuery(definitionsQuery, [actualParams.contributor_id, actualParams.lang, start, limit]),
+        pQuery(votesQuery, [actualParams.contributor_id, actualParams.lang, start, limit])
+    ])
+        .spread(function (phrases, definitions, votes) {
+            return {
+                phrases: phrases,
+                definitions: definitions,
+                votes: votes
+            };
+        });
+};
+
 /*Data.prototype.searchDefinition
  * depending on `params.mode`, it will behave in one of the following ways:
  * # `mode` === `search`*/
@@ -201,16 +257,6 @@ Data.prototype.putVote = function (payload) {
         throw Error("no payload (HTTP body) or no 'definition_id' or 'vote' in it");
     }
     return pQuery("INSERT INTO `vote` SET ? ON DUPLICATE KEY UPDATE ?", [payload, payload]);
-};
-
-Data.prototype.getUsers = function () {
-    return 'hahahahha';
-};
-Data.prototype.getTeam = function (teamname) {
-    return 'hahahahha';
-};
-Data.prototype.getTeams = function () {
-    return 'hahahahha';
 };
 
 module.exports = Data;
