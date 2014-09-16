@@ -610,7 +610,7 @@ var CrowDictionary = React.createClass({
         var lang = this.state.globalLang,
             crumb = this.state.crumb,
             addDefinitionUrl = util.format(selfRoot + "/v1/lang/%s/phrases/%s/definitions", lang, phrase);
-        return pRequest({method: "POST", url: addDefinitionUrl, body: {phrase: phrase, definition: definition, examples: examples, tags: tags.join(','), lang: lang, crumb: crumb}, json: true})
+        return pRequest({method: "POST", url: addDefinitionUrl, body: {phrase: phrase, definition: definition, examples: examples, tags: tags, lang: lang, crumb: crumb}, json: true})
             .then((function (res) {
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to add a new definition...");
@@ -896,7 +896,7 @@ var DefinitionInDetails = React.createClass({
     render: function () {
         var userVote = this.getCurrentUserVote(),
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
-            definition = definitionObj,definition,
+            definition = definitionObj.definition,
             examples = definitionObj.examples,
             tags = definitionObj.tags,
             votesUpCount = _.filter(definitionObj.votes, {vote: "up"}).length,
