@@ -23,7 +23,7 @@ TODO Features
 *   ~~Add 'examples', 'tags' fields to definitions~~
 *   ~~Don't let users overwrite phrases/definitions submitted by others~~
 *   Finish email account creation/verification flow
-*   User page (come up with queries, rollup tables)
+*   ~~User page (come up with queries, rollup tables)~~
 *   Users leaderboard (come up with queries, rollup tables)
 *   Eliminate remaining pieces of code that still don't use route-based states (except infinite scrolling ones)
 *   Style (mobile first)
