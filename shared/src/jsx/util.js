@@ -60,7 +60,7 @@ var getLangBasedOnHostname = function (hostname, supportedLangs) {
             })
             .filter({lcLang: firstComponentOfHostname})
             .valueOf();
-        activeLang = (!_.isEmpty(activeLangCodes) && !_.isEmpty(activeLangCodes[0]) && activeLangCodes[0].lang) || 'en-US';
+        activeLang = (!_.isEmpty(activeLangCodes) && !_.isEmpty(activeLangCodes[0]) && activeLangCodes[0].lang) || 'es-MX';
         return activeLang;
 };
 
