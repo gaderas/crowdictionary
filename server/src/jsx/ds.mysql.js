@@ -4,27 +4,7 @@ var _ = require('lodash');
 var util = require('util');
 var appUtil = require('../../../shared/build/js/util.js');
 
-_.mixin({
-    isUndefined: function (value) {
-        return (undefined === value);
-    },
-    isNotUndefined: function (value) {
-        return (undefined !== value);
-    },
-    filterObject: function (obj, callback) {
-        /*if (this.isObject(callback)) {
-            // _.where style callback should be used
-        } else if (this.isString(callback)) {
-            // _.pluck style callback should be used
-        }*/
-        return this.reduce(obj, function (acc, val, key) {
-            if (callback(val)) {
-                acc[key] = val;
-            }
-            return acc;
-        }, {});
-    }
-});
+_.mixin(require('../../../shared/build/js/lodash_mixin.js'));
 
 var Data = function (dbConfig) {
     console.log('using mysql ds with config: ' + JSON.stringify(dbConfig, ' ', 4));

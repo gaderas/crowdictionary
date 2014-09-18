@@ -9,7 +9,7 @@ var Q = require('q');
  *
  * Implemented with, and meant to be consumed as, Q promises.
  *
- * @autor Gerardo Moad <gerardo@gerardomoad.com>
+ * @author Gerardo Moad <gerardo@gerardomoad.com>
  */
 
 var Data = function (dbConfig) {
@@ -31,6 +31,9 @@ var Data = function (dbConfig) {
 Data.prototype.pLookup = function (ip) {
     var inet_pton = phpjs.inet_pton,
         inet_ntop = phpjs.inet_ntop;
+    ip = this.extractIPv4MappedIPv6(ip);
+    console.log("addr_type: " + this.addr_type(ip));
+    console.log("ip: " + ip);
     return this.pDoLookup(this.addr_type(ip), new Buffer(inet_pton(ip), 'binary'))
         .then(function (res) {
             var ret = res[0];
@@ -48,6 +51,16 @@ Data.prototype.pDoLookup = function (addr_type, addr_start) {
     var pQuery = this.pQuery,
         table = this.table;
     return pQuery("select * from ?? where addr_type = ? and ip_start <= ? order by ip_start desc limit 1", [table, addr_type, addr_start]);
+};
+
+Data.prototype.extractIPv4MappedIPv6 = function (addr) {
+    var matches;
+    if (matches = addr.match(/^::ffff:(.*)$/)) {
+        // an IPv4-mapped IPv6 address (http://en.wikipedia.org/wiki/IPv6#IPv4-mapped_IPv6_addresses).
+        // we convert it to IPv4 here.
+        return matches[1];
+    }
+    return addr;
 };
 
 Data.prototype.addr_type = function (addr) {

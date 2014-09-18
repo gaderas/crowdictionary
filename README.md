@@ -22,6 +22,7 @@ TODO Features
 
 *   ~~Add 'examples', 'tags' fields to definitions~~
 *   ~~Don't let users overwrite phrases/definitions submitted by others~~
+*   Implement locale negotiation: Preferred lang in loginInfo > Preferred lang cookie > IP geo
 *   Finish email account creation/verification flow
 *   ~~User page (come up with queries, rollup tables)~~
 *   Users leaderboard (come up with queries, rollup tables)

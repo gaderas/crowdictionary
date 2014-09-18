@@ -21,7 +21,7 @@
                 "database": "dbip",
                 "table": "dbip_lookup",
                 "connectionLimit": 10
-            },
+            }
         }
     },
     "cookies": {
@@ -29,5 +29,22 @@
             "name": "U",
             "secrets": ""
         }
+    },
+    "ipDbLocaleMap": {
+        "mx": "es-MX",
+        "cl": "es-CL",
+        "pe": "es-PE",
+        "us": "en-US",
+        "id": "id-ID",
+        "br": "pt-BR",
+        "default": "es-MX"
+    },
+    "localeRootMap": {
+        "es-MX": "http://www.espanol.com/mx",
+        "es-CL": "http://www.espanol.com/cl",
+        "es-PE": "http://www.espanol.com/pe",
+        "en-US": "http://www.english.com/us",
+        "id-ID": "http://www.bahasa.com/id",
+        "pt-BR": "http://www.portugues.com/br"
     }
 }

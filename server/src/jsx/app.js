@@ -15,12 +15,14 @@ var appWs = koa();
 var shared = require('../../../shared/build/js/app.js');
 //var Mock = require('./data.mock.js');
 var dsFactory = require('./dsFactory.js');
+var DBIP = require('./dbip.js');
 var nconf = require('nconf');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var appUtil = require('../../../shared/build/js/util.js');
 var Keygrip = require('keygrip');
 var crypto = require('crypto');
+var url = require('url');
 
 var NODE_ENV = process.env.NODE_ENV;
 
@@ -39,7 +41,7 @@ var CrowDictionary = shared.CrowDictionary,
     asyncRenderComponentToString = shared.asyncRenderComponentToString,
     setInitialState = shared.setInitialState,
     setPRequest = shared.setPRequest,
-    l10n = shared.l10n;
+    l10n = shared.l10n,
     pCalculateStateBasedOnNormalizedRouteInfo = shared.pCalculateStateBasedOnNormalizedRouteInfo;
 
 var request = require('request');
@@ -65,6 +67,7 @@ var pRequest = Q.denodeify(requestWithIncomingCookies);
 
 setPRequest(pRequest);
 
+_.mixin(require('../../../shared/build/js/lodash_mixin.js'));
 
 appReact.use(router(appReact));
 app.keys = nconf.get("cookies:user:secrets").split(',');
@@ -378,49 +381,123 @@ appWs.put('/definitions/:definition_id/vote', function *(next) {
         }).bind(this));
 });
 
-_.forEach(routesInfo, function (routeInfo) {
-    console.log('adding server route ' + routeInfo.serverRoute + '?');
-    appReact.get(routeInfo.serverRoute, function *(next) {
-        var hostname = this.request.hostname,
-            selfRoot = util.format("%s://%s", this.request.protocol, this.request.host);
-        console.log("das hostname: " + hostname);
-        var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params, this.query, hostname, selfRoot);
-        console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
-
-        shared.setSelfRoot(selfRoot);
-
-        // this is for forwarding these relevant app cookies to api calls to work. api is solely responsible for handling authorization.
-        _.forEach(['browserId', 'contributor', 'browserId.sig', 'contributor.sig'], (function (cookieName) {
-            var incomingCookie = this.cookies.get(cookieName, {signed: false}),
-                cookie = cookieName + '=' + incomingCookie,
-                outgoingCookie = request.cookie(cookie);
-
-            console.log(util.format("cookieName: %s, incomingCookie: %s", cookieName, incomingCookie));
-            jar.setCookie(outgoingCookie, selfRoot);
-        }).bind(this));
-
-        yield pCalculateStateBasedOnNormalizedRouteInfo(nRouteInfo)
-            .then((function (state) {
-                console.log("state: " + JSON.stringify(state));
-                console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
-                setInitialState(state);
-                var markup = "<!DOCTYPE html>\n" + React.renderComponentToString(
-                    <CrowDictionary nRouteInfo={nRouteInfo} />
-                ).replace(/<html /, '<html manifest="/static/assets/global_cache.manifest" ');
-                this.body = markup;
-                return;
-            }).bind(this))
-            .fail(function (err) {
-                console.error("error: " + (err));
-            });
-    });
+appWs.get('/langDetect', function *(next) {
+    //yield next;
+    var ip = this.ip,
+        referrer = this.header.referrer || this.query.referrer || '',
+        localeRootMap = nconf.get("localeRootMap"),
+        ipDbLocaleMap = nconf.get("ipDbLocaleMap"),
+        dbip = new DBIP(nconf.get("data:dbip:dbConfig")),
+        parsedReferrer,
+        receivedShortLangCode,
+        matches,
+        matchingLocaleRootMap;
+    if (!referrer) {
+        this.state = 400;
+        this.body = {message: "no referrer and no referrer param in query string present. can't detect language."};
+        return;
+    }
+    parsedReferrer = url.parse(referrer);
+    matches = parsedReferrer.pathname.match(/^\/([^\/]+)(\/|$)/);
+    if (!matches) {
+        this.state = 400;
+        this.body = {message: "couldn't get a short lang code from the received referrer data"};
+        return;
+    }
+    receivedShortLangCode = matches[1];
+    matchingReferrerLocale = _.reduce(localeRootMap, function (acc, root, lang) {
+        var parsedRoot = url.parse(root),
+            re = new RegExp("^/" + receivedShortLangCode + "(/|$)"),
+            matches = parsedRoot.pathname.match(re);
+        console.log("looking for " + receivedShortLangCode + " in " + parsedRoot.pathname);
+        if (matches) {
+            console.log("found it!");
+            return lang;
+        }
+        return acc;
+    }, null);
+    yield dbip.pLookup(ip)
+        .then(function (geo) {
+            var dbipCountry = geo.country.toLowerCase(),
+                matchingIpLocale = ipDbLocaleMap[dbipCountry] || ipDbLocaleMap['default'];
+            this.body = {
+                langByIp: matchingIpLocale,
+                langByReferrer: matchingReferrerLocale
+            };
+        }.bind(this))
+        .fail(function (err) {
+            console.error(err);
+            this.status = 500;
+            this.body = {message: "something went wrong"};
+        }.bind(this));
+    /*console.log('query string: ' + JSON.stringify(this.query));
+    var params = appUtil.getObjectWithoutProps(this.query, ['lang', 'phrase']);
+    params.lang = this.params.lang;
+    if (undefined !== params.search) {
+        this.body = yield mockData.searchPhrase(params);
+    } else {
+        this.body = yield mockData.getPhrases(params);
+    }*/
 });
 
-appReact.get('/dummy/:something', function *(next) {
-    yield next;
-    //var markup = serverRoute.server(this.params);
-    console.log("this.params: " + JSON.stringify(_.toArray(this.params)));
-    this.body = 'dummay';
+
+_.forEach(nconf.get("localeRootMap"), function (root, confLang) {
+    _.forEach(routesInfo, function (routeInfo) {
+        console.log('adding server route ' + routeInfo.serverRoute + ' for lang ' + confLang);
+        /**
+         * * host: host.com:8080
+         * * hostname: host.com
+         */
+        var parsedRoot = url.parse(root),
+            matches = parsedRoot.pathname.match(/^\/([^\/]+)(\/|$)/),
+            confHostname,
+            confShortLangCode;
+        console.log("parsedRoot: " + JSON.stringify(parsedRoot));
+        if (!matches) {
+            throw Error("can't handle this root: " + root + ", confLang: " + confLang);
+        }
+        confHostname = parsedRoot.hostname;
+        confShortLangCode = matches[1];
+        appReact.get(confShortLangCode + routeInfo.serverRoute, function *(next) {
+            if (confHostname !== this.request.hostname) {
+                throw Error("expected short lang code " + confShortLangCode + " (for lang " + confLang + ") to be hit via hostname: " + confHostname + ", but was hit via " + this.request.hostname + " instead");
+            }
+            var hostname = this.request.hostname,
+                apiRoot = util.format("%s://%s", this.request.protocol, this.request.host),
+                selfRoot = util.format("%s/%s", apiRoot, confShortLangCode);
+            console.log("das hostname: " + hostname);
+            var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params, this.query, hostname, selfRoot, apiRoot, confLang);
+            console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
+
+            shared.setSelfRoot(selfRoot);
+            shared.setApiRoot(selfRoot);
+
+            // this is to forward these relevant app cookies for api calls to work. api is solely responsible for handling authorization.
+            _.forEach(['browserId', 'contributor', 'browserId.sig', 'contributor.sig'], (function (cookieName) {
+                var incomingCookie = this.cookies.get(cookieName, {signed: false}),
+                    cookie = cookieName + '=' + incomingCookie,
+                    outgoingCookie = request.cookie(cookie);
+
+                console.log(util.format("cookieName: %s, incomingCookie: %s", cookieName, incomingCookie));
+                jar.setCookie(outgoingCookie, selfRoot);
+            }).bind(this));
+
+            yield pCalculateStateBasedOnNormalizedRouteInfo(nRouteInfo)
+                .then((function (state) {
+                    console.log("state: " + JSON.stringify(state));
+                    console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
+                    setInitialState(state);
+                    var markup = "<!DOCTYPE html>\n" + React.renderComponentToString(
+                        <CrowDictionary nRouteInfo={nRouteInfo} />
+                    ).replace(/<html /, '<html manifest="/static/assets/global_cache.manifest" ');
+                    this.body = markup;
+                    return;
+                }).bind(this))
+                .fail(function (err) {
+                    console.error("error: " + (err));
+                });
+        });
+    });
 });
 
 

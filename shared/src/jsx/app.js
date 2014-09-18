@@ -15,6 +15,7 @@ var querystring = require('querystring');
 var EventEmitter = require('events').EventEmitter;
 var pRequest,
     selfRoot,
+    apiRoot,
     Router,
     setPRequest = function (incoming) {
         pRequest = incoming;
@@ -23,6 +24,10 @@ var pRequest,
     setSelfRoot = function (incoming) {
         selfRoot = incoming;
         l10n.setSelfRoot(incoming);
+    },
+    setApiRoot = function (incoming) {
+        apiRoot = incoming;
+        l10n.setApiRoot(incoming);
     },
     setRouter = function (incoming) {
         console.log("setting Router to : " + incoming);
@@ -73,7 +78,8 @@ RouteNotifier.prototype.removeStateChangeListener = function () {
 
 var routeNotifier = new RouteNotifier();
 
-var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, query, hostname, selfRoot) {
+
+var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, query, hostname, selfRoot, apiRoot, lang) {
     console.log('on getNormalizedRouteInfo(), routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
     console.log('on getNormalizedRouteInfo(), routeParams: ' + JSON.stringify(routeParams, ' ', 4));
     return _.merge(
@@ -81,7 +87,9 @@ var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, q
         {
             clientOrServer: clientOrServer,
             hostname: hostname,
-            selfRoot: selfRoot
+            selfRoot: selfRoot,
+            apiRoot: apiRoot,
+            lang: lang
         }
     );
 };
@@ -149,7 +157,9 @@ var clientRouterFunc = function (routeInfo) {
  *     "clientOrServer": "client",
  *     "calculateStateFunc": "calculateStateFunc",
  *     "hostname": "example.com",
- *     "selfRoot": "http://example.com:8888"
+ *     "selfRoot": "http://example.com:8888/mx",
+ *     "apiRoot": "http://example.com:8888",
+ *     "lang": "es-MX"
  * }"
  */
 var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
@@ -166,12 +176,9 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
         pL10nForLang = null;
 
     setSelfRoot(selfRoot);
-    pL10nForLang = l10n.getAvailableLangs()
-        .then(function (langs) {
-            console.log("available langs: " + JSON.stringify(langs));
-            stateOverrides.globalLang = appUtil.getLangBasedOnHostname(hostname, langs);
-            return l10n.getL10nForLang(stateOverrides.globalLang);
-        });
+
+    pL10nForLang = l10n.getL10nForLang(nRouteInfo.lang);
+
     if ('/' === nRouteInfo.route) {
         if (!nRouteInfo.query || !nRouteInfo.query.q) {
             // "home page"
@@ -210,9 +217,9 @@ var getPhraseSearchReactState = function (params) {
         start = (page * pageSize),
         l10nData = params.l10nData;
     if (!term) {
-        phrasesUrl = selfRoot + "/v1/lang/"+lang+"/phrases?start="+start+"&limit="+pageSize;
+        phrasesUrl = apiRoot + "/v1/lang/"+lang+"/phrases?start="+start+"&limit="+pageSize;
     } else {
-        phrasesUrl = selfRoot + "/v1/lang/"+lang+"/phrases?search="+term+"&start="+start+"&limit="+pageSize;
+        phrasesUrl = apiRoot + "/v1/lang/"+lang+"/phrases?search="+term+"&start="+start+"&limit="+pageSize;
     }
     return pRequest({method: "GET", url: phrasesUrl, json: true})
         .then(function (phrasesRes) {
@@ -235,7 +242,7 @@ var getPhraseSearchReactState = function (params) {
             if (!phraseIds.length) {
                 return reactState;
             }
-            definitionsUrl = selfRoot + "/v1/definitions?phraseIds="+phraseIds.join(',')
+            definitionsUrl = apiRoot + "/v1/definitions?phraseIds="+phraseIds.join(',')
             return pRequest({method: "GET", url: definitionsUrl, json: true})
                 .then(function (res) {
                     if (200 !== res[0].statusCode) {
@@ -254,7 +261,7 @@ var getContributorActivityReactState = function (params) {
         page = params.page,
         start = (page * pageSize),
         l10nData = params.l10nData,
-        activityUrl = selfRoot + util.format("/v1/contributors/%d/activity?lang=%s&start=%d&limit=%d", contributor_id, lang, start, pageSize);
+        activityUrl = apiRoot + util.format("/v1/contributors/%d/activity?lang=%s&start=%d&limit=%d", contributor_id, lang, start, pageSize);
 
         return pRequest({url: activityUrl, json: true})
             .then(function (activityRes) {
@@ -304,7 +311,7 @@ var routesInfo = [
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 term = (overrides && overrides.searchTerm) || '',
                 l10nData = (overrides && overrides.l10nData) || {},
-                loginStateUrl = selfRoot + "/v1/login",
+                loginStateUrl = apiRoot + "/v1/login",
                 definitionsUrl,
                 phrasesUrl;
             return Q.all([
@@ -330,8 +337,8 @@ var routesInfo = [
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 phrase = (nRouteInfo && nRouteInfo.params && nRouteInfo.params.phrase),
                 l10nData = (overrides && overrides.l10nData) || {},
-                phraseUrl = selfRoot + util.format("/v1/lang/%s/phrases/%s", lang, phrase),
-                loginStateUrl = selfRoot + "/v1/login";
+                phraseUrl = apiRoot + util.format("/v1/lang/%s/phrases/%s", lang, phrase),
+                loginStateUrl = apiRoot + "/v1/login";
             if ("string" !== typeof phrase || _.isEmpty(phrase)) {
                 throw Error("phrase not provided in URL");
             }
@@ -353,7 +360,7 @@ var routesInfo = [
 
                     var phraseIds = [rObj[0].id];
 
-                    return pRequest(selfRoot + "/v1/definitions?phraseIds=" + phraseIds.join(','))
+                    return pRequest(apiRoot + "/v1/definitions?phraseIds=" + phraseIds.join(','))
                         .then(function (res) {
                             if (200 !== res[0].statusCode) {
                                 throw Error("couldn't fetch definitions");
@@ -376,7 +383,7 @@ var routesInfo = [
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 contributor_id = parseInt(nRouteInfo && nRouteInfo.params && nRouteInfo.params.contributor_id, 10),
                 l10nData = (overrides && overrides.l10nData) || {},
-                loginStateUrl = selfRoot + "/v1/login";
+                loginStateUrl = apiRoot + "/v1/login";
             if (!contributor_id) {
                 throw Error("contributor_id not provided in URL");
             }
@@ -533,7 +540,7 @@ var CrowDictionary = React.createClass({
     },
     handleLogIn: function (username, password) {
         console.log("user: " + username + ", pass: " + password);
-        loginStateUrl = selfRoot + "/v1/login";
+        loginStateUrl = apiRoot + "/v1/login";
         return pRequest({method: "POST", url: loginStateUrl, body: {email: username, passhash: password}, json:true})
             .then((function(res) {
                 if (200 !== res[0].statusCode) {
@@ -561,7 +568,7 @@ var CrowDictionary = React.createClass({
             });
     },
     handleLogOut: function () {
-        var logOutUrl = selfRoot + "/v1/logout";
+        var logOutUrl = apiRoot + "/v1/logout";
         return pRequest(logOutUrl)
             .then((function (res) {
                 //return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
@@ -588,7 +595,7 @@ var CrowDictionary = React.createClass({
         console.log("got a new phrase: " + phrase);
         var lang = this.state.globalLang,
             crumb = this.state.crumb,
-            addPhraseUrl = util.format(selfRoot + "/v1/lang/%s/phrases/%s", lang, phrase);
+            addPhraseUrl = util.format(apiRoot + "/v1/lang/%s/phrases/%s", lang, phrase);
         return pRequest({method: "PUT", url: addPhraseUrl, body: {phrase: phrase, lang: lang, crumb: crumb}, json: true})
             .then((function (res) {
                 if (200 !== res[0].statusCode) {
@@ -617,7 +624,7 @@ var CrowDictionary = React.createClass({
         }
         var lang = this.state.globalLang,
             crumb = this.state.crumb,
-            addDefinitionUrl = util.format(selfRoot + "/v1/lang/%s/phrases/%s/definitions", lang, phrase);
+            addDefinitionUrl = util.format(apiRoot + "/v1/lang/%s/phrases/%s/definitions", lang, phrase);
         return pRequest({method: "POST", url: addDefinitionUrl, body: {phrase: phrase, definition: definition, examples: examples, tags: tags, lang: lang, crumb: crumb}, json: true})
             .then((function (res) {
                 if (200 !== res[0].statusCode) {
@@ -688,7 +695,7 @@ var CrowDictionary = React.createClass({
         }
         console.log("got a vote: " + JSON.stringify(voteInfo));
         var crumb = this.state.crumb,
-            addVoteUrl = util.format(selfRoot + "/v1/definitions/%d/vote", voteInfo.definitionId);
+            addVoteUrl = util.format(apiRoot + "/v1/definitions/%d/vote", voteInfo.definitionId);
         return pRequest({method: "PUT", url: addVoteUrl, body: {vote: voteInfo.vote, definition_id: voteInfo.definitionId, crumb: crumb}, json: true})
             .then((function (res) {
                 if (200 !== res[0].statusCode) {
@@ -1374,5 +1381,4 @@ module.exports.setSelfRoot = setSelfRoot;
 module.exports.setRouter = setRouter;
 module.exports.pCalculateStateBasedOnNormalizedRouteInfo = pCalculateStateBasedOnNormalizedRouteInfo;
 module.exports.l10n = {};
-module.exports.l10n.getAvailableLangs = l10n.getAvailableLangs;
 module.exports.l10n.getL10nForLang = l10n.getL10nForLang;
