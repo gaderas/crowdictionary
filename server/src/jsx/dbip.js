@@ -4,6 +4,14 @@ var mysql = require('mysql');
 var _ = require('lodash');
 var Q = require('q');
 
+/**
+ * Based on DB-IP.com's "dbip-phpsrc-1.4/dbip.class.php" file.
+ *
+ * Implemented with, and meant to be consumed as, Q promises.
+ *
+ * @autor Gerardo Moad <gerardo@gerardomoad.com>
+ */
+
 var Data = function (dbConfig) {
     console.log('using mysql ds with config: ' + JSON.stringify(dbConfig, ' ', 4));
     this.pool = mysql.createPool(dbConfig);
