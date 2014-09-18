@@ -1121,7 +1121,6 @@ var PhraseSearchResults = React.createClass({
                 loader={<div className="loader">loading...</div>}
                 loadMore={this.loadMore}
                 hasMore={this.state.hasMore}
-                key="somethin"
                 resetPageStart={this.state.resetPageStart}
             >
                 {phraseSearchResults}
@@ -1202,7 +1201,6 @@ var ContributorActivity = React.createClass({
                 loader={<div className="loader">loading...</div>}
                 loadMore={this.loadMore}
                 hasMore={this.state.hasMore}
-                key="somethin"
                 resetPageStart={this.state.resetPageStart}
             >
                 {activityEntries}
@@ -1228,7 +1226,7 @@ var ContributorActivityItem = React.createClass({
             activityType = this.props.activityObject.activityType,
             vote = this.props.activityObject.vote,
             goToPhraseLinkMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.goToPhraseLink)),
-            activityMessage = "meh";
+            activityMessage;
         if ('phrases' === activityType) {
             activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.phraseActivityEntry), {phrase: phrase});
         } else if ('definitions' === activityType) {
