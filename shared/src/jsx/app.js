@@ -14,20 +14,15 @@ var util = require('util');
 var querystring = require('querystring');
 var EventEmitter = require('events').EventEmitter;
 var pRequest,
-    selfRoot,
-    apiRoot,
+    baseRoot,
     Router,
     setPRequest = function (incoming) {
         pRequest = incoming;
         l10n.setPRequest(pRequest);
     },
-    setSelfRoot = function (incoming) {
-        selfRoot = incoming;
-        l10n.setSelfRoot(incoming);
-    },
-    setApiRoot = function (incoming) {
-        apiRoot = incoming;
-        l10n.setApiRoot(incoming);
+    setBaseRoot = function (incoming) {
+        baseRoot = incoming;
+        l10n.setBaseRoot(incoming);
     },
     setRouter = function (incoming) {
         console.log("setting Router to : " + incoming);
@@ -79,7 +74,7 @@ RouteNotifier.prototype.removeStateChangeListener = function () {
 var routeNotifier = new RouteNotifier();
 
 
-var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, query, hostname, selfRoot, apiRoot, lang) {
+var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, query, hostname, baseRoot) {
     console.log('on getNormalizedRouteInfo(), routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
     console.log('on getNormalizedRouteInfo(), routeParams: ' + JSON.stringify(routeParams, ' ', 4));
     return _.merge(
@@ -87,9 +82,7 @@ var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, q
         {
             clientOrServer: clientOrServer,
             hostname: hostname,
-            selfRoot: selfRoot,
-            apiRoot: apiRoot,
-            lang: lang
+            baseRoot: baseRoot
         }
     );
 };
@@ -114,8 +107,8 @@ var clientRouterFunc = function (routeInfo) {
         fake1 = console.log('on clientRouterFunc(), routeInfo: ' + JSON.stringify(routeInfo)),
         fake2 = console.log('on clientRouterFunc(), params: ' + JSON.stringify(params)),
         hostname = window.location.hostname,
-        selfRoot = util.format("%s//%s", window.location.protocol, window.location.host),
-        nRouteInfo = getNormalizedRouteInfo('client', routeInfo, params, query, hostname, selfRoot);
+        baseRoot = util.format("%s//%s", window.location.protocol, window.location.host),
+        nRouteInfo = getNormalizedRouteInfo('client', routeInfo, params, query, hostname, baseRoot);
 
 
     console.log('routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
@@ -157,9 +150,7 @@ var clientRouterFunc = function (routeInfo) {
  *     "clientOrServer": "client",
  *     "calculateStateFunc": "calculateStateFunc",
  *     "hostname": "example.com",
- *     "selfRoot": "http://example.com:8888/mx",
- *     "apiRoot": "http://example.com:8888",
- *     "lang": "es-MX"
+ *     "baseRoot": "http://example.com:8888"
  * }"
  */
 var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
@@ -168,43 +159,54 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
         selfRoot: 'http://ex-mx.crowdictionary.com:3000',
         globalLang: 'es-MX'
     };*/
-    var stateOverrides = {};
+    //var stateOverrides = {};
         //hostname = (stateOverrides && stateOverrides.hostname) || window.location.hostname,
         //selfRoot = (stateOverrides && stateOverrides.selfRoot) || util.format("%s//%s", window.location.protocol, window.location.host),
-        hostname = nRouteInfo.hostname,
-        selfRoot = nRouteInfo.selfRoot,
+    var hostname = nRouteInfo.hostname,
+        baseRoot = nRouteInfo.baseRoot,
         pL10nForLang = null;
 
-    setSelfRoot(selfRoot);
+    setBaseRoot(baseRoot);
 
-    pL10nForLang = l10n.getL10nForLang(nRouteInfo.lang);
+    pL10nForLang = l10n.langDetect(baseRoot)
+        .then(function (langInfo) {
+            return l10n.getL10nForLang(langInfo.langByReferrer) // we also have langByIp which we can use to tease the user to visit another lang
+                .then(function (l10nData) {
+                    return {
+                        l10nData: l10nData,
+                        globalLang: langInfo.langByReferrer,
+                        langByIp: langInfo.langByIp
+                    };
+                });
+        });
+
 
     if ('/' === nRouteInfo.route) {
         if (!nRouteInfo.query || !nRouteInfo.query.q) {
             // "home page"
             return pL10nForLang
-                .then(function (l10nData) {
-                    return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData}, nRouteInfo));
+                .then(function (l) {
+                    return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
                 });
         } else if (nRouteInfo.query && nRouteInfo.query.q) {
             return pL10nForLang
-                .then(function (l10nData) {
-                    return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData, searchTerm: nRouteInfo.query.q}, nRouteInfo));
+                .then(function (l) {
+                    return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, searchTerm: nRouteInfo.query.q}, nRouteInfo));
                 });
         }
     } else if ('/phrases/:phrase' === nRouteInfo.route) {
         // "phrase page"
         console.log("nRouteInfo: " + JSON.stringify(nRouteInfo));
         return pL10nForLang
-            .then(function (l10nData) {
-                return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData}, nRouteInfo));
+            .then(function (l) {
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
             });
     } else if ('/contributors/:contributor_id/activity' === nRouteInfo.route) {
         // "contributor activity page"
         console.log("nRouteInfo: " + JSON.stringify(nRouteInfo));
         return pL10nForLang
-            .then(function (l10nData) {
-                return Q(nRouteInfo.calculateStateFunc({l10nData: l10nData}, nRouteInfo));
+            .then(function (l) {
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
             });
     }
 };
@@ -1377,7 +1379,7 @@ module.exports.setupRoute = setupRoute;
 module.exports.CrowDictionary = CrowDictionary;
 module.exports.setInitialState = setInitialState;
 module.exports.setPRequest = setPRequest;
-module.exports.setSelfRoot = setSelfRoot;
+module.exports.setBaseRoot = setBaseRoot;
 module.exports.setRouter = setRouter;
 module.exports.pCalculateStateBasedOnNormalizedRouteInfo = pCalculateStateBasedOnNormalizedRouteInfo;
 module.exports.l10n = {};

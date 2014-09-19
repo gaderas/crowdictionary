@@ -430,74 +430,77 @@ appWs.get('/langDetect', function *(next) {
             this.status = 500;
             this.body = {message: "something went wrong"};
         }.bind(this));
-    /*console.log('query string: ' + JSON.stringify(this.query));
-    var params = appUtil.getObjectWithoutProps(this.query, ['lang', 'phrase']);
-    params.lang = this.params.lang;
-    if (undefined !== params.search) {
-        this.body = yield mockData.searchPhrase(params);
-    } else {
-        this.body = yield mockData.getPhrases(params);
-    }*/
 });
 
 
 _.forEach(nconf.get("localeRootMap"), function (root, confLang) {
-    _.forEach(routesInfo, function (routeInfo) {
-        console.log('adding server route ' + routeInfo.serverRoute + ' for lang ' + confLang);
-        /**
-         * * host: host.com:8080
-         * * hostname: host.com
-         */
-        var parsedRoot = url.parse(root),
-            matches = parsedRoot.pathname.match(/^\/([^\/]+)(\/|$)/),
-            confHostname,
-            confShortLangCode;
-        console.log("parsedRoot: " + JSON.stringify(parsedRoot));
-        if (!matches) {
-            throw Error("can't handle this root: " + root + ", confLang: " + confLang);
-        }
-        confHostname = parsedRoot.hostname;
-        confShortLangCode = matches[1];
-        appReact.get(confShortLangCode + routeInfo.serverRoute, function *(next) {
-            if (confHostname !== this.request.hostname) {
-                throw Error("expected short lang code " + confShortLangCode + " (for lang " + confLang + ") to be hit via hostname: " + confHostname + ", but was hit via " + this.request.hostname + " instead");
-            }
-            var hostname = this.request.hostname,
-                apiRoot = util.format("%s://%s", this.request.protocol, this.request.host),
-                selfRoot = util.format("%s/%s", apiRoot, confShortLangCode);
-            console.log("das hostname: " + hostname);
-            var nRouteInfo = getNormalizedRouteInfo('server', routeInfo, this.params, this.query, hostname, selfRoot, apiRoot, confLang);
-            console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
+    var parsedRoot = url.parse(root),
+        matches = parsedRoot.pathname.match(/^\/([^\/]+)(\/|$)/),
+        shortLangCode;
+    if (!matches) {
+        throw Error("couldn't find shortLangCode for pathname: " + parsedRoot.pathname);
+    }
+    shortLangCode = matches[1];
 
-            shared.setSelfRoot(selfRoot);
-            shared.setApiRoot(selfRoot);
+_.forEach(routesInfo, function (routeInfo) {
+    var localRouteInfo = _.clone(routeInfo);
+    localRouteInfo.serverRoute = "/" + shortLangCode + localRouteInfo.serverRoute;
+    localRouteInfo.clientRoute = shortLangCode + "/" + localRouteInfo.clientRoute;
+    console.log('adding server route ' + localRouteInfo.serverRoute + ' for short lang code ' + shortLangCode);
+    /**
+     * * host: host.com:8080
+     * * hostname: host.com
+     */
+    /*var parsedRoot = url.parse(root),
+        matches = parsedRoot.pathname.match(/^\/([^\/]+)(\/|$)/),
+        confHostname,
+        confShortLangCode;
+    console.log("parsedRoot: " + JSON.stringify(parsedRoot));
+    if (!matches) {
+        throw Error("can't handle this root: " + root + ", confLang: " + confLang);
+    }
+    confHostname = parsedRoot.hostname;
+    confShortLangCode = matches[1];*/
+    appReact.get(localRouteInfo.serverRoute, function *(next) {
+        /*if (confHostname !== this.request.hostname) {
+            throw Error("expected short lang code " + confShortLangCode + " (for lang " + confLang + ") to be hit via hostname: " + confHostname + ", but was hit via " + this.request.hostname + " instead");
+        }*/
+        var hostname = this.request.hostname,
+            baseRoot = util.format("%s://%s", this.request.protocol, this.request.host);
+            //selfRoot = util.format("%s/%s", apiRoot, confShortLangCode);
+        console.log("das hostname: " + hostname);
+        var nRouteInfo = getNormalizedRouteInfo('server', localRouteInfo, this.params, this.query, hostname, baseRoot);
+        console.log('nRouteInfo: ' + JSON.stringify(nRouteInfo, ' ', 4));
 
-            // this is to forward these relevant app cookies for api calls to work. api is solely responsible for handling authorization.
-            _.forEach(['browserId', 'contributor', 'browserId.sig', 'contributor.sig'], (function (cookieName) {
-                var incomingCookie = this.cookies.get(cookieName, {signed: false}),
-                    cookie = cookieName + '=' + incomingCookie,
-                    outgoingCookie = request.cookie(cookie);
+        //shared.setBaseRoot(baseRoot);
 
-                console.log(util.format("cookieName: %s, incomingCookie: %s", cookieName, incomingCookie));
-                jar.setCookie(outgoingCookie, selfRoot);
-            }).bind(this));
+        // this is to forward these relevant app cookies for api calls to work. api is solely responsible for handling authorization.
+        _.forEach(['browserId', 'contributor', 'browserId.sig', 'contributor.sig'], (function (cookieName) {
+            var incomingCookie = this.cookies.get(cookieName, {signed: false}),
+                cookie = cookieName + '=' + incomingCookie,
+                outgoingCookie = request.cookie(cookie);
 
-            yield pCalculateStateBasedOnNormalizedRouteInfo(nRouteInfo)
-                .then((function (state) {
-                    console.log("state: " + JSON.stringify(state));
-                    console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
-                    setInitialState(state);
-                    var markup = "<!DOCTYPE html>\n" + React.renderComponentToString(
-                        <CrowDictionary nRouteInfo={nRouteInfo} />
-                    ).replace(/<html /, '<html manifest="/static/assets/global_cache.manifest" ');
-                    this.body = markup;
-                    return;
-                }).bind(this))
-                .fail(function (err) {
-                    console.error("error: " + (err));
-                });
-        });
+            console.log(util.format("cookieName: %s, incomingCookie: %s", cookieName, incomingCookie));
+            jar.setCookie(outgoingCookie, baseRoot);
+        }).bind(this));
+
+        yield pCalculateStateBasedOnNormalizedRouteInfo(nRouteInfo)
+            .then((function (state) {
+                console.log("state: " + JSON.stringify(state));
+                console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
+                setInitialState(state);
+                var markup = "<!DOCTYPE html>\n" + React.renderComponentToString(
+                    <CrowDictionary nRouteInfo={nRouteInfo} />
+                ).replace(/<html /, '<html manifest="/static/assets/global_cache.manifest" ');
+                this.body = markup;
+                return;
+            }).bind(this))
+            .fail(function (err) {
+                console.error("error: " + (err));
+            });
     });
+});
+
 });
 
 
