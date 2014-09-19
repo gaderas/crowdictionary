@@ -219,7 +219,8 @@ var getPhraseSearchReactState = function (params) {
         pageSize = params.pageSize,
         page = params.page,
         start = (page * pageSize),
-        l10nData = params.l10nData;
+        l10nData = params.l10nData,
+        shortLangCode = params.shortLangCode;
     if (!term) {
         phrasesUrl = baseRoot + "/v1/lang/"+lang+"/phrases?start="+start+"&limit="+pageSize;
     } else {
@@ -234,6 +235,7 @@ var getPhraseSearchReactState = function (params) {
             var rawSearchResults = phrasesRes[1],
                 reactState = {
                     globalLang: lang,
+                    shortLangCode: shortLangCode,
                     l10nData: l10nData,
                     searchTerm: term,
                     searchResults: getReactStatePhraseSearchResults(rawSearchResults)
@@ -265,7 +267,8 @@ var getContributorActivityReactState = function (params) {
         page = params.page,
         start = (page * pageSize),
         l10nData = params.l10nData,
-        activityUrl = baseRoot + util.format("/v1/contributors/%d/activity?lang=%s&start=%d&limit=%d", contributor_id, lang, start, pageSize);
+        activityUrl = baseRoot + util.format("/v1/contributors/%d/activity?lang=%s&start=%d&limit=%d", contributor_id, lang, start, pageSize),
+        shortLangCode = params.shortLangCode;
 
         return pRequest({url: activityUrl, json: true})
             .then(function (activityRes) {
@@ -275,6 +278,7 @@ var getContributorActivityReactState = function (params) {
                 var rObj = activityRes[1],
                     reactState = {
                         globalLang: lang,
+                        shortLangCode: shortLangCode,
                         l10nData: l10nData,
                         contributorActivity: rObj
                     };
@@ -311,7 +315,7 @@ var routesInfo = [
         clientRoute: '',
         clientRouterFunc: clientRouterFunc,
         clientRouterFuncName: '/',
-        calculateStateFunc: function (overrides) {
+        calculateStateFunc: function (overrides, nRouteInfo) {
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 term = (overrides && overrides.searchTerm) || '',
                 l10nData = (overrides && overrides.l10nData) || {},
@@ -319,7 +323,7 @@ var routesInfo = [
                 definitionsUrl,
                 phrasesUrl;
             return Q.all([
-                getPhraseSearchReactState({l10nData: l10nData, lang: lang, term: term, pageSize: PHRASES_PAGE_SIZE, page: 0}),
+                getPhraseSearchReactState({l10nData: l10nData, lang: lang, shortLangCode: nRouteInfo.shortLangCode, term: term, pageSize: PHRASES_PAGE_SIZE, page: 0}),
                 pRequest({method: "GET", url: loginStateUrl, json: true})
             ])
                 .spread(function (reactState, loginStateRes) {
@@ -342,7 +346,8 @@ var routesInfo = [
                 phrase = (nRouteInfo && nRouteInfo.params && nRouteInfo.params.phrase),
                 l10nData = (overrides && overrides.l10nData) || {},
                 phraseUrl = baseRoot + util.format("/v1/lang/%s/phrases/%s", lang, phrase),
-                loginStateUrl = baseRoot + "/v1/login";
+                loginStateUrl = baseRoot + "/v1/login",
+                shortLangCode = nRouteInfo.shortLangCode;
             if ("string" !== typeof phrase || _.isEmpty(phrase)) {
                 throw Error("phrase not provided in URL");
             }
@@ -354,6 +359,7 @@ var routesInfo = [
                     var rObj = JSON.parse(phraseRes[1]),
                         reactState = {
                             globalLang: lang,
+                            shortLangCode: shortLangCode,
                             l10nData: l10nData,
                             shownPhraseData: rObj[0]
                         };
@@ -387,19 +393,22 @@ var routesInfo = [
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 contributor_id = parseInt(nRouteInfo && nRouteInfo.params && nRouteInfo.params.contributor_id, 10),
                 l10nData = (overrides && overrides.l10nData) || {},
-                loginStateUrl = baseRoot + "/v1/login";
+                loginStateUrl = baseRoot + "/v1/login",
+                shortLangCode = nRouteInfo.shortLangCode;
             if (!contributor_id) {
                 throw Error("contributor_id not provided in URL");
             }
 
             return Q.all([
-                getContributorActivityReactState({l10nData: l10nData, lang: lang, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: 0}),
+                getContributorActivityReactState({l10nData: l10nData, shortLangCode: shortLangCode, lang: lang, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: 0}),
                 pRequest({method: "GET", url: loginStateUrl, json: true})
             ])
                 .spread(function (reactState, loginStateRes) {
                     // add login information if we got it
                     if (200 === loginStateRes[0].statusCode) {
                         reactState.loginInfo = loginStateRes[1];
+                    } else {
+                        // here we could prevent visits to others' activity pages when not logged in
                     }
                     return reactState;
                 });
@@ -520,6 +529,12 @@ var CrowDictionary = React.createClass({
     },
     componentDidMount: function () {
         mainReactComponentMounted = true;
+        if (this.refs.topBar) {
+            // persist searchTerm in state
+            this.setState({
+                searchTerm: this.refs.topBar.getSearchTerm(),
+            });
+        }
     },
     getInitialState: function () {
         return initialState;
@@ -667,23 +682,13 @@ var CrowDictionary = React.createClass({
             filteredRoutesInfo = _.filter(routesInfo, {serverRoute: '/'}),
             routeInfo = filteredRoutesInfo[0],
             newQuery = !_.isEmpty(searchTerm) ? {q: searchTerm} : {},
-            newNRouteInfo = getNormalizedRouteInfo('client', routeInfo, [], newQuery, hostname, selfRoot);
-        return pCalculateStateBasedOnNormalizedRouteInfo(newNRouteInfo)
-            .then((function (newState) {
-                var fragment = newNRouteInfo.route;
-                if (!_.isEmpty(newNRouteInfo.query)) {
-                    fragment += '?' + _.map(newNRouteInfo.query, function (val, key) {
-                        return key + "=" + val;
-                    }).join('&');
-                }
-                //this.replaceState(appUtil.getObjectWithoutProps(newState, ['shownPhraseData']));
-                this.replaceState(newState);
-                Router.navigate(fragment);
-            }).bind(this))
-            .fail((function (err) {
-                console.error("error: " + err);
-                throw Error(err);
-            }));
+            newNRouteInfo = getNormalizedRouteInfo('client', routeInfo, [], newQuery, hostname, selfRoot),
+            fragment = '';
+
+        if ('' !== searchTerm) {
+            fragment = '?q=' + searchTerm;
+        }
+        Router.navigate(fragment, {trigger: true, replace: true});
     },
     handleClearError: function () {
         this.setState({
@@ -771,18 +776,24 @@ var ErrorMessage = React.createClass({
 });
 
 var PhraseDetails = React.createClass({
+    mixins: [I18nMixin],
     handleBack: function () {
         console.log("closing PhraseDetails...");
         this.props.onClosePhraseDetails();
     },
     render: function () {
+        var backToSearchResultsCaption = this.fmt(this.msg(this.messages.PhraseDetails.backToSearchResults)),
+            shortLangCode = this.props.topState.shortLangCode,
+            searchTerm = this.props.topState.searchTerm,
+            backToSearchResultsRelativeUrl = searchTerm ? '?q=' + searchTerm : '',
+            backToSearchResultsUrl = util.format("/%s/%s", shortLangCode, backToSearchResultsRelativeUrl);
         return (
             <div>
                 phrase: <PhraseInDetails topState={this.props.topState} />
                 definitions: <DefinitionsInDetails onVote={this.props.onVote} topState={this.props.topState}/>
                 <AddDefinitionForm topState={this.props.topState} onSubmitAddDefinition={this.props.onSubmitAddDefinition}/>
                 <div>
-                    <a onClick={this.handleBack}>Back</a>
+                    <a href={backToSearchResultsUrl} onClick={this.handleBack}>Back</a>
                 </div>
             </div>
         );
@@ -997,10 +1008,11 @@ var NavBar = React.createClass({
         //this.loadMessages();
         var home = this.fmt(this.msg(this.messages.NavBar.home)),
             about = this.fmt(this.msg(this.messages.NavBar.about)),
-            jobs = this.fmt(this.msg(this.messages.NavBar.jobs));
+            jobs = this.fmt(this.msg(this.messages.NavBar.jobs)),
+            homeUrl = util.format("/%s/", this.props.topState.shortLangCode);
         return (
             <div>
-                <span>{home}</span>
+                <span><a href={homeUrl}>{home}</a></span>
                 <span>{about}</span>
                 <span>{jobs}</span>
                 <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut}/>
@@ -1111,7 +1123,7 @@ var PhraseSearchResults = React.createClass({
             start = (page * PHRASES_PAGE_SIZE),
             lang = this.state.globalLang;
         console.log('load');
-        getPhraseSearchReactState({lang: lang, term: term, pageSize: PHRASES_PAGE_SIZE, page: page})
+        getPhraseSearchReactState({lang: lang, shortLangCode: this.state.shortLangCode, term: term, pageSize: PHRASES_PAGE_SIZE, page: page})
             .then(function (reactState) {
                 // the only part of the newly computed reactState that we'll use is the searchResults array to append it to our current one...
                 this.setState({
@@ -1127,7 +1139,7 @@ var PhraseSearchResults = React.createClass({
         _.forEach(this.state.searchResults, (function (result) {
             //phrase topDefinition
             phraseSearchResults.push(
-                <PhraseSearchResult searchResult={result} key={result.key} onSelectPhrase={this.props.onSelectPhrase}/>
+                <PhraseSearchResult searchResult={result} key={result.key} onSelectPhrase={this.props.onSelectPhrase} topState={this.props.topState}/>
             );
         }).bind(this));
         var infiniteScroll = <InfiniteScroll
@@ -1179,9 +1191,10 @@ var ContributorActivity = React.createClass({
         // page is 0-index based
         var start = (page * PHRASES_PAGE_SIZE),
             lang = this.props.topState.globalLang,
+            shortLangCode = this.props.topState.shortLangCode,
             contributor_id = this.props.topState.loginInfo.id;
         console.log('load');
-        getContributorActivityReactState({lang: lang, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: page})
+        getContributorActivityReactState({lang: lang, shortLangCode: shortLangCode, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: page})
             .then(function (reactState) {
                 var newContributorActivity = {
                     phrases: _.union(this.state.contributorActivity.phrases, reactState.contributorActivity.phrases),
@@ -1272,7 +1285,7 @@ var PhraseSearchResult = React.createClass({
     render: function () {
         return (
             <div>
-                <PhraseInList searchResult={this.props.searchResult} onSelectPhrase={this.props.onSelectPhrase}/>
+                <PhraseInList searchResult={this.props.searchResult} onSelectPhrase={this.props.onSelectPhrase} topState={this.props.topState}/>
                 <DefinitionInList searchResult={this.props.searchResult}/>
             </div>
         );
@@ -1280,15 +1293,17 @@ var PhraseSearchResult = React.createClass({
 });
 
 var PhraseInList = React.createClass({
-    handleClick: function () {
+    handleClick: function (e) {
+        e.preventDefault();
         console.log("clicked on phrase: " + this.props.searchResult.phrase);
         var phraseData = this.props.searchResult;
         this.props.onSelectPhrase(phraseData);
     },
     render: function () {
+        var phraseUrl = util.format("/%s/phrases/%s", this.props.topState.shortLangCode, this.props.searchResult.phrase);
         return (
             <div onClick={this.handleClick}>
-                {this.props.searchResult.phrase}
+                <a href={phraseUrl}>{this.props.searchResult.phrase}</a>
             </div>
         );
     }
