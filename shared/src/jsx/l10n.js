@@ -26,11 +26,14 @@ var langDetect = function (referrer) {
 
 var getL10nForLang = function (lang) {
     console.log(":)");
+    if (!lang) {
+        throw Error("no lang passed to getL10nForLang");
+    }
     var url = util.format(baseRoot + "/static/l10n/l10n-%s.json", lang);
     return pRequest({method: "GET", url: url, json: true})
         .then(function (res) {
             if (200 !== res[0].statusCode) {
-                throw Error("error, got status code: '" + res[0].statusCode + "' while trying to fetch l10n data");
+                throw Error("error, got status code: '" + res[0].statusCode + "' while trying to fetch l10n data from: " + url);
             }
             console.log(":-*");
             return res[1];

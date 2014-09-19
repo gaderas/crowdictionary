@@ -17,6 +17,15 @@ var request = require('browser-request');
 var pRequest = Q.denodeify(request);
 setPRequest(pRequest);
 
+var path = window.location.pathname,
+    matches = path.match(/^\/([^\/]+)(\/|$)/),
+    shortLangCode = matches ? matches[1] : 'none',
+    effectiveRoot = matches ? '/' + matches[1] + '/' : '/';
+
+console.log("path: " + path);
+console.log("matches: " + JSON.stringify(matches));
+console.log("settign router root to: " + effectiveRoot);
+
 var Router = Backbone.Router.extend(
     _.merge(
         {
@@ -29,6 +38,7 @@ var Router = Backbone.Router.extend(
         _.zipObject(_.map(routesInfo, function (routeInfo) {
             return routeInfo.clientRouterFuncName
         }), _.map(routesInfo, function (routeInfo) {
+            routeInfo.shortLangCode = shortLangCode;
             return routeInfo.clientRouterFunc.bind(this, routeInfo)
         }))
     )
@@ -52,7 +62,8 @@ var router = new Router();
 
 Backbone.history.start({
     pushState: true,
-    hashChange: true
+    hashChange: true,
+    root: effectiveRoot
     // hashChange: Modernizr.history ? true : false
 });
 

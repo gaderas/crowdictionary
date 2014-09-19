@@ -444,8 +444,9 @@ _.forEach(nconf.get("localeRootMap"), function (root, confLang) {
 
 _.forEach(routesInfo, function (routeInfo) {
     var localRouteInfo = _.clone(routeInfo);
-    localRouteInfo.serverRoute = "/" + shortLangCode + localRouteInfo.serverRoute;
-    localRouteInfo.clientRoute = shortLangCode + "/" + localRouteInfo.clientRoute;
+    //localRouteInfo.serverRoute = "/" + shortLangCode + localRouteInfo.serverRoute;
+    //localRouteInfo.clientRoute = shortLangCode + "/" + localRouteInfo.clientRoute;
+    localRouteInfo.shortLangCode = shortLangCode;
     console.log('adding server route ' + localRouteInfo.serverRoute + ' for short lang code ' + shortLangCode);
     /**
      * * host: host.com:8080
@@ -461,7 +462,7 @@ _.forEach(routesInfo, function (routeInfo) {
     }
     confHostname = parsedRoot.hostname;
     confShortLangCode = matches[1];*/
-    appReact.get(localRouteInfo.serverRoute, function *(next) {
+    appReact.get("/" + shortLangCode + localRouteInfo.serverRoute, function *(next) {
         /*if (confHostname !== this.request.hostname) {
             throw Error("expected short lang code " + confShortLangCode + " (for lang " + confLang + ") to be hit via hostname: " + confHostname + ", but was hit via " + this.request.hostname + " instead");
         }*/
