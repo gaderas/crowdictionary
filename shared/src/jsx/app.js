@@ -210,6 +210,12 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
             .then(function (l) {
                 return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
             });
+    } else if ('/logout' === nRouteInfo.route) {
+        // "logout" page
+        return pL10nForLang
+            .then(function (l) {
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+            });
     }
 };
 
@@ -413,6 +419,33 @@ var routesInfo = [
                     return reactState;
                 });
         }
+    },
+    {
+        serverRoute: '/logout',
+        serverParamNames: [],
+        clientRoute: 'logout',
+        clientRouterFunc: clientRouterFunc,
+        clientRouterFuncName: '/logout',
+        calculateStateFunc: function (overrides, nRouteInfo) {
+            var lang = (overrides && overrides.globalLang) || 'es-MX',
+                l10nData = (overrides && overrides.l10nData) || {},
+                shortLangCode = nRouteInfo.shortLangCode,
+                logOutUrl = baseRoot + "/v1/logout",
+                reactState = {
+                    globalLang: lang,
+                    shortLangCode: shortLangCode,
+                    l10nData: l10nData
+                };
+
+            return pRequest(logOutUrl)
+                .then((function (res) {
+                    if (200 !== res[0].statusCode) {
+                        console.log("error while attempting to call the /v1/logout endpoint...");
+                        reactState.error = "generic";
+                    }
+                    return reactState;
+                }).bind(this));
+        }
     }
 ];
 
@@ -529,12 +562,6 @@ var CrowDictionary = React.createClass({
     },
     componentDidMount: function () {
         mainReactComponentMounted = true;
-        if (this.refs.topBar) {
-            // persist searchTerm in state
-            this.setState({
-                searchTerm: this.refs.topBar.getSearchTerm(),
-            });
-        }
     },
     getInitialState: function () {
         return initialState;
@@ -547,11 +574,6 @@ var CrowDictionary = React.createClass({
         Router.navigate(fragment, {trigger: true, replace: true});
     },
     handleGlobalLangChange: function (newLang) {
-        /*pGenericCalculateState({globalLang: newLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
-            .then((function (newState) {
-                this.setState(newState);
-                console.log("newState: " + JSON.stringify(newState, ' ', 4));
-            }).bind(this));*/
     },
     handleToggleLoginPrompt: function () {
         console.log('clicked on toggle login prompt...');
@@ -571,7 +593,6 @@ var CrowDictionary = React.createClass({
                 console.log("res is: " + JSON.stringify(res, ' ', 4));
                 var rObj = res[1]; // it's already json because we called `pRequest` with `{json:true}`
                 console.log("rObj: " + JSON.stringify(rObj, ' ', 4));
-                //return pGenericCalculateState({searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
                 var searchTerm = this.state.searchTerm || '';
                 var fragment = '';
                 if ('' !== searchTerm) {
@@ -589,10 +610,11 @@ var CrowDictionary = React.createClass({
             });
     },
     handleLogOut: function () {
-        var logOutUrl = baseRoot + "/v1/logout";
+        var fragment = util.format("/logout");
+        Router.navigate(fragment, {trigger: true, replace: false});
+        /*var logOutUrl = baseRoot + "/v1/logout";
         return pRequest(logOutUrl)
             .then((function (res) {
-                //return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
                 var searchTerm = this.state.searchTerm || '';
                 var fragment = '';
                 if ('' !== searchTerm) {
@@ -602,14 +624,15 @@ var CrowDictionary = React.createClass({
             }).bind(this))
             .then((function (newState) {
                 this.replaceState(newState);
-            }).bind(this));
+            }).bind(this));*/
     },
     handleSubmitAddPhrase: function (phrase) {
         try {
             this.getLoggedInInfo(true);
         } catch (err) {
+            console.error("caught error: " + err);
             this.setState({
-                error: err
+                error: "generic"
             });
             return;
         }
@@ -623,14 +646,13 @@ var CrowDictionary = React.createClass({
                     console.log("gonna throw");
                     throw Error("failed to add a new phrase...");
                 }
-                //return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
                 var fragment = "/phrases/"+phrase+"?updated="+Date.now();
                 Router.navigate(fragment, {trigger: true, replace: false});
             }).bind(this))
             .fail((function (err) {
                 console.error("got an error: " + err);
                 this.setState({
-                    error: this.fmt(this.msg(this.messages.Errors.generic))
+                    error: "generic"
                 });
             }).bind(this));
     },
@@ -638,8 +660,9 @@ var CrowDictionary = React.createClass({
         try {
             this.getLoggedInInfo(true);
         } catch (err) {
+            console.error("got an error: " + err);
             this.setState({
-                error: err
+                error: "generic"
             });
             return;
         }
@@ -654,16 +677,12 @@ var CrowDictionary = React.createClass({
                 console.log("res: " + JSON.stringify(res));
                 var definitionId = res[1].last_id,
                     fragment = "/phrases/"+phrase+"?updated="+Date.now();
-                //return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm, shownPhraseData: this.state.shownPhraseData}, this.props.nRouteInfo.calculateStateFunc)
                 Router.navigate(fragment, {trigger: true, replace: true});
             }).bind(this))
-            /*.then((function (newState) {
-                this.replaceState(newState);
-            }).bind(this))*/
             .fail((function (err) {
                 console.error("got an error: " + JSON.stringify(err, ' ', 4));
                 this.setState({
-                    error: this.fmt(this.msg(this.messages.Errors.generic))
+                    error: "generic"
                 });
             }).bind(this));
     },
@@ -674,11 +693,14 @@ var CrowDictionary = React.createClass({
         });*/
         Router.navigate(fragment, {trigger: true});
     },
+    getSearchTermFromDOM: function () {
+        return this.refs.topBar.getSearchTerm();
+    },
     handleClosePhraseDetails: function () {
         // getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, query, hostname, selfRoot) {
         var hostname = this.props.nRouteInfo.hostname,
             selfRoot = this.props.nRouteInfo.selfRoot,
-            searchTerm = this.refs.topBar.getSearchTerm(),
+            searchTerm = this.getSearchTermFromDOM(),
             filteredRoutesInfo = _.filter(routesInfo, {serverRoute: '/'}),
             routeInfo = filteredRoutesInfo[0],
             newQuery = !_.isEmpty(searchTerm) ? {q: searchTerm} : {},
@@ -699,8 +721,9 @@ var CrowDictionary = React.createClass({
         try {
             this.getLoggedInInfo(true);
         } catch (err) {
+            console.error("caught error: " + err);
             this.setState({
-                error: err
+                error: "generic"
             });
             return;
         }
@@ -712,20 +735,27 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to record vote...");
                 }
-                //return pGenericCalculateState({globalLang: this.state.globalLang, searchTerm: this.state.searchTerm}, this.props.nRouteInfo.calculateStateFunc)
                 var fragment = "/phrases/"+voteInfo.phrase+"?update="+Date.now();
                 Router.navigate(fragment, {trigger: true, replace: true});
             }).bind(this));
+    },
+    handleToMyActivity: function () {
+        var loginInfo = this.state.loginInfo,
+            shortLangCode = this.state.shortLangCode,
+            fragment = util.format("/contributors/%s/activity", loginInfo.id);
+        Router.navigate(fragment, {trigger: true, replace: false});
     },
     render: function () {
         var mainContent;
         if (this.state.error) {
             mainContent = <ErrorMessage onClearError={this.handleClearError} topState={this.state}/>;
+        } else if (this.state.info) {
+            mainContent = <InfoMessage topState={this.state}/>;
         } else if (this.state.showLoginPrompt) {
             mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn}/>;
         } else {
             if (this.state.shownPhraseData) {
-                mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition}/>;
+                mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition} getSearchTermFromDOM={this.getSearchTermFromDOM}/>;
             } else if (!_.isEmpty(this.state.contributorActivity)) {
                 mainContent = <ContributorActivity topState={this.state} onClickActivityItem={this.handleSelectPhrase}/>;
             } else {
@@ -744,7 +774,7 @@ var CrowDictionary = React.createClass({
             </head>
             <body>
             <div>
-                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} topState={this.state} ref="topBar" />
+                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} onToMyActivity={this.handleToMyActivity} topState={this.state} ref="topBar" />
                 {mainContent}
             </div>
             <script src="/static/js/app.js" />
@@ -763,12 +793,13 @@ var ErrorMessage = React.createClass({
         this.props.onClearError();
     },
     render: function () {
-        console.log("error message rendered by ErrorMessage: " + this.props.topState.error);
+        console.log("error message code that will be rendered by ErrorMessage: " + this.props.topState.error);
         var error = this.props.topState.error,
-            OK = this.fmt(this.msg(this.messages.Errors.OK));
+            errorMessage = this.messages.Errors[error] || "ERROR",
+            OK = this.messages.Errors.OK;
         return (
             <div>
-                <div>{error}</div>
+                <div>{errorMessage}</div>
                 <div onClick={this.handleClearError}>{OK}</div>
             </div>
         );
@@ -777,14 +808,14 @@ var ErrorMessage = React.createClass({
 
 var PhraseDetails = React.createClass({
     mixins: [I18nMixin],
-    handleBack: function () {
-        console.log("closing PhraseDetails...");
+    handleBack: function (e) {
+        e.preventDefault();
         this.props.onClosePhraseDetails();
     },
     render: function () {
         var backToSearchResultsCaption = this.fmt(this.msg(this.messages.PhraseDetails.backToSearchResults)),
             shortLangCode = this.props.topState.shortLangCode,
-            searchTerm = this.props.topState.searchTerm,
+            searchTerm = this.props.getSearchTermFromDOM(),
             backToSearchResultsRelativeUrl = searchTerm ? '?q=' + searchTerm : '',
             backToSearchResultsUrl = util.format("/%s/%s", shortLangCode, backToSearchResultsRelativeUrl);
         return (
@@ -793,7 +824,7 @@ var PhraseDetails = React.createClass({
                 definitions: <DefinitionsInDetails onVote={this.props.onVote} topState={this.props.topState}/>
                 <AddDefinitionForm topState={this.props.topState} onSubmitAddDefinition={this.props.onSubmitAddDefinition}/>
                 <div>
-                    <a href={backToSearchResultsUrl} onClick={this.handleBack}>Back</a>
+                    <a href={backToSearchResultsUrl} onClick={this.handleBack}>{backToSearchResultsCaption}</a>
                 </div>
             </div>
         );
@@ -966,13 +997,13 @@ var DefinitionInDetails = React.createClass({
 
 var TopBar = React.createClass({
     getSearchTerm: function () {
-        return this.refs.searchBar.getSearchTerm();
+        return (this.refs.searchBar && this.refs.searchBar.getSearchTerm()) || "";
     },
     render: function () {
         return (
             <div>
                 <SearchBar onUserInput={this.props.onUserInput} topState={this.props.topState} ref="searchBar" />
-                <NavBar onGlobalLangChange={this.props.onGlobalLangChange} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} topState={this.props.topState}/>
+                <NavBar onGlobalLangChange={this.props.onGlobalLangChange} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} topState={this.props.topState} onToMyActivity={this.props.onToMyActivity}/>
             </div>
         );
     }
@@ -981,8 +1012,13 @@ var TopBar = React.createClass({
 var SearchBar = React.createClass({
     mixins: [I18nMixin],
     getSearchTerm: function () {
-        console.log("getSearchTerm() called on component SearchBar. will return: " + this.refs.searchInput.getDOMNode().value);
-        return this.refs.searchInput.getDOMNode().value;
+        try {
+            // React quirk: this throws when called on the server side, so we try/catch it...
+            return (this.refs.searchInput && this.refs.searchInput.getDOMNode() && this.refs.searchInput.getDOMNode().value) || "";
+        } catch (err) {
+            console.log("caught: " + err + "... returning '' (empty string)");
+            return "";
+        }
     },
     handleChange: function () {
         console.log('in SearchBar::handleChange()');
@@ -1015,7 +1051,7 @@ var NavBar = React.createClass({
                 <span><a href={homeUrl}>{home}</a></span>
                 <span>{about}</span>
                 <span>{jobs}</span>
-                <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut}/>
+                <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} onToMyActivity={this.props.onToMyActivity}/>
                 <GlobalLangPicker onGlobalLangChange={this.props.onGlobalLangChange} topState={this.props.topState}/>
             </div>
         );
@@ -1025,33 +1061,35 @@ var NavBar = React.createClass({
 var LoginStatus = React.createClass({
     mixins: [I18nMixin],
     handleClick: function () {
-        console.log('on handleClick');
         this.props.onToggleLoginPrompt();
     },
-    handleLogOut: function () {
+    handleLogOut: function (e) {
+        e.preventDefault();
         this.props.onLogOut();
+    },
+    handleToMyActivity: function (e) {
+        e.preventDefault();
+        this.props.onToMyActivity();
     },
     render: function () {
         //this.loadMessages();
-        var loginInfo = this.props.topState.loginInfo;
+        var loginInfo = this.props.topState.loginInfo,
+            shortLangCode = this.props.topState.shortLangCode;
         console.log("loginInfo...: " + JSON.stringify(loginInfo, ' ', 4));
         if (undefined === loginInfo) {
-            console.log("auch");
-            console.log("mesagems: " + this.messages);
-            console.log("tutti: " + JSON.stringify(this.messages));
             var greeting = this.fmt(this.msg(this.messages.LoginStatus.notLoggedInGreeting));
             return (
                 <span onClick={this.handleClick}>{greeting}</span>
             );
         } else {
-            console.log("on else");
             var greeting = this.fmt(this.msg(this.messages.LoginStatus.loggedInGreeting), {username: loginInfo.email}),
-                logOutMessage = this.fmt(this.msg(this.messages.LoginStatus.logOutMessage));;
+                myActivityUrl = util.format("/%s/contributors/%s/activity", shortLangCode, loginInfo.id),
+                logOutMessage = this.fmt(this.msg(this.messages.LoginStatus.logOutMessage)),
+                logOutUrl = util.format("/%s/logout");
             return (
-                <span>{greeting} <a onClick={this.handleLogOut}>{logOutMessage}</a></span>
+                <span><a href={myActivityUrl} onClick={this.handleToMyActivity}>{greeting}</a> <a href={logOutUrl} onClick={this.handleLogOut}>{logOutMessage}</a></span>
             );
         }
-        console.log("in LoginStatus, after all...");
     }
 });
 
