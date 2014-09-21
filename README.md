@@ -20,17 +20,24 @@ TODO Performance Improvements
 TODO Features
 ----
 
+*   Create (editable) user profile page
+*   Add social network links, avatar to user profile
 *   ~~Add 'examples', 'tags' fields to definitions~~
 *   ~~Don't let users overwrite phrases/definitions submitted by others~~
-*   Implement locale negotiation: Preferred lang in loginInfo > Preferred lang cookie > IP geo
+*   Implement redirect when hitting URLs with no shortLangCode, and cross links to other languages
 *   Finish email account creation/verification flow
 *   ~~User page (come up with queries, rollup tables)~~
 *   Users leaderboard (come up with queries, rollup tables)
-*   Eliminate remaining pieces of code that still don't use route-based states (except infinite scrolling ones)
+*   ~~Eliminate remaining pieces of code that still don't use route-based states (except infinite scrolling ones)~~
 *   Style (mobile first)
 *   Test on mobile
 *   Allow anonymous voting (guard by IP)
 *   Allow Google/Facebook/Twitter login
+
+BUGS
+----
+
+*   Sometimes (when infinite scroll pages are hit), the browser history is polluted with lots of wrong and unnecessary entries
 
 Sample requests
 ----
