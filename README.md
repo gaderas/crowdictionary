@@ -9,7 +9,7 @@ Building
 Running a development instance
 ----
 
-`export NODE_ENV=development; node --harmony server/build/js/app.js --cookies.user.secrets="blah" --data.dbConfig.user="root"`
+`export NODE_ENV=development; node --harmony server/build/js/app.js --cookies.user.secrets="blah" --data.dbConfig.user="root" --data.dbip.dbConfig.user="root"`
 
 TODO Performance Improvements
 ----

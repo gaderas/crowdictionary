@@ -892,13 +892,17 @@ var DefinitionInDetails = React.createClass({
         console.log("annnd they voted...");
         console.log("on: " + e.target);
         console.log("is a: " + e.target.className);
-        var userVote = this.getCurrentUserVote(),
+        var loginInfo = this.props.topState.loginInfo,
+            userVote = this.getCurrentUserVote(),
             matches = e.target.className.match(/(up|down)/),
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
-    
             phrase = this.props.topState.shownPhraseData.phrase,
             apparentVote = matches[1],
             effectiveVote = apparentVote;
+        if (!loginInfo) {
+            // @TODO: prompt user to login/sign up
+            return false;
+        }
         if (('up' === userVote && 'up' === apparentVote) || ('down' === userVote && 'down' === apparentVote)) {
             effectiveVote = 'neutral'
         }
@@ -909,7 +913,7 @@ var DefinitionInDetails = React.createClass({
     getCurrentUserVote: function () {
         var loginInfo = this.props.topState.loginInfo,
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
-            userVoteObjects = _.filter(definitionObj.votes, {contributor_id: loginInfo.id}),
+            userVoteObjects = loginInfo && _.filter(definitionObj.votes, {contributor_id: loginInfo.id}),
             userVote = !_.isEmpty(loginInfo) && userVoteObjects && userVoteObjects[0] && userVoteObjects[0].vote; // 'up, 'down', or 'neutral'... or false
 
         this.userVote = userVote; // set this so we can use it in render() to adjust the 'title' a.k.a. 'tooltip'
