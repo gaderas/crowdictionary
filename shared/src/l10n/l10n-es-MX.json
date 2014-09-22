@@ -14,6 +14,32 @@
             "notLoggedInGreeting": "¡entrá!",
             "logOutMessage": "Salir"
         },
+        "LoginPrompt": {
+            "loginFormTitle": "Entrar",
+            "loginFormDescription": "Si ya tienes una cuenta de usuario con nosotros, entra aquí.",
+            "usernameFieldPlaceholder": "correo electrónico",
+            "passwordFieldPlaceholder": "contraseña",
+            "submitButtonValue": "Entrar",
+            "usernameFieldLabel": "Correo Electrónico",
+            "passwordFieldLabel": "Contraseña",
+            "submitButtonLabel": ""
+        },
+        "SignupForm": {
+            "formTitle": "Crear una cuenta",
+            "formDescription": "Introduce algunos datos para crear una nueva cuenta de usuario.",
+            "usernameFieldPlaceholder": "correo electrónico",
+            "passwordFieldPlaceholder": "contraseña",
+            "nicknameFieldPlaceholder": "Alias, apodo o nombre abreviado",
+            "firstNameFieldPlaceholder": "nombre",
+            "lastNameFieldPlaceholder": "apellidos",
+            "submitButtonValue": "Crear",
+            "usernameFieldLabel": "Correo Electrónico",
+            "passwordFieldLabel": "Contraseña",
+            "nicknameFieldLabel": "Alias",
+            "firstNameFieldLabel": "Nombre",
+            "lastNameFieldLabel": "Apellidos",
+            "submitButtonLabel": ""
+        },
         "AddPhraseForm": {
             "addPhrase": "Introduce una frase",
             "newPhrasePlaceHolder": "introduce una nueva frase aquí",

@@ -38,7 +38,24 @@ Data.prototype.getContributors = function (params) {
     return pQuery("SELECT * FROM `contributor` WHERE ?", actualParams);
 };
 
-Data.prototype.putContributor = function (params, payload) {
+Data.prototype.createContributor = function (params, payload) {
+    var pQuery = this.pQuery,
+        insertBy;
+    if (!payload || !payload.email) {
+        throw Error("no payload (HTTP body) or no email in it");
+    }
+    if (params.email) {
+        if (params.email !== payload.email) {
+            throw Error("email in query string doesn't match email in HTTP body");
+        }
+        insertBy = {email: params.email};
+    } else {
+        throw Error("no email param passed. need it for inserts...");
+    }
+    return pQuery("INSERT INTO `contributor` SET ? ", payload);
+};
+
+Data.prototype.updateContributor = function (params, payload) {
     var pQuery = this.pQuery,
         insertBy;
     if (!payload || !payload.email) {
@@ -54,7 +71,7 @@ Data.prototype.putContributor = function (params, payload) {
     } else {
         throw Error("no email or id params passed. need either one of them for updates, or email for inserts...");
     }
-    return pQuery("INSERT INTO `contributor` SET ? ON DUPLICATE KEY UPDATE ?", [payload, payload]);
+    return pQuery("UPDATE `contributor` SET ? ", payload);
 };
 
 Data.prototype.getPhrases = function (params) {

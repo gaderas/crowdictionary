@@ -172,28 +172,51 @@ appWs.get('/contributors/:contributor_id/activity', function *(next) {
 });
 
 appWs.put('/contributors', function *(next) {
-    var requestBody = appUtil.getObjectWithoutProps(this.request.body, ['status', 'verified', 'verification_code', 'verification_retries']);
+    var requestBody = appUtil.getObjectWithoutProps(this.request.body, ['status', 'verified', 'verification_code', 'verification_retries']),
+        random_buffer = new Buffer((Math.random()*1000000).toString()),
+        verification_code = random_buffer.toString('base64').substring(0, 15);
     console.log('put /contributors incoming body: ' + JSON.stringify(this.request.body));
-    if (!appWs.contributor) {
-        this.status = 401;
-        this.body = "not logged in";
-        return;
-    } else if (appWs.contributor.email !== this.query.email) {
-        this.status = 403;
-        this.body = "trying to modify a contributor record for a user other than the signed in user";
-        return;
-    } else if (app.crumb !== requestBody.crumb) {
-        this.status = 403;
-        this.body = "invalid crumb";
+    if (appWs.contributor) {
+        if (app.crumb !== requestBody.crumb) {
+            this.status = 403;
+            this.body = "invalid crumb";
+            return;
+        }
+        if (appWs.contributor.email !== this.query.email) {
+            this.status = 403;
+            this.body = "trying to modify a contributor record for a user other than the signed in user";
+            return;
+        }
+        this.body = yield mockData.updateContributor(this.query, appUtil.getObjectWithoutProps(requestBody, ['crumb']))
+            .then(function (res) {
+                return {message: "contributor updated"};
+            })
+            .fail((function (err) {
+                this.status = 500;
+                return {message: "couldn't update contributor. error: " + err};
+            }).bind(this));
         return;
     }
-    this.body = yield mockData.putContributor(this.query, appUtil.getObjectWithoutProps(requestBody, ['crumb']))
+    requestBody = appUtil.getObjectWithoutProps(requestBody, ['crumb']);
+    requestBody.verification_code = verification_code;
+    this.body = yield mockData.createContributor(this.query, appUtil.getObjectWithoutProps(requestBody, ['crumb']))
         .then(function (res) {
-            return {message: "contributor created/updated"};
+            return {message: "contributor created"};
         })
         .fail((function (err) {
+            var res = {fields: {}},
+                matches,
+                fieldName;
             this.status = 500;
-            return {message: "couldn't create/update contributor. error: " + err};
+            if (err.message.match(/ER_DUP_ENTRY/) && err.message.match(/for key 'email'/)) {
+                res.fields.email = 'duplicate';
+            }
+            if (err.message.match(/^ER_NO_DEFAULT_FOR_FIELD/) && (matches = err.message.match(/'([^']+)'/))) {
+                fieldName = matches[1];
+                res.fields[fieldName] = 'missing';
+            }
+            res.message = "couldn't create contributor. error: " + err.message;
+            return res;
         }).bind(this));
 });
 

@@ -609,6 +609,34 @@ var CrowDictionary = React.createClass({
                 console.error("failed with error: " + err);
             });
     },
+    handleSignup: function (values) {
+        //console.log("user: " + username + ", pass: " + password);
+        signupUrl = baseRoot + "/v1/contributors?email=" + values.email;
+        return pRequest({method: "PUT", url: signupUrl, body: values, json:true})
+            .then((function(res) {
+                if (200 !== res[0].statusCode) {
+                    throw Error("invalid credentials");
+                }
+                console.log("login success!");
+                console.log("res is: " + JSON.stringify(res, ' ', 4));
+                var rObj = res[1]; // it's already json because we called `pRequest` with `{json:true}`
+                console.log("rObj: " + JSON.stringify(rObj, ' ', 4));
+                var searchTerm = this.state.searchTerm || '';
+                var fragment = '';
+                if ('' !== searchTerm) {
+                    fragment = '?q=' + searchTerm;
+                }
+                Router.navigate(fragment, {trigger: true, replace: true});
+            }).bind(this))
+            .then((function (newState) {
+                newState.showLoginPrompt = false;
+                this.replaceState(newState);
+                this.forceUpdate();
+            }).bind(this))
+            .fail(function (err) {
+                console.error("failed with error: " + err);
+            });
+    },
     handleLogOut: function () {
         var fragment = util.format("/logout");
         Router.navigate(fragment, {trigger: true, replace: false});
@@ -717,14 +745,26 @@ var CrowDictionary = React.createClass({
             error: null
         });
     },
+    handleClearInfo: function () {
+        this.setState({
+            info: null
+        });
+    },
     handleDefinitionVote: function (voteInfo) {
-        try {
+        /*try {
             this.getLoggedInInfo(true);
         } catch (err) {
             console.error("caught error: " + err);
             this.setState({
                 error: "generic"
             });
+            return;
+        }*/
+        if (voteInfo.error) {
+            this.setState(voteInfo);
+            return;
+        } else if (voteInfo.info) {
+            this.setState(voteInfo);
             return;
         }
         console.log("got a vote: " + JSON.stringify(voteInfo));
@@ -750,7 +790,7 @@ var CrowDictionary = React.createClass({
         if (this.state.error) {
             mainContent = <ErrorMessage onClearError={this.handleClearError} topState={this.state}/>;
         } else if (this.state.info) {
-            mainContent = <InfoMessage topState={this.state}/>;
+            mainContent = <InfoMessage onClearInfo={this.handleClearInfo} topState={this.state}/>;
         } else if (this.state.showLoginPrompt) {
             mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn}/>;
         } else {
@@ -787,7 +827,6 @@ var CrowDictionary = React.createClass({
 var ErrorMessage = React.createClass({
     mixins: [I18nMixin],
     componentWillMount: function () {
-        //this.loadMessages();
     },
     handleClearError: function () {
         this.props.onClearError();
@@ -801,6 +840,25 @@ var ErrorMessage = React.createClass({
             <div>
                 <div>{errorMessage}</div>
                 <div onClick={this.handleClearError}>{OK}</div>
+            </div>
+        );
+    }
+});
+
+var InfoMessage = React.createClass({
+    mixins: [I18nMixin],
+    componentWillMount: function () {
+    },
+    handleClearInfo: function () {
+        this.props.onClearInfo();
+    },
+    render: function () {
+        var message = this.props.topState.info,
+            OK = this.messages.Errors.OK;
+        return (
+            <div>
+                <div>{message}</div>
+                <div onClick={this.handleClearInfo}>{OK}</div>
             </div>
         );
     }
@@ -898,9 +956,13 @@ var DefinitionInDetails = React.createClass({
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
             phrase = this.props.topState.shownPhraseData.phrase,
             apparentVote = matches[1],
-            effectiveVote = apparentVote;
+            effectiveVote = apparentVote,
+            voteInfo;
         if (!loginInfo) {
             // @TODO: prompt user to login/sign up
+            this.props.onVote({
+                info: <div title="jaja">os la habeis arrancao</div>
+            });
             return false;
         }
         if (('up' === userVote && 'up' === apparentVote) || ('down' === userVote && 'down' === apparentVote)) {
@@ -908,6 +970,10 @@ var DefinitionInDetails = React.createClass({
         }
         if (matches) {
             this.props.onVote({vote: effectiveVote, definitionId: definitionObj.id, phrase: phrase});
+        } else {
+            this.props.onVote({
+                error: 'generic'
+            });
         }
     },
     getCurrentUserVote: function () {
@@ -1106,16 +1172,75 @@ var LoginPrompt = React.createClass({
     },
     render: function () {
         var display = this.props.topState.showLoginPrompt ? "block" : "none",
-            style = {display: display};
+            style = {display: display},
+            messages = this.messages.LoginPrompt;
         return (
-            <form onSubmit={this.handleLogIn}>
-            <div>Login</div>
-            <input ref="username" type="text"/>
-            <input ref="password" type="password"/>
-            <input type="submit" value="log in"/>
-            </form>
+            <div>
+                <form onSubmit={this.handleLogIn}>
+                    <fieldset>
+                        <legend>{messages.loginFormTitle}</legend>
+                        <p>{messages.loginFormDescription}</p>
+                        <label class="username">
+                            {messages.usernameFieldLabel}
+                            <input ref="username" type="text" placeholder={messages.usernameFieldPlaceholder}/>
+                        </label>
+                        <label class="password">
+                            {messages.passwordFieldLabel}
+                            <input ref="password" type="password" placeholder={messages.passwordFieldPlaceholder}/>
+                        </label>
+                        <label class="submit">
+                            {messages.submitButtonLabel}
+                            <input type="submit" value={messages.submitButtonValue}/>
+                        </label>
+                    </fieldset>
+                </form>
+                <SignupForm />
+            </div>
         );
     }
+});
+
+var SignupForm = React.createClass({
+    handleSignup: function (e) {
+        e.preventDefault();
+    },
+    render: function () {
+        var messages = this.messages.SignupForm;
+        return (
+            <div>
+                <form onSubmit={this.handleSignup}>
+                    <fieldset>
+                        <legend>{messages.formTitle}</legend>
+                        <p>{messages.formDescription}</p>
+                        <label class="username">
+                            {messages.usernameFieldLabel}
+                            <input ref="username" type="text" placeholder={messages.usernameFieldPlaceholder}/>
+                        </label>
+                        <label class="password">
+                            {messages.passwordFieldLabel}
+                            <input ref="password" type="password" placeholder={messages.passwordFieldPlaceholder}/>
+                        </label>
+                        <label class="nickname">
+                            {messages.nicknameFieldLabel}
+                            <input ref="nickname" type="text" placeholder={messages.nicknameFieldPlaceholder}/>
+                        </label>
+                        <label class="firstName">
+                            {messages.firstNameLabel}
+                            <input ref="firstName" type="text" placeholder={messages.firstNameFieldPlaceholder}/>
+                        </label>
+                        <label class="lastName">
+                            {messages.lastNameLabel}
+                            <input ref="lastName" type="text" placeholder={messages.lastNameFieldPlaceholder}/>
+                        </label>
+                        <label class="submit">
+                            {messages.submitButtonLabel}
+                            <input type="submit" value={messages.submitButtonValue}/>
+                        </label>
+                    </fieldset>
+                </form>
+            </div>
+        );
+    },
 });
 
 var GlobalLangPicker = React.createClass({
