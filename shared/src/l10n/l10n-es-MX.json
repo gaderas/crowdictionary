@@ -38,7 +38,8 @@
             "nicknameFieldLabel": "Alias",
             "firstNameFieldLabel": "Nombre",
             "lastNameFieldLabel": "Apellidos",
-            "submitButtonLabel": ""
+            "submitButtonLabel": "",
+            "signupSuccess": "Tu cuenta ha sido creada. A continuación te mandaremos un correo de verificación con una liga que deberás seguir para finalizar tu proceso de registro."
         },
         "AddPhraseForm": {
             "addPhrase": "Introduce una frase",

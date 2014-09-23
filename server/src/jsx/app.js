@@ -520,7 +520,7 @@ _.forEach(routesInfo, function (routeInfo) {
                 return;
             }).bind(this))
             .fail(function (err) {
-                console.error("error: " + (err));
+                console.error("error: " + (err.message) + "\nstack: \n" + (err.stack));
             });
     });
 });

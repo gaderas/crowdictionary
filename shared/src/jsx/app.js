@@ -35,6 +35,8 @@ var mainReactComponentMounted = false;
 var PHRASES_PAGE_SIZE = 2;
 
 
+_.mixin(require('./lodash_mixin.js'));
+
 var nRouteInfo,
     setupRoute = function (newNRouteInfo, callback) {
         console.log('on setupRoute!!');
@@ -133,7 +135,7 @@ var clientRouterFunc = function (routeInfo, shortLangCode) {
             return;
         }).bind(this))
         .fail(function (err) {
-            console.error("error: " + (err));
+            console.error("error: " + (err.message) + "\nstack: \n" + (err.stack));
         });
 };
 
@@ -212,6 +214,12 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
             });
     } else if ('/logout' === nRouteInfo.route) {
         // "logout" page
+        return pL10nForLang
+            .then(function (l) {
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+            });
+    } else if ('/login' === nRouteInfo.route) {
+        // "login" page
         return pL10nForLang
             .then(function (l) {
                 return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
@@ -446,6 +454,26 @@ var routesInfo = [
                     return reactState;
                 }).bind(this));
         }
+    },
+    {
+        serverRoute: '/login',
+        serverParamNames: [],
+        clientRoute: 'login',
+        clientRouterFunc: clientRouterFunc,
+        clientRouterFuncName: '/login',
+        calculateStateFunc: function (overrides, nRouteInfo) {
+            var lang = (overrides && overrides.globalLang) || 'es-MX',
+                l10nData = (overrides && overrides.l10nData) || {},
+                shortLangCode = nRouteInfo.shortLangCode,
+                reactState = {
+                    globalLang: lang,
+                    shortLangCode: shortLangCode,
+                    l10nData: l10nData,
+                    showLoginPrompt: true,
+                    contributorAccountCreated: !!nRouteInfo.query.contributorAccountCreated
+                };
+            return reactState;
+        }
     }
 ];
 
@@ -612,30 +640,20 @@ var CrowDictionary = React.createClass({
     handleSignup: function (values) {
         //console.log("user: " + username + ", pass: " + password);
         signupUrl = baseRoot + "/v1/contributors?email=" + values.email;
-        return pRequest({method: "PUT", url: signupUrl, body: values, json:true})
+        return pRequest({method: "PUT", url: signupUrl, body: _.filterObject(values, _.isNotEmptyValue), json:true})
             .then((function(res) {
                 if (200 !== res[0].statusCode) {
-                    throw Error("invalid credentials");
+                    throw res[1]; // the body contains structured data about errors
                 }
-                console.log("login success!");
-                console.log("res is: " + JSON.stringify(res, ' ', 4));
-                var rObj = res[1]; // it's already json because we called `pRequest` with `{json:true}`
-                console.log("rObj: " + JSON.stringify(rObj, ' ', 4));
-                var searchTerm = this.state.searchTerm || '';
-                var fragment = '';
-                if ('' !== searchTerm) {
-                    fragment = '?q=' + searchTerm;
-                }
+                var rObj = res[1],
+                    fragment = '/login?contributorAccountCreated=1';
                 Router.navigate(fragment, {trigger: true, replace: true});
             }).bind(this))
-            .then((function (newState) {
-                newState.showLoginPrompt = false;
-                this.replaceState(newState);
-                this.forceUpdate();
-            }).bind(this))
             .fail(function (err) {
-                console.error("failed with error: " + err);
+                throw err;
+                //console.error("failed with error: " + err);
             });
+
     },
     handleLogOut: function () {
         var fragment = util.format("/logout");
@@ -792,7 +810,7 @@ var CrowDictionary = React.createClass({
         } else if (this.state.info) {
             mainContent = <InfoMessage onClearInfo={this.handleClearInfo} topState={this.state}/>;
         } else if (this.state.showLoginPrompt) {
-            mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn}/>;
+            mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn} onSignup={this.handleSignup}/>;
         } else {
             if (this.state.shownPhraseData) {
                 mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition} getSearchTermFromDOM={this.getSearchTermFromDOM}/>;
@@ -1042,9 +1060,9 @@ var DefinitionInDetails = React.createClass({
             thumbsDownTitle = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsDownTitle), {currentVote: userVote});
         return (
             <div>
-                <div class="definition">{definition}</div>
-                <div class="examples">{examples}</div>
-                <div class="tags">{tags}</div>
+                <div className="definition">{definition}</div>
+                <div className="examples">{examples}</div>
+                <div className="tags">{tags}</div>
                 <div className="votes up container">
                     <div className="thumbs up container">
                         <object ref="thumbsUp" data="/static/assets/img/designmodo_linecons_free-like.svg" type="image/svg+xml"/>
@@ -1164,11 +1182,25 @@ var LoginStatus = React.createClass({
 });
 
 var LoginPrompt = React.createClass({
+    mixins: [I18nMixin],
+    contributorAccountCreated: false,
     handleLogIn: function (e) {
         var username = this.refs.username.getDOMNode().value,
             password = this.refs.password.getDOMNode().value;
         e.preventDefault();
         this.props.onLogIn(username, password);
+    },
+    componentWillReceiveProps: function () {
+        if (this.props.state.contributorAccountCreated) {
+            this.contributorAccountCreated = true;
+        }
+    },
+    componentDidUpdate: function () {
+        if (this.contributorAccountCreated) {
+            this.setState({
+                info: <span>{this.messages.SignupForm.signupSuccess}</span>
+            });
+        }
     },
     render: function () {
         var display = this.props.topState.showLoginPrompt ? "block" : "none",
@@ -1180,30 +1212,50 @@ var LoginPrompt = React.createClass({
                     <fieldset>
                         <legend>{messages.loginFormTitle}</legend>
                         <p>{messages.loginFormDescription}</p>
-                        <label class="username">
+                        <label className="username">
                             {messages.usernameFieldLabel}
                             <input ref="username" type="text" placeholder={messages.usernameFieldPlaceholder}/>
                         </label>
-                        <label class="password">
+                        <label className="password">
                             {messages.passwordFieldLabel}
                             <input ref="password" type="password" placeholder={messages.passwordFieldPlaceholder}/>
                         </label>
-                        <label class="submit">
+                        <label className="submit">
                             {messages.submitButtonLabel}
                             <input type="submit" value={messages.submitButtonValue}/>
                         </label>
                     </fieldset>
                 </form>
-                <SignupForm />
+                <SignupForm topState={this.props.topState} onSignup={this.props.onSignup}/>
             </div>
         );
     }
 });
 
 var SignupForm = React.createClass({
+    mixins: [I18nMixin],
     handleSignup: function (e) {
+        var username = this.refs.username.getDOMNode().value,
+            password = this.refs.password.getDOMNode().value,
+            nickname = this.refs.nickname.getDOMNode().value,
+            firstName = this.refs.firstName.getDOMNode().value,
+            lastName = this.refs.lastName.getDOMNode().value;
         e.preventDefault();
+        Q(this.props.onSignup({
+            first_name: firstName,
+            last_name: lastName,
+            email: username,
+            passhash: password,
+            nickname: nickname
+        }))
+            .fail(function (err) {
+                _.forEach(err.fields, function (condition, fieldName) {
+                    console.log("ERR! " + fieldName + ": " + condition);
+                });
+            });
     },
+    /*receiveErrors: function () {
+    },*/
     render: function () {
         var messages = this.messages.SignupForm;
         return (
@@ -1211,6 +1263,7 @@ var SignupForm = React.createClass({
                 <form onSubmit={this.handleSignup}>
                     <fieldset>
                         <legend>{messages.formTitle}</legend>
+                        <p class="error"></p>
                         <p>{messages.formDescription}</p>
                         <label class="username">
                             {messages.usernameFieldLabel}
@@ -1225,11 +1278,11 @@ var SignupForm = React.createClass({
                             <input ref="nickname" type="text" placeholder={messages.nicknameFieldPlaceholder}/>
                         </label>
                         <label class="firstName">
-                            {messages.firstNameLabel}
+                            {messages.firstNameFieldLabel}
                             <input ref="firstName" type="text" placeholder={messages.firstNameFieldPlaceholder}/>
                         </label>
                         <label class="lastName">
-                            {messages.lastNameLabel}
+                            {messages.lastNameFieldLabel}
                             <input ref="lastName" type="text" placeholder={messages.lastNameFieldPlaceholder}/>
                         </label>
                         <label class="submit">
