@@ -4,7 +4,11 @@
     "messages": {
         "Errors": {
             "generic": "algo ha salido mal, lo sentimos...",
-            "OK": "OK"
+            "OK": "OK",
+            "validationError": "Por favor corrije y/o añade los datos faltantes e inténtalo de nuevo.",
+            "missingField": "campo faltante",
+            "duplicateField": "duplicado. favor de cambiar",
+            "invalidField": "formato no válido. favor de corregir"
         },
         "SearchBar": {
             "placeHolder": "busca..."
@@ -39,7 +43,7 @@
             "firstNameFieldLabel": "Nombre",
             "lastNameFieldLabel": "Apellidos",
             "submitButtonLabel": "",
-            "signupSuccess": "Tu cuenta ha sido creada. A continuación te mandaremos un correo de verificación con una liga que deberás seguir para finalizar tu proceso de registro."
+            "signupSuccess": "Tu cuenta ha sido creada. A continuación te enviaremos un correo de verificación con una liga que deberás seguir para finalizar tu proceso de registro."
         },
         "AddPhraseForm": {
             "addPhrase": "Introduce una frase",

@@ -199,7 +199,7 @@ appWs.put('/contributors', function *(next) {
     }
     requestBody = appUtil.getObjectWithoutProps(requestBody, ['crumb']);
     requestBody.verification_code = verification_code;
-    this.body = yield mockData.createContributor(this.query, appUtil.getObjectWithoutProps(requestBody, ['crumb']))
+    this.body = yield Q.fcall(mockData.createContributor.bind(mockData, this.query, appUtil.getObjectWithoutProps(requestBody, ['crumb'])))
         .then(function (res) {
             return {message: "contributor created"};
         })
@@ -210,10 +210,11 @@ appWs.put('/contributors', function *(next) {
             this.status = 500;
             if (err.message.match(/ER_DUP_ENTRY/) && err.message.match(/for key 'email'/)) {
                 res.fields.email = 'duplicate';
-            }
-            if (err.message.match(/^ER_NO_DEFAULT_FOR_FIELD/) && (matches = err.message.match(/'([^']+)'/))) {
+            } else if (err.message.match(/^ER_NO_DEFAULT_FOR_FIELD/) && (matches = err.message.match(/'([^']+)'/))) {
                 fieldName = matches[1];
                 res.fields[fieldName] = 'missing';
+            } else if (err.message.match(/no email/)) {
+                res.fields.email = 'missing';
             }
             res.message = "couldn't create contributor. error: " + err.message;
             return res;

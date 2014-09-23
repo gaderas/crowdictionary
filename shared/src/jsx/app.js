@@ -2,7 +2,7 @@
 
 var Q = require('q');
 var appUtil = require('./util.js');
-var React = require('react');
+var React = require('react/addons');
 var LifecycleDebug = require('react-lifecycle-debug');
 var InfiniteScroll = require('react-infinite-scroll')(React, [LifecycleDebug({displayName: 'InfiniteScroll'})]);
 var l10n = require('./l10n.js');
@@ -586,8 +586,6 @@ var RouterMixin = {
 
 var CrowDictionary = React.createClass({
     mixins: [I18nMixin, LoggedInMixin, RouterMixin],
-    componentWillMount: function () {
-    },
     componentDidMount: function () {
         mainReactComponentMounted = true;
     },
@@ -646,8 +644,11 @@ var CrowDictionary = React.createClass({
                     throw res[1]; // the body contains structured data about errors
                 }
                 var rObj = res[1],
-                    fragment = '/login?contributorAccountCreated=1';
-                Router.navigate(fragment, {trigger: true, replace: true});
+                    fragment = '/login?contributorAccountCreated=1&updated='+Date.now();
+                this.setState({
+                    info: <span>{this.messages.SignupForm.signupSuccess}</span>
+                });
+                Router.navigate(fragment, {trigger: false, replace: false});
             }).bind(this))
             .fail(function (err) {
                 throw err;
@@ -658,19 +659,6 @@ var CrowDictionary = React.createClass({
     handleLogOut: function () {
         var fragment = util.format("/logout");
         Router.navigate(fragment, {trigger: true, replace: false});
-        /*var logOutUrl = baseRoot + "/v1/logout";
-        return pRequest(logOutUrl)
-            .then((function (res) {
-                var searchTerm = this.state.searchTerm || '';
-                var fragment = '';
-                if ('' !== searchTerm) {
-                    fragment = '?q=' + searchTerm;
-                }
-                Router.navigate(fragment, {trigger: true, replace: true});
-            }).bind(this))
-            .then((function (newState) {
-                this.replaceState(newState);
-            }).bind(this));*/
     },
     handleSubmitAddPhrase: function (phrase) {
         try {
@@ -764,20 +752,17 @@ var CrowDictionary = React.createClass({
         });
     },
     handleClearInfo: function () {
+        console.log("clearing info...");
         this.setState({
             info: null
         });
     },
+    handleSetInfo: function (info) {
+        this.setState({
+            info: info
+        });
+    },
     handleDefinitionVote: function (voteInfo) {
-        /*try {
-            this.getLoggedInInfo(true);
-        } catch (err) {
-            console.error("caught error: " + err);
-            this.setState({
-                error: "generic"
-            });
-            return;
-        }*/
         if (voteInfo.error) {
             this.setState(voteInfo);
             return;
@@ -810,7 +795,7 @@ var CrowDictionary = React.createClass({
         } else if (this.state.info) {
             mainContent = <InfoMessage onClearInfo={this.handleClearInfo} topState={this.state}/>;
         } else if (this.state.showLoginPrompt) {
-            mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn} onSignup={this.handleSignup}/>;
+            mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn} onSignup={this.handleSignup} onSetInfo={this.handleSetInfo} onClearInfo={this.handleClearInfo}/>;
         } else {
             if (this.state.shownPhraseData) {
                 mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition} getSearchTermFromDOM={this.getSearchTermFromDOM}/>;
@@ -1183,24 +1168,11 @@ var LoginStatus = React.createClass({
 
 var LoginPrompt = React.createClass({
     mixins: [I18nMixin],
-    contributorAccountCreated: false,
     handleLogIn: function (e) {
         var username = this.refs.username.getDOMNode().value,
             password = this.refs.password.getDOMNode().value;
         e.preventDefault();
         this.props.onLogIn(username, password);
-    },
-    componentWillReceiveProps: function () {
-        if (this.props.state.contributorAccountCreated) {
-            this.contributorAccountCreated = true;
-        }
-    },
-    componentDidUpdate: function () {
-        if (this.contributorAccountCreated) {
-            this.setState({
-                info: <span>{this.messages.SignupForm.signupSuccess}</span>
-            });
-        }
     },
     render: function () {
         var display = this.props.topState.showLoginPrompt ? "block" : "none",
@@ -1226,66 +1198,161 @@ var LoginPrompt = React.createClass({
                         </label>
                     </fieldset>
                 </form>
-                <SignupForm topState={this.props.topState} onSignup={this.props.onSignup}/>
+                <SignupForm topState={this.props.topState} onSignup={this.props.onSignup} onSetInfo={this.props.onSetInfo} onClearInfo={this.props.onClearInfo}/>
             </div>
         );
     }
 });
 
 var SignupForm = React.createClass({
-    mixins: [I18nMixin],
+    mixins: [I18nMixin, LifecycleDebug({displayName: 'SignupForm'})],
+    componentDidMount: function () {
+        console.log("SignupForm componentDidMount");
+        if (this.props.topState.contributorAccountCreated) {
+            console.log("yes?");
+            this.props.onSetInfo(<span>{this.messages.SignupForm.signupSuccess}</span>);
+        }
+    },
+    componentWillUpdate: function (nextProps) {
+        if (!nextProps.topState.contributorAccountCreated && this.props.topState.contributorAccountCreated) {
+            this.props.onClearInfo();
+        }
+    },
+    getDefaultState: function () {
+        // not to be confused with getInitialState() :-)
+        var messages = this.messages;
+        return {
+            errors: {
+                globalError: false,
+                email: false,
+                passhash: false,
+                nickname: false,
+                first_name: false,
+                last_name: false
+            },
+            titles: {
+                globalError: "",
+                email: "",
+                passhash: "",
+                nickname: "",
+                first_name: "",
+                last_name: ""
+            },
+            placeholders: {
+                email: messages.SignupForm.usernameFieldPlaceholder,
+                passhash: messages.SignupForm.passwordFieldPlaceholder,
+                nickname: messages.SignupForm.nicknameFieldPlaceholder,
+                first_name: messages.SignupForm.firstNameFieldPlaceholder,
+                last_name: messages.SignupForm.lastNameFieldPlaceholder
+            },
+            labels: {
+                email: messages.SignupForm.usernameFieldLabel,
+                passhash: messages.SignupForm.passwordFieldLabel,
+                nickname: messages.SignupForm.nicknameFieldLabel,
+                first_name: messages.SignupForm.firstNameFieldLabel,
+                last_name: messages.SignupForm.lastNameFieldLabel
+            }
+        };
+    },
+    componentWillMount: function () {
+        var messages = this.messages;
+        this.setState(this.getDefaultState());
+    },
     handleSignup: function (e) {
-        var username = this.refs.username.getDOMNode().value,
-            password = this.refs.password.getDOMNode().value,
+        var email = this.refs.email.getDOMNode().value,
+            passhash = this.refs.passhash.getDOMNode().value,
             nickname = this.refs.nickname.getDOMNode().value,
-            firstName = this.refs.firstName.getDOMNode().value,
-            lastName = this.refs.lastName.getDOMNode().value;
+            first_name = this.refs.first_name.getDOMNode().value,
+            last_name = this.refs.last_name.getDOMNode().value;
         e.preventDefault();
         Q(this.props.onSignup({
-            first_name: firstName,
-            last_name: lastName,
-            email: username,
-            passhash: password,
+            first_name: first_name,
+            last_name: last_name,
+            email: email,
+            passhash: passhash,
             nickname: nickname
         }))
             .fail(function (err) {
+                var newState = this.getDefaultState(),
+                    errors = newState.errors;
+                errors.globalError = this.messages.Errors.validationError;
                 _.forEach(err.fields, function (condition, fieldName) {
-                    console.log("ERR! " + fieldName + ": " + condition);
-                });
-            });
+                    if ('duplicate' === condition) {
+                        errors[fieldName] = this.messages.Errors.duplicateField;
+                    } else if ('missing' === condition) {
+                        errors[fieldName] = this.messages.Errors.missingField;
+                    } else if ('invalid' === condition) {
+                        errors[fieldName] = this.messages.Errors.invalidField;
+                    } else {
+                        errors[fieldName] = condition;
+                    }
+                }.bind(this));
+                this.setState(newState);
+            }.bind(this));
     },
-    /*receiveErrors: function () {
-    },*/
     render: function () {
-        var messages = this.messages.SignupForm;
+        var messages = this.messages.SignupForm,
+            cx = React.addons.classSet,
+            classNames = {
+                globalError: cx({global: true, error: true, hidden: !this.state.errors.globalError}),
+                email: cx({error: this.state.errors.email}),
+                passhash: cx({error: this.state.errors.passhash}),
+                nickname: cx({error: this.state.errors.nickname}),
+                first_name: cx({error: this.state.errors.first_name}),
+                last_name: cx({error: this.state.errors.last_name})
+            },
+            titles = {
+                email: this.state.errors.email || "",
+                passhash: this.state.errors.passhash || "",
+                nickname: this.state.errors.nickname || "",
+                first_name: this.state.errors.first_name || "",
+                last_name: this.state.errors.last_name || ""
+            },
+            placeholders = {
+                email: (!this.state.errors.email && this.state.placeholders.email) || this.state.errors.email,
+                passhash: (!this.state.errors.passhash && this.state.placeholders.passhash) || this.state.errors.passhash,
+                nickname: (!this.state.errors.nickname && this.state.placeholders.nickname) || this.state.errors.nickname,
+                first_name: (!this.state.errors.first_name && this.state.placeholders.first_name) || this.state.errors.first_name,
+                last_name: (!this.state.errors.last_name && this.state.placeholders.last_name) || this.state.errors.last_name
+            },
+            labels = {
+                email: (!this.state.errors.email && this.state.labels.email) || "* " + this.state.labels.email,
+                passhash: (!this.state.errors.passhash && this.state.labels.passhash) || "* " + this.state.labels.passhash,
+                nickname: (!this.state.errors.nickname && this.state.labels.nickname) || "* " + this.state.labels.nickname,
+                first_name: (!this.state.errors.first_name && this.state.labels.first_name) || "* " + this.state.labels.first_name,
+                last_name: (!this.state.errors.last_name && this.state.labels.last_name) || "* " + this.state.labels.last_name
+            };
+        console.log("errors: " + JSON.stringify(this.state.errors));
+        console.log("classNames: " + JSON.stringify(classNames));
+        console.log("labels: " + JSON.stringify(labels));
         return (
             <div>
                 <form onSubmit={this.handleSignup}>
                     <fieldset>
                         <legend>{messages.formTitle}</legend>
-                        <p class="error"></p>
+                        <p className={classNames.globalError} ref="globalError">{this.state.errors.globalError}</p>
                         <p>{messages.formDescription}</p>
-                        <label class="username">
-                            {messages.usernameFieldLabel}
-                            <input ref="username" type="text" placeholder={messages.usernameFieldPlaceholder}/>
+                        <label className="username">
+                            {labels.email}
+                            <input className={classNames.email} title={titles.email} ref="email" type="text" placeholder={placeholders.email}/>
                         </label>
-                        <label class="password">
-                            {messages.passwordFieldLabel}
-                            <input ref="password" type="password" placeholder={messages.passwordFieldPlaceholder}/>
+                        <label className="password">
+                            {labels.passhash}
+                            <input className={classNames.passhash} title={titles.passhash} ref="passhash" type="password" placeholder={placeholders.passhash}/>
                         </label>
-                        <label class="nickname">
-                            {messages.nicknameFieldLabel}
-                            <input ref="nickname" type="text" placeholder={messages.nicknameFieldPlaceholder}/>
+                        <label className="nickname">
+                            {labels.nickname}
+                            <input className={classNames.nickname} title={titles.nickname} ref="nickname" type="text" placeholder={placeholders.nickname}/>
                         </label>
-                        <label class="firstName">
-                            {messages.firstNameFieldLabel}
-                            <input ref="firstName" type="text" placeholder={messages.firstNameFieldPlaceholder}/>
+                        <label className="firstName">
+                            {labels.first_name}
+                            <input className={classNames.first_name} title={titles.first_name} ref="first_name" type="text" placeholder={placeholders.first_name}/>
                         </label>
-                        <label class="lastName">
-                            {messages.lastNameFieldLabel}
-                            <input ref="lastName" type="text" placeholder={messages.lastNameFieldPlaceholder}/>
+                        <label className="lastName">
+                            {labels.last_name}
+                            <input className={classNames.last_name} title={titles.last_name} ref="last_name" type="text" placeholder={placeholders.last_name}/>
                         </label>
-                        <label class="submit">
+                        <label className="submit">
                             {messages.submitButtonLabel}
                             <input type="submit" value={messages.submitButtonValue}/>
                         </label>
