@@ -444,21 +444,23 @@ var routesInfo = [
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 l10nData = (overrides && overrides.l10nData) || {},
                 shortLangCode = nRouteInfo.shortLangCode,
-                logOutUrl = baseRoot + "/v1/logout",
                 reactState = {
                     globalLang: lang,
                     shortLangCode: shortLangCode,
-                    l10nData: l10nData
-                };
-
-            return pRequest(logOutUrl)
-                .then((function (res) {
-                    if (200 !== res[0].statusCode) {
-                        console.log("error while attempting to call the /v1/logout endpoint...");
-                        reactState.error = "generic";
+                    l10nData: l10nData,
+                    doLogOut: true
+                },
+                loginStateUrl = baseRoot + "/v1/login";
+            return pRequest({method: "GET", url: loginStateUrl, json: true})
+                .then(function (loginStateRes) {
+                    // add login information if we got it
+                    if (200 === loginStateRes[0].statusCode) {
+                        reactState.loginInfo = loginStateRes[1];
                     }
                     return reactState;
-                }).bind(this));
+                });
+            // if above promise fails, return here
+            return reactState;
         }
     },
     {
@@ -636,20 +638,21 @@ var RouterMixin = {
 var CodedMessagesMixin = {
     getCodedMessage: function (wsResponse) {
         var ret,
-            m = this.messages.Errors;
+            e = this.messages.Errors,
+            i = this.messages.Infos;
         if (!wsResponse || _.isEmpty(wsResponse)) {
             throw Error("no wsResponse passed to CodeMessagesMixin::get()");
         }
         if (wsResponse.errno) {
             var errcode = 'errno'+wsResponse.errno;
-            ret = m[errcode];
+            ret = e[errcode];
             if (!ret) {
                 console.error("couldn't find error with code: " + errcode + " in strings collection");
                 ret = "ERROR";
             }
         } else if (wsResponse.infono) {
             var infocode = 'infono'+wsResponse.infono;
-            ret = m[infocode];
+            ret = i[infocode];
             if (!ret) {
                 console.error("couldn't find info message with code: " + infocode + " in strings collection");
                 ret = "GENERIC NOTICE";
@@ -724,11 +727,13 @@ var CrowDictionary = React.createClass({
                     throw res[1]; // the body contains structured data about errors
                 }
                 var rObj = res[1],
-                    fragment = '/login?contributorAccountCreated=1&updated='+Date.now();
+                    fragment = '/login?updated='+Date.now();
                 this.setState({
-                    info: <span>{this.messages.SignupForm.signupSuccess}</span>
+                    info: <span>{this.messages.SignupForm.signupSuccess}</span>,
+                    clearInfoCallback: function () {
+                        Router.navigate(fragment, {trigger: true, replace: false});
+                    }
                 });
-                Router.navigate(fragment, {trigger: false, replace: false});
             }).bind(this))
             .fail(function (err) {
                 throw err;
@@ -830,19 +835,21 @@ var CrowDictionary = React.createClass({
             error: undefined
         });
     },
-    handleClearInfo: function (callback) {
+    handleClearInfo: function () {
         console.log("clearing info...");
-        if (callback) {
-            callback();
+        if (this.state.clearInfoCallback) {
+            this.state.clearInfoCallback();
+            // invoke the callback (most likely Router.navigate), and we're done!
             return;
         }
         this.setState({
             info: undefined
         });
     },
-    handleSetInfo: function (info) {
+    handleSetInfo: function (info, cb) {
         this.setState({
-            info: info
+            info: info,
+            clearInfoCallback: cb
         });
     },
     handleDefinitionVote: function (voteInfo) {
@@ -879,22 +886,43 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     console.error("err: " + res[0]);
                     this.setState({
-                        info: <div>{this.getCodedMessage(res[1])}</div>
+                        info: this.getCodedMessage(res[1])
                     });
                     return;
                 }
                 this.setState({
-                    info: <div>account verified OK</div>
+                    info: this.getCodedMessage(res[1])
                 });
             }.bind(this))
             .fail(function (err) {
                 console.error(err);
                 this.setState({
-                    error: <div>FAILED account verification</div>
+                    error: 'generic'
                 });
             }.bind(this));
     },
+    doLogOut: function () {
+        var logOutUrl = baseRoot + "/v1/logout";
+        return pRequest({url: logOutUrl, json: true})
+            .then((function (res) {
+                if (200 !== res[0].statusCode) {
+                    console.error("/v1/logout error: " + JSON.stringify(res[1]));
+                    this.setState({
+                        error: this.getCodedMessage(res[1])
+                    });
+                    return;
+                }
+                console.log("doLogOut(). no error. setting state...");
+                this.setState({
+                    info: this.getCodedMessage(res[1]),
+                    clearInfoCallback: function () {
+                        Router.navigate("", {trigger: true, replace: false});
+                    }
+                });
+            }).bind(this));
+    },
     render: function () {
+        //console.log("on render, with state: " + JSON.stringify(this.state));
         var mainContent;
         if (this.state.error) {
             mainContent = <ErrorMessage onClearError={this.handleClearError} topState={this.state}/>;
@@ -904,10 +932,13 @@ var CrowDictionary = React.createClass({
             mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn} onSignup={this.handleSignup} onSetInfo={this.handleSetInfo} onClearInfo={this.handleClearInfo}/>;
         } else if (this.state.showVerificationPrompt) {
             // display form where verification code can be entered
-            mainContent = <VerificationPrompt />
+            mainContent = <VerificationPrompt topState={this.state}/>
         } else if (this.state.validateVerification) {
             // we got the code. let's check if it's valid and display the result
             mainContent = <VerificationOutcome topState={this.state} submitVerification={this.submitVerification} />
+        } else if (this.state.doLogOut) {
+            // log out
+            mainContent = <LogOutOutcome topState={this.state} doLogOut={this.doLogOut} />
         } else if (this.state.shownPhraseData) {
             mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition} getSearchTermFromDOM={this.getSearchTermFromDOM}/>;
         } else if (!_.isEmpty(this.state.contributorActivity)) {
@@ -968,7 +999,7 @@ var VerificationPrompt = React.createClass({
     mixins: [I18nMixin],
     handleSubmit: function (e) {
         var validateVerification = this.refs.validateVerification.getDOMNode().value,
-            email = this.refs.validateVerification.getDOMNode().value,
+            email = this.refs.email.getDOMNode().value,
             fragment = "verify?validateVerification="+validateVerification+"&email="+email;
         e.preventDefault();
         Router.navigate(fragment, {trigger: true, replace: false});
@@ -976,7 +1007,7 @@ var VerificationPrompt = React.createClass({
     render: function () {
         var messages = this.messages.VerificationPrompt;
         return (
-            <form>
+            <form onSubmit={this.handleSubmit}>
                 <fieldset>
                     <legend>{messages.formTitle}</legend>
                     <label>
@@ -987,12 +1018,17 @@ var VerificationPrompt = React.createClass({
                         {messages.emailFieldLabel}
                         <input ref="email" placeholder={messages.emailFieldPlaceholder}/>
                     </label>
+                    <input type="submit" value={messages.submit}/>
                 </fieldset>
             </form>
         );
     }
 });
 
+/**
+ * the 'error' property on the state that triggers this is a *code*
+ * @TODO refactor this to work like InfoMessage, to take a string and a callback
+ */
 var ErrorMessage = React.createClass({
     mixins: [I18nMixin],
     componentWillMount: function () {
@@ -1014,14 +1050,15 @@ var ErrorMessage = React.createClass({
     }
 });
 
+/**
+ * the 'info' property on the state that triggers this is a string
+ */
 var InfoMessage = React.createClass({
     mixins: [I18nMixin],
     componentWillMount: function () {
     },
     handleClearInfo: function () {
-        this.props.onClearInfo(function () {
-            Router.navigate('login', {trigger: true, replace: false});
-        });
+        this.props.onClearInfo();
     },
     render: function () {
         var message = this.props.topState.info,
@@ -1306,6 +1343,9 @@ var LoginStatus = React.createClass({
     },
     handleLogOut: function (e) {
         e.preventDefault();
+        /*this.setState({
+            doLogOut: true
+        });*/
         this.props.onLogOut();
     },
     handleToMyActivity: function (e) {
@@ -1372,13 +1412,28 @@ var LoginPrompt = React.createClass({
     }
 });
 
+var LogOutOutcome = React.createClass({
+    mixins: [I18nMixin],
+    componentWillMount: function () {
+        var doLogOut = this.props.doLogOut;
+
+        doLogOut();
+    },
+    render: function () {
+        var m = this.messages.LogOutOutcome;
+        return <div>{m.willLogYouOutShortly}</div>;
+    }
+});
+
 var SignupForm = React.createClass({
     mixins: [I18nMixin, LifecycleDebug({displayName: 'SignupForm'})],
     componentDidMount: function () {
         console.log("SignupForm componentDidMount");
         if (this.props.topState.contributorAccountCreated) {
             console.log("yes?");
-            this.props.onSetInfo(<span>{this.messages.SignupForm.signupSuccess}</span>);
+            this.props.onSetInfo(<span>{this.messages.SignupForm.signupSuccess}</span>, function () {
+                Router.navigate('login?update='+Date.now(), {trigger: true, replace: false});
+            });
         }
     },
     componentWillUpdate: function (nextProps) {

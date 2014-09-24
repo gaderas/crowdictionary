@@ -148,7 +148,7 @@ appWs.get('/login', function *(next) {
 appWs.get('/logout', function *(next) {
     yield next;
     this.status = 200;
-    this.body = {message: "logged out"};
+    this.body = {message: "logged out", infono: 3};
     this.cookies.set('contributor', JSON.stringify(null), {signed: true});
 });
 

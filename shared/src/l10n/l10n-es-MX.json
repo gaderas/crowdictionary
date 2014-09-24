@@ -9,11 +9,11 @@
             "missingField": "campo faltante",
             "duplicateField": "duplicado. favor de cambiar",
             "invalidField": "formato no válido. favor de corregir",
-            "errno1": "la cuenta del usuario correspondiente a ese correo electrónico ya había sido verificada",
+            "errno1": "la cuenta del usuario correspondiente a ese correo electrónico ha sido verificada",
             "errno2": "se ha introducido un código de verificación que no es válido",
             "errno3": "no hay un usuario con el correo electrónico introducido",
             "errno4": "sucedió un problema al tratar de marcar ésta cuenta de usuario como verificada",
-            "errno5": "no pudimos leer la información de la cuenta para verificar si el código es válido",
+            "errno5": "no pudimos leer la información de la cuenta para verificar si el código que introduciste es válido",
             "errno6": "correo electrónico ausente del cuerpo de la petición HTTP",
             "errno7": "contraseña ausente del cuerpo de la petición HTTP",
             "errno8": "contraseña incorrecta",
@@ -21,7 +21,8 @@
         },
         "Infos": {
             "infono1": "la verificación ha sido exitosa",
-            "infono2": "se ha ingresado al sistema con éxito"
+            "infono2": "se ha ingresado al sistema con éxito",
+            "infono3": "se ha salido del sistema con éxito"
         },
         "SearchBar": {
             "placeHolder": "busca..."
@@ -40,6 +41,9 @@
             "usernameFieldLabel": "Correo Electrónico",
             "passwordFieldLabel": "Contraseña",
             "submitButtonLabel": ""
+        },
+        "LogOutOutcome": {
+            "willLogYouOutShortly": "saliendo..."
         },
         "SignupForm": {
             "formTitle": "Crear una cuenta",
@@ -101,7 +105,8 @@
             "verificationCodeFieldLabel": "El código que enviamos a tu correo",
             "verificationCodeFieldPlaceholder": "código de verificación",
             "emailFieldLabel": "El correo que usaste al darte de alta",
-            "emailFieldPlaceholder": "correo electrónico"
+            "emailFieldPlaceholder": "correo electrónico",
+            "submit": "mandar"
         }
     }
 }
