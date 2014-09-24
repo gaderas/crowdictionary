@@ -477,7 +477,17 @@ var routesInfo = [
                     l10nData: l10nData,
                     showLoginPrompt: true,
                     contributorAccountCreated: !!nRouteInfo.query.contributorAccountCreated
-                };
+                },
+                loginStateUrl = baseRoot + "/v1/login";
+            return pRequest({method: "GET", url: loginStateUrl, json: true})
+                .then(function (loginStateRes) {
+                    // add login information if we got it
+                    if (200 === loginStateRes[0].statusCode) {
+                        reactState.loginInfo = loginStateRes[1];
+                    }
+                    return reactState;
+                });
+            // if above promise fails, return here
             return reactState;
         }
     },
@@ -498,7 +508,17 @@ var routesInfo = [
                     showVerificationPrompt: !nRouteInfo.query.validateVerification,
                     validateVerification: nRouteInfo.query.validateVerification,
                     email: nRouteInfo.query.email
-                };
+                },
+                loginStateUrl = baseRoot + "/v1/login";
+            return pRequest({method: "GET", url: loginStateUrl, json: true})
+                .then(function (loginStateRes) {
+                    // add login information if we got it
+                    if (200 === loginStateRes[0].statusCode) {
+                        reactState.loginInfo = loginStateRes[1];
+                    }
+                    return reactState;
+                });
+            // if above promise fails, return here
             return reactState;
         }
     }
@@ -610,9 +630,38 @@ var RouterMixin = {
     },
 };
 
+/**
+ * depends on I18nMixin
+ */
+var CodedMessagesMixin = {
+    getCodedMessage: function (wsResponse) {
+        var ret,
+            m = this.messages.Errors;
+        if (!wsResponse || _.isEmpty(wsResponse)) {
+            throw Error("no wsResponse passed to CodeMessagesMixin::get()");
+        }
+        if (wsResponse.errno) {
+            var errcode = 'errno'+wsResponse.errno;
+            ret = m[errcode];
+            if (!ret) {
+                console.error("couldn't find error with code: " + errcode + " in strings collection");
+                ret = "ERROR";
+            }
+        } else if (wsResponse.infono) {
+            var infocode = 'infono'+wsResponse.infono;
+            ret = m[infocode];
+            if (!ret) {
+                console.error("couldn't find info message with code: " + infocode + " in strings collection");
+                ret = "GENERIC NOTICE";
+            }
+        }
+        return ret;
+    }
+};
+
 
 var CrowDictionary = React.createClass({
-    mixins: [I18nMixin, LoggedInMixin, RouterMixin],
+    mixins: [I18nMixin, LoggedInMixin, RouterMixin, CodedMessagesMixin],
     componentDidMount: function () {
         mainReactComponentMounted = true;
     },
@@ -630,9 +679,7 @@ var CrowDictionary = React.createClass({
     },
     handleToggleLoginPrompt: function () {
         console.log('clicked on toggle login prompt...');
-        this.setState({
-            showLoginPrompt: !this.state.showLoginPrompt
-        });
+        Router.navigate('login', {trigger: true, replace: false});
     },
     handleLogIn: function (username, password) {
         console.log("user: " + username + ", pass: " + password);
@@ -640,26 +687,32 @@ var CrowDictionary = React.createClass({
         return pRequest({method: "POST", url: loginStateUrl, body: {email: username, passhash: password}, json:true})
             .then((function(res) {
                 if (200 !== res[0].statusCode) {
-                    throw Error("invalid credentials");
+                    console.error("handleLogIn(). invalid credentials");
+                    this.setState({
+                        error: this.getCodedMessage(res[1])
+                    });
                 }
                 console.log("login success!");
                 console.log("res is: " + JSON.stringify(res, ' ', 4));
-                var rObj = res[1]; // it's already json because we called `pRequest` with `{json:true}`
+                var rObj = res[1];
                 console.log("rObj: " + JSON.stringify(rObj, ' ', 4));
                 var searchTerm = this.state.searchTerm || '';
                 var fragment = '';
                 if ('' !== searchTerm) {
                     fragment = '?q=' + searchTerm;
                 }
-                Router.navigate(fragment, {trigger: true, replace: true});
+                Router.navigate(fragment, {trigger: true, replace: false});
             }).bind(this))
-            .then((function (newState) {
+            /*.then((function (newState) {
                 newState.showLoginPrompt = false;
                 this.replaceState(newState);
                 this.forceUpdate();
-            }).bind(this))
+            }).bind(this))*/
             .fail(function (err) {
-                console.error("failed with error: " + err);
+                console.error("handleLogIn(). failed with error: " + err);
+                this.setState({
+                    error: 'generic'
+                });
             });
     },
     handleSignup: function (values) {
@@ -684,8 +737,7 @@ var CrowDictionary = React.createClass({
 
     },
     handleLogOut: function () {
-        var fragment = util.format("/logout");
-        Router.navigate(fragment, {trigger: true, replace: false});
+        Router.navigate('logout', {trigger: true, replace: false});
     },
     handleSubmitAddPhrase: function (phrase) {
         try {
@@ -775,13 +827,17 @@ var CrowDictionary = React.createClass({
     },
     handleClearError: function () {
         this.setState({
-            error: null
+            error: undefined
         });
     },
-    handleClearInfo: function () {
+    handleClearInfo: function (callback) {
         console.log("clearing info...");
+        if (callback) {
+            callback();
+            return;
+        }
         this.setState({
-            info: null
+            info: undefined
         });
     },
     handleSetInfo: function (info) {
@@ -820,6 +876,13 @@ var CrowDictionary = React.createClass({
             requestBody = {email: email, validateVerification: validateVerification};
         return pRequest({method: "PUT", url: modifyContributorUrl, body: requestBody, json: true})
             .then(function (res) {
+                if (200 !== res[0].statusCode) {
+                    console.error("err: " + res[0]);
+                    this.setState({
+                        info: <div>{this.getCodedMessage(res[1])}</div>
+                    });
+                    return;
+                }
                 this.setState({
                     info: <div>account verified OK</div>
                 });
@@ -956,7 +1019,9 @@ var InfoMessage = React.createClass({
     componentWillMount: function () {
     },
     handleClearInfo: function () {
-        this.props.onClearInfo();
+        this.props.onClearInfo(function () {
+            Router.navigate('login', {trigger: true, replace: false});
+        });
     },
     render: function () {
         var message = this.props.topState.info,
@@ -1261,7 +1326,7 @@ var LoginStatus = React.createClass({
             var greeting = this.fmt(this.msg(this.messages.LoginStatus.loggedInGreeting), {username: loginInfo.email}),
                 myActivityUrl = util.format("/%s/contributors/%s/activity", shortLangCode, loginInfo.id),
                 logOutMessage = this.fmt(this.msg(this.messages.LoginStatus.logOutMessage)),
-                logOutUrl = util.format("/%s/logout");
+                logOutUrl = util.format("/%s/logout", shortLangCode);
             return (
                 <span><a href={myActivityUrl} onClick={this.handleToMyActivity}>{greeting}</a> <a href={logOutUrl} onClick={this.handleLogOut}>{logOutMessage}</a></span>
             );

@@ -111,33 +111,32 @@ appWs.post('/login', function *(next) {
     var email = this.request.body.email || '',
         passhash = this.request.body.passhash || '';
     if (!email) {
-        this.body = {message: "email not supplied in HTTP request body!"};
+        this.body = {message: "email not supplied in HTTP request body!", errno: 6};
         this.status = 400;
         return
     } else if (!passhash) {
-        this.body = {message: "no passhash supplied in HTTP request body!"};
+        this.body = {message: "no passhash supplied in HTTP request body!", errno: 7};
         this.status = 400;
         return;
     }
-    yield mockData.getContributors({email: email})
+    this.body = yield mockData.getContributors({email: email})
         .then(function (contribs) {
             var contributor = contribs[0] || {};
+                safeContributorInfo = appUtil.getObjectWithoutProps(contributor, ['passhash', 'verification_code']);
             console.log('contributor = ' + JSON.stringify(contributor.passhash));
             console.log('contributor.passhash = ' + contributor.passhash);
             if (contributor.passhash !== passhash) {
-                throw Error("passhash mismatch!");
+                console.error("passhash mismatch!");
+                this.status = 403;
+                return {message: "bad password provided", errno: 8};
             }
-            return {status: 200, body: {message: "login successful"}, contributor: contributor};
-        })
-        .fail(function (err) {
-            return {status: 401, body: err.message};
-        })
-        .then((function (outcome) {
-            var safeContributorInfo = appUtil.getObjectWithoutProps(outcome.contributor, ['passhash', 'verification_code']);
-            this.status = outcome.status;
-            this.body = outcome.body;
             this.cookies.set('contributor', JSON.stringify(safeContributorInfo), {signed: true});
-        }).bind(this));
+            return {message: "login successful", infono: 2};
+        }.bind(this))
+        .fail(function (err) {
+            console.error("error on POST /login: " + err);
+            return {message: "something went wrong and we couldn't log you in", errno: 9};
+        }.bind(this));
 });
 
 appWs.get('/login', function *(next) {
@@ -187,29 +186,29 @@ appWs.put('/contributors', function *(next) {
                 var contributor = (res && res[0]) || {};
                 if (_.isEmpty(contributor)) {
                     this.status = 403;
-                    return {message: "contributor with email provided not found"};
+                    return {message: "contributor with email provided not found", errno: 3};
                 }
                 if (requestBody.validateVerification !== contributor.verification_code) {
                     this.status = 403;
-                    return {message: "bad verification code provided"};
+                    return {message: "bad verification code provided", errno: 2};
                 }
                 if ('yes' === contributor.verified) {
                     this.status = 403;
-                    return {message: "the user identified by the provided email is already verified"};
+                    return {message: "the user identified by the provided email is already verified", errno: 1};
                 }
                 return mockData.updateContributor({email: requestBody.email}, {email: requestBody.email, verified: 'yes'})
                     .then(function (res) {
-                        return {message: "verification success"}
+                        return {message: "verification success", infono: 1}
                     }.bind(this))
                     .fail(function (err) {
                         this.status = 500;
-                        return {message: "there was a problem trying to mark account as validated"};
+                        return {message: "there was a problem trying to mark account as validated", errno: 4};
                     }.bind(this));
             }.bind(this))
             .fail(function (err) {
                 this.status = 500;
                 console.error(err);
-                return {message: "couldn't fetch contributor data to validate verification code"};
+                return {message: "couldn't fetch contributor data to validate verification code", errno: 5};
             }.bind(this));
         return;
     } else if (appWs.contributor) {
