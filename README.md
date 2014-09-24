@@ -51,6 +51,7 @@ Sample requests
     `curl -H "Accept: application/json" 'http://localhost:3000/v1/contributors?email=bono@yahoo.com' --cookie /tmp/cookiez -v`
 *   PUT contributors - create (sign/up) or update a contributor's record
     `curl -X PUT -d '{"email": "germoad@yahoo.com", "passhash": "poiuyt", "crumb": "xxxxx"}' -H "Content-Type: application/json" 'http://localhost:3000/v1/contributors?email=germoad@yahoo.com' --cookie-jar /tmp/cookiez -v`
+    `curl -X PUT -d '{"email": "germoad@yahoo.com", "submitVerification": "xxxxx"}' -H "Content-Type: application/json" 'http://localhost:3000/v1/contributors?email=germoad@yahoo.com' --cookie-jar /tmp/cookiez -v`
 *   GET phrases - get phrases in a specific language
     `curl -H "Accept: application/json" "http://localhost:3000/v1/lang/es-MX/phrases"`
     Search is supported e.g. by performing the following request:

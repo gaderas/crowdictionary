@@ -176,7 +176,43 @@ appWs.put('/contributors', function *(next) {
         random_buffer = new Buffer((Math.random()*1000000).toString()),
         verification_code = random_buffer.toString('base64').substring(0, 15);
     console.log('put /contributors incoming body: ' + JSON.stringify(this.request.body));
-    if (appWs.contributor) {
+    if (requestBody.validateVerification) {
+        if (!requestBody.email) {
+            this.status = 403;
+            this.body = "missing email";
+            return;
+        }
+        this.body = yield mockData.getContributors({email: requestBody.email})
+            .then(function (res) {
+                var contributor = (res && res[0]) || {};
+                if (_.isEmpty(contributor)) {
+                    this.status = 403;
+                    return {message: "contributor with email provided not found"};
+                }
+                if (requestBody.validateVerification !== contributor.verification_code) {
+                    this.status = 403;
+                    return {message: "bad verification code provided"};
+                }
+                if ('yes' === contributor.verified) {
+                    this.status = 403;
+                    return {message: "the user identified by the provided email is already verified"};
+                }
+                return mockData.updateContributor({email: requestBody.email}, {email: requestBody.email, verified: 'yes'})
+                    .then(function (res) {
+                        return {message: "verification success"}
+                    }.bind(this))
+                    .fail(function (err) {
+                        this.status = 500;
+                        return {message: "there was a problem trying to mark account as validated"};
+                    }.bind(this));
+            }.bind(this))
+            .fail(function (err) {
+                this.status = 500;
+                console.error(err);
+                return {message: "couldn't fetch contributor data to validate verification code"};
+            }.bind(this));
+        return;
+    } else if (appWs.contributor) {
         if (app.crumb !== requestBody.crumb) {
             this.status = 403;
             this.body = "invalid crumb";

@@ -224,6 +224,12 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
             .then(function (l) {
                 return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
             });
+    } else if ('/verify' === nRouteInfo.route) {
+        // "login" page
+        return pL10nForLang
+            .then(function (l) {
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+            });
     }
 };
 
@@ -471,6 +477,27 @@ var routesInfo = [
                     l10nData: l10nData,
                     showLoginPrompt: true,
                     contributorAccountCreated: !!nRouteInfo.query.contributorAccountCreated
+                };
+            return reactState;
+        }
+    },
+    {
+        serverRoute: '/verify',
+        serverParamNames: [],
+        clientRoute: 'verify',
+        clientRouterFunc: clientRouterFunc,
+        clientRouterFuncName: '/verify',
+        calculateStateFunc: function (overrides, nRouteInfo) {
+            var lang = (overrides && overrides.globalLang) || 'es-MX',
+                l10nData = (overrides && overrides.l10nData) || {},
+                shortLangCode = nRouteInfo.shortLangCode,
+                reactState = {
+                    globalLang: lang,
+                    shortLangCode: shortLangCode,
+                    l10nData: l10nData,
+                    showVerificationPrompt: !nRouteInfo.query.validateVerification,
+                    validateVerification: nRouteInfo.query.validateVerification,
+                    email: nRouteInfo.query.email
                 };
             return reactState;
         }
@@ -788,6 +815,22 @@ var CrowDictionary = React.createClass({
             fragment = util.format("/contributors/%s/activity", loginInfo.id);
         Router.navigate(fragment, {trigger: true, replace: false});
     },
+    submitVerification: function (validateVerification, email) {
+        var modifyContributorUrl = util.format(baseRoot + "/v1/contributors?email=%s", email),
+            requestBody = {email: email, validateVerification: validateVerification};
+        return pRequest({method: "PUT", url: modifyContributorUrl, body: requestBody, json: true})
+            .then(function (res) {
+                this.setState({
+                    info: <div>account verified OK</div>
+                });
+            }.bind(this))
+            .fail(function (err) {
+                console.error(err);
+                this.setState({
+                    error: <div>FAILED account verification</div>
+                });
+            }.bind(this));
+    },
     render: function () {
         var mainContent;
         if (this.state.error) {
@@ -796,14 +839,18 @@ var CrowDictionary = React.createClass({
             mainContent = <InfoMessage onClearInfo={this.handleClearInfo} topState={this.state}/>;
         } else if (this.state.showLoginPrompt) {
             mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn} onSignup={this.handleSignup} onSetInfo={this.handleSetInfo} onClearInfo={this.handleClearInfo}/>;
+        } else if (this.state.showVerificationPrompt) {
+            // display form where verification code can be entered
+            mainContent = <VerificationPrompt />
+        } else if (this.state.validateVerification) {
+            // we got the code. let's check if it's valid and display the result
+            mainContent = <VerificationOutcome topState={this.state} submitVerification={this.submitVerification} />
+        } else if (this.state.shownPhraseData) {
+            mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition} getSearchTermFromDOM={this.getSearchTermFromDOM}/>;
+        } else if (!_.isEmpty(this.state.contributorActivity)) {
+            mainContent = <ContributorActivity topState={this.state} onClickActivityItem={this.handleSelectPhrase}/>;
         } else {
-            if (this.state.shownPhraseData) {
-                mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition} getSearchTermFromDOM={this.getSearchTermFromDOM}/>;
-            } else if (!_.isEmpty(this.state.contributorActivity)) {
-                mainContent = <ContributorActivity topState={this.state} onClickActivityItem={this.handleSelectPhrase}/>;
-            } else {
-                mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase} onSelectPhrase={this.handleSelectPhrase}/>;
-            }
+            mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase} onSelectPhrase={this.handleSelectPhrase}/>;
         }
         //manifest="/static/assets/global_cache.manifest"
         return (
@@ -823,6 +870,62 @@ var CrowDictionary = React.createClass({
             <script src="/static/js/app.js" />
             </body>
             </html>
+        );
+    }
+});
+
+var VerificationOutcome = React.createClass({
+    mixins: [I18nMixin],
+    componentWillMount: function () {
+        var topState = this.props.topState,
+            validateVerification = topState.validateVerification,
+            email = topState.email,
+            submitVerification = this.props.submitVerification;
+        submitVerification(validateVerification, email);
+        /*Q.fcall(submitVerification.bind(this.props, validateVerification, email))
+            .then(function (res) {
+                console.log("verification success!");
+                this.setState({
+                    verified: true
+                });
+            }.bind(this))
+            .fail(function (err) {
+                console.err("verification error: " + err.message);
+                this.setState({
+                    verified: false
+                });
+            }.bind(this));*/
+    },
+    render: function () {
+        return <div>Validating your account...</div>;
+    }
+});
+
+var VerificationPrompt = React.createClass({
+    mixins: [I18nMixin],
+    handleSubmit: function (e) {
+        var validateVerification = this.refs.validateVerification.getDOMNode().value,
+            email = this.refs.validateVerification.getDOMNode().value,
+            fragment = "verify?validateVerification="+validateVerification+"&email="+email;
+        e.preventDefault();
+        Router.navigate(fragment, {trigger: true, replace: false});
+    },
+    render: function () {
+        var messages = this.messages.VerificationPrompt;
+        return (
+            <form>
+                <fieldset>
+                    <legend>{messages.formTitle}</legend>
+                    <label>
+                        {messages.verificationCodeFieldLabel}
+                        <input ref="validateVerification" placeholder={messages.verificationCodeFieldPlaceholder}/>
+                    </label>
+                    <label>
+                        {messages.emailFieldLabel}
+                        <input ref="email" placeholder={messages.emailFieldPlaceholder}/>
+                    </label>
+                </fieldset>
+            </form>
         );
     }
 });

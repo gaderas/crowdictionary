@@ -71,7 +71,7 @@ Data.prototype.updateContributor = function (params, payload) {
     } else {
         throw Error("no email or id params passed. need either one of them for updates, or email for inserts...");
     }
-    return pQuery("UPDATE `contributor` SET ? ", payload);
+    return pQuery("UPDATE `contributor` SET ? WHERE ?", [payload, insertBy]);
 };
 
 Data.prototype.getPhrases = function (params) {

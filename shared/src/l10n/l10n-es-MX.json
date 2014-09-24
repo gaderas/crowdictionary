@@ -82,6 +82,13 @@
         },
         "PhraseDetails": {
             "backToSearchResults": "regresar a los resultados de búsqueda"
+        },
+        "VerificationPrompt": {
+            "formTitle": "Verificación de nueva cuenta de usuario",
+            "verificationCodeFieldLabel": "El código que enviamos a tu correo",
+            "verificationCodeFieldPlaceholder": "código de verificación",
+            "emailFieldLabel": "El correo que usaste al darte de alta",
+            "emailFieldPlaceholder": "correo electrónico"
         }
     }
 }
