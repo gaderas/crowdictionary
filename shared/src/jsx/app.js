@@ -718,7 +718,7 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     console.error("handleLogIn(). invalid credentials");
                     this.setState({
-                        error: this.getCodedMessage(res[1])
+                        error: res[1].errno
                     });
                 }
                 console.log("login success!");

@@ -5,7 +5,7 @@
         "Errors": {
             "generic": "algo ha salido mal, lo sentimos...",
             "OK": "OK",
-            "validationError": "Por favor corrije y/o añade los datos faltantes e inténtalo de nuevo.",
+            "validationError": "Por favor corrije y/o añade los datos faltantes e intentalo de nuevo.",
             "missingField": "campo faltante",
             "duplicateField": "duplicado. favor de cambiar",
             "invalidField": "formato no válido. favor de corregir",

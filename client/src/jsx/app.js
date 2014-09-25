@@ -18,7 +18,7 @@ var pRequest = Q.denodeify(request);
 setPRequest(pRequest);
 
 var path = window.location.pathname,
-    matches = path.match(/^\/([^\/]+)(\/|$)/),
+    matches = path.match(/^\/([^\/]{,2})(\/|$)/), // lang code max lenght 2 is a hack to avoid having to have the full list of supported lang codes
     shortLangCode = matches ? matches[1] : '',
     effectiveRoot = matches ? '/' + matches[1] + '/' : '/';
 
