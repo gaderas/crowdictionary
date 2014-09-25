@@ -75,6 +75,11 @@ RouteNotifier.prototype.removeStateChangeListener = function () {
 
 var routeNotifier = new RouteNotifier();
 
+var aUrl = function (path, shortLangCode) {
+    path = (path.match(/^\//) && path) || '/'+path;
+    return (shortLangCode && '/'+shortLangCode+path) || path;
+}
+
 
 var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, query, hostname, baseRoot) {
     console.log('on getNormalizedRouteInfo(), routeInfo: ' + JSON.stringify(routeInfo, ' ', 4));
@@ -1083,7 +1088,7 @@ var PhraseDetails = React.createClass({
             shortLangCode = this.props.topState.shortLangCode,
             searchTerm = this.props.getSearchTermFromDOM(),
             backToSearchResultsRelativeUrl = searchTerm ? '?q=' + searchTerm : '',
-            backToSearchResultsUrl = util.format("/%s/%s", shortLangCode, backToSearchResultsRelativeUrl);
+            backToSearchResultsUrl = aUrl(backToSearchResultsRelativeUrl, shortLangCode);
         return (
             <div>
                 phrase: <PhraseInDetails topState={this.props.topState} />
@@ -1328,7 +1333,7 @@ var NavBar = React.createClass({
         var home = this.fmt(this.msg(this.messages.NavBar.home)),
             about = this.fmt(this.msg(this.messages.NavBar.about)),
             jobs = this.fmt(this.msg(this.messages.NavBar.jobs)),
-            homeUrl = util.format("/%s/", this.props.topState.shortLangCode);
+            homeUrl = aUrl("/", this.props.topState.shortLangCode);
         return (
             <div>
                 <span><a href={homeUrl}>{home}</a></span>
@@ -1369,9 +1374,9 @@ var LoginStatus = React.createClass({
             );
         } else {
             var greeting = this.fmt(this.msg(this.messages.LoginStatus.loggedInGreeting), {username: loginInfo.email}),
-                myActivityUrl = util.format("/%s/contributors/%s/activity", shortLangCode, loginInfo.id),
+                myActivityUrl = aUrl(util.format("/contributors/%s/activity", loginInfo.id), shortLangCode);
                 logOutMessage = this.fmt(this.msg(this.messages.LoginStatus.logOutMessage)),
-                logOutUrl = util.format("/%s/logout", shortLangCode);
+                logOutUrl = aUrl("/logout", shortLangCode);
             return (
                 <span><a href={myActivityUrl} onClick={this.handleToMyActivity}>{greeting}</a> <a href={logOutUrl} onClick={this.handleLogOut}>{logOutMessage}</a></span>
             );
@@ -1815,7 +1820,7 @@ var PhraseInList = React.createClass({
         this.props.onSelectPhrase(phraseData);
     },
     render: function () {
-        var phraseUrl = util.format("/%s/phrases/%s", this.props.topState.shortLangCode, this.props.searchResult.phrase);
+        var phraseUrl = aUrl(util.format("/phrases/%s", this.props.searchResult.phrase), this.props.topState.shortLangCode);
         return (
             <div onClick={this.handleClick}>
                 <a href={phraseUrl}>{this.props.searchResult.phrase}</a>
@@ -1922,6 +1927,7 @@ module.exports.setInitialState = setInitialState;
 module.exports.setPRequest = setPRequest;
 module.exports.setBaseRoot = setBaseRoot;
 module.exports.setRouter = setRouter;
+module.exports.aUrl = aUrl;
 module.exports.pCalculateStateBasedOnNormalizedRouteInfo = pCalculateStateBasedOnNormalizedRouteInfo;
 module.exports.l10n = {};
 module.exports.l10n.getL10nForLang = l10n.getL10nForLang;

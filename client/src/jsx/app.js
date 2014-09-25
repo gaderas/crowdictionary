@@ -19,7 +19,7 @@ setPRequest(pRequest);
 
 var path = window.location.pathname,
     matches = path.match(/^\/([^\/]+)(\/|$)/),
-    shortLangCode = matches ? matches[1] : 'none',
+    shortLangCode = matches ? matches[1] : '',
     effectiveRoot = matches ? '/' + matches[1] + '/' : '/';
 
 console.log("path: " + path);

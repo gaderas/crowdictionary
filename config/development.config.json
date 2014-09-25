@@ -40,7 +40,7 @@
         "default": "es-MX"
     },
     "localeRootMap": {
-        "es-MX": "http://www.espanol.com/mx",
+        "es-MX": "http://www.mexico.com/",
         "es-CL": "http://www.espanol.com/cl",
         "es-PE": "http://www.espanol.com/pe",
         "en-US": "http://www.english.com/us",

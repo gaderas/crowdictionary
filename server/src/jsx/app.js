@@ -42,7 +42,8 @@ var CrowDictionary = shared.CrowDictionary,
     setInitialState = shared.setInitialState,
     setPRequest = shared.setPRequest,
     l10n = shared.l10n,
-    pCalculateStateBasedOnNormalizedRouteInfo = shared.pCalculateStateBasedOnNormalizedRouteInfo;
+    pCalculateStateBasedOnNormalizedRouteInfo = shared.pCalculateStateBasedOnNormalizedRouteInfo,
+    aUrl = shared.aUrl;
 
 var request = require('request');
 var jar = request.jar();
@@ -448,6 +449,7 @@ appWs.get('/langDetect', function *(next) {
         ipDbLocaleMap = nconf.get("ipDbLocaleMap"),
         dbip = new DBIP(nconf.get("data:dbip:dbConfig")),
         parsedReferrer,
+        receivedDomain,
         receivedShortLangCode,
         matches,
         matchingLocaleRootMap;
@@ -459,21 +461,29 @@ appWs.get('/langDetect', function *(next) {
     parsedReferrer = url.parse(referrer);
     matches = parsedReferrer.pathname.match(/^\/([^\/]+)(\/|$)/);
     if (!matches) {
-        this.state = 400;
-        this.body = {message: "couldn't get a short lang code from the received referrer data"};
-        return;
+        receivedShortLangCode = '';
+    } else {
+        receivedShortLangCode = matches[1];
     }
-    receivedShortLangCode = matches[1];
+    receivedDomain = parsedReferrer.hostname;
     matchingReferrerLocale = _.reduce(localeRootMap, function (acc, root, lang) {
         var parsedRoot = url.parse(root),
-            re = new RegExp("^/" + receivedShortLangCode + "(/|$)"),
-            matches = parsedRoot.pathname.match(re);
-        console.log("looking for " + receivedShortLangCode + " in " + parsedRoot.pathname);
+            re = new RegExp("^/?" + receivedShortLangCode + "(/|$)"),
+            matches = parsedRoot.pathname.match(re),
+            configDomain = parsedRoot.hostname,
+            configShortLangCode;
+        if (matches && configDomain === receivedDomain) {
+            // we already have a 'shortLangCode' match. if the domains match too, we have an overall match.
+            return lang;
+        }
+        return acc;
+
+        /*console.log("looking for " + receivedShortLangCode + " in " + parsedRoot.pathname);
         if (matches) {
             console.log("found it!");
             return lang;
         }
-        return acc;
+        return acc;*/
     }, null);
     yield dbip.pLookup(ip)
         .then(function (geo) {
@@ -487,6 +497,7 @@ appWs.get('/langDetect', function *(next) {
         .fail(function (err) {
             console.error(err);
             this.status = 500;
+            // @TODO should probably just return langByReferrer here instead of an error response
             this.body = {message: "something went wrong"};
         }.bind(this));
 });
@@ -497,9 +508,12 @@ _.forEach(nconf.get("localeRootMap"), function (root, confLang) {
         matches = parsedRoot.pathname.match(/^\/([^\/]+)(\/|$)/),
         shortLangCode;
     if (!matches) {
-        throw Error("couldn't find shortLangCode for pathname: " + parsedRoot.pathname);
+        // if no matches, this locale is served from "root" path
+        shortLangCode = '';
+        //throw Error("couldn't find shortLangCode for pathname: " + parsedRoot.pathname);
+    } else {
+        shortLangCode = matches[1];
     }
-    shortLangCode = matches[1];
 
 _.forEach(routesInfo, function (routeInfo) {
     var localRouteInfo = _.clone(routeInfo);
@@ -521,7 +535,7 @@ _.forEach(routesInfo, function (routeInfo) {
     }
     confHostname = parsedRoot.hostname;
     confShortLangCode = matches[1];*/
-    appReact.get("/" + shortLangCode + localRouteInfo.serverRoute, function *(next) {
+    appReact.get(aUrl(localRouteInfo.serverRoute, shortLangCode), function *(next) {
         /*if (confHostname !== this.request.hostname) {
             throw Error("expected short lang code " + confShortLangCode + " (for lang " + confLang + ") to be hit via hostname: " + confHostname + ", but was hit via " + this.request.hostname + " instead");
         }*/
