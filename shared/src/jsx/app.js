@@ -75,10 +75,24 @@ RouteNotifier.prototype.removeStateChangeListener = function () {
 
 var routeNotifier = new RouteNotifier();
 
+/**
+ * transform a path, the kind that we pass to Router.navigate()
+ * into a url (no hostname) suitable for anchor tags
+ */
 var aUrl = function (path, shortLangCode) {
     path = (path.match(/^\//) && path) || '/'+path;
     return (shortLangCode && '/'+shortLangCode+path) || path;
-}
+};
+
+/**
+ * transform a url (no hostname), the kind that we display in anchor tags,
+ * into a path string suitable for passing to Router.navigate()
+ */
+var aPath = function (url, shortLangCode) {
+    var re = new RegExp("^/?"+shortLangCode+"(/.*|$)"),
+        matches = url.match(re);
+    return (matches && matches[1]) || url;
+};
 
 
 var getNormalizedRouteInfo = function (clientOrServer, routeInfo, routeParams, query, hostname, baseRoot) {
@@ -667,6 +681,13 @@ var CodedMessagesMixin = {
     }
 };
 
+var LinksMixin = {
+    handleToLink: function (url, e) {
+        e.preventDefault();
+        Router.navigate(aPath(url), {trigger: true, replace: false});
+    }
+};
+
 
 var CrowDictionary = React.createClass({
     mixins: [I18nMixin, LoggedInMixin, RouterMixin, CodedMessagesMixin],
@@ -926,6 +947,10 @@ var CrowDictionary = React.createClass({
                 });
             }).bind(this));
     },
+    handleToLink: function (e) {
+        e.preventDefault();
+        console.log("target: " + util.inspect(e.target));
+    },
     render: function () {
         //console.log("on render, with state: " + JSON.stringify(this.state));
         var mainContent;
@@ -963,7 +988,7 @@ var CrowDictionary = React.createClass({
             </head>
             <body>
             <div>
-                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} onToMyActivity={this.handleToMyActivity} topState={this.state} ref="topBar" />
+                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} onToMyActivity={this.handleToMyActivity} onToLink={this.handleToLink} topState={this.state} ref="topBar" />
                 {mainContent}
             </div>
             <script src="/static/js/app.js" />
@@ -1291,7 +1316,7 @@ var TopBar = React.createClass({
         return (
             <div>
                 <SearchBar onUserInput={this.props.onUserInput} topState={this.props.topState} ref="searchBar" />
-                <NavBar onGlobalLangChange={this.props.onGlobalLangChange} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} topState={this.props.topState} onToMyActivity={this.props.onToMyActivity}/>
+                <NavBar onGlobalLangChange={this.props.onGlobalLangChange} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} topState={this.props.topState} onToMyActivity={this.props.onToMyActivity} onToLink={this.props.onToLink} />
             </div>
         );
     }
@@ -1327,7 +1352,7 @@ var SearchBar = React.createClass({
 });
 
 var NavBar = React.createClass({
-    mixins: [I18nMixin],
+    mixins: [I18nMixin, LinksMixin],
     render: function () {
         //this.loadMessages();
         var home = this.fmt(this.msg(this.messages.NavBar.home)),
@@ -1336,7 +1361,7 @@ var NavBar = React.createClass({
             homeUrl = aUrl("/", this.props.topState.shortLangCode);
         return (
             <div>
-                <span><a href={homeUrl}>{home}</a></span>
+                <span><a onClick={this.handleToLink.bind(this, homeUrl)} href={homeUrl}>{home}</a></span>
                 <span>{about}</span>
                 <span>{jobs}</span>
                 <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} onToMyActivity={this.props.onToMyActivity}/>
