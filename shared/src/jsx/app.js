@@ -729,7 +729,7 @@ var CrowDictionary = React.createClass({
                 var rObj = res[1],
                     fragment = '/login?updated='+Date.now();
                 this.setState({
-                    info: <span>{this.messages.SignupForm.signupSuccess}</span>,
+                    info: this.messages.SignupForm.signupSuccess,
                     clearInfoCallback: function () {
                         Router.navigate(fragment, {trigger: true, replace: false});
                     }
@@ -853,13 +853,13 @@ var CrowDictionary = React.createClass({
         });
     },
     handleDefinitionVote: function (voteInfo) {
-        if (voteInfo.error) {
+        /*if (voteInfo.error) {
             this.setState(voteInfo);
             return;
         } else if (voteInfo.info) {
             this.setState(voteInfo);
             return;
-        }
+        }*/
         console.log("got a vote: " + JSON.stringify(voteInfo));
         var crumb = this.state.crumb,
             addVoteUrl = util.format(baseRoot + "/v1/definitions/%d/vote", voteInfo.definitionId);
@@ -940,11 +940,11 @@ var CrowDictionary = React.createClass({
             // log out
             mainContent = <LogOutOutcome topState={this.state} doLogOut={this.doLogOut} />
         } else if (this.state.shownPhraseData) {
-            mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition} getSearchTermFromDOM={this.getSearchTermFromDOM}/>;
+            mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition} getSearchTermFromDOM={this.getSearchTermFromDOM} onSetInfo={this.handleSetInfo}/>;
         } else if (!_.isEmpty(this.state.contributorActivity)) {
             mainContent = <ContributorActivity topState={this.state} onClickActivityItem={this.handleSelectPhrase}/>;
         } else {
-            mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase} onSelectPhrase={this.handleSelectPhrase}/>;
+            mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase} onSelectPhrase={this.handleSelectPhrase} onSetInfo={this.handleSetInfo}/>;
         }
         //manifest="/static/assets/global_cache.manifest"
         return (
@@ -1087,8 +1087,8 @@ var PhraseDetails = React.createClass({
         return (
             <div>
                 phrase: <PhraseInDetails topState={this.props.topState} />
-                definitions: <DefinitionsInDetails onVote={this.props.onVote} topState={this.props.topState}/>
-                <AddDefinitionForm topState={this.props.topState} onSubmitAddDefinition={this.props.onSubmitAddDefinition}/>
+                definitions: <DefinitionsInDetails onVote={this.props.onVote} topState={this.props.topState} onSetInfo={this.props.onSetInfo}/>
+                <AddDefinitionForm topState={this.props.topState} onSubmitAddDefinition={this.props.onSubmitAddDefinition} onSetInfo={this.props.onSetInfo}/>
                 <div>
                     <a href={backToSearchResultsUrl} onClick={this.handleBack}>{backToSearchResultsCaption}</a>
                 </div>
@@ -1102,8 +1102,14 @@ var AddDefinitionForm = React.createClass({
     handleSubmit: function (e) {
         var newDefinition = this.refs.newDefinition.getDOMNode().value,
             examples = this.refs.examples.getDOMNode().value,
-            tags = this.refs.tags.getDOMNode().value;
+            tags = this.refs.tags.getDOMNode().value,
+            loginInfo = this.props.topState.loginInfo,
+            m = this.messages.AddDefinitionForm;
         e.preventDefault();
+        if (!loginInfo) {
+            this.props.onSetInfo(m.loginRequired);
+            return false;
+        }
         this.props.onSubmitAddDefinition(this.props.topState.shownPhraseData.phrase, newDefinition, examples, tags);
     },
     render: function () {
@@ -1139,7 +1145,7 @@ var DefinitionsInDetails = React.createClass({
     render: function () {
         var definitionElements = _.map(this.props.topState.shownPhraseData.definitions, (function (definitionData, idx) {
             return (
-                <DefinitionInDetails onVote={this.props.onVote} topState={this.props.topState} key={idx}/>
+                <DefinitionInDetails onVote={this.props.onVote} topState={this.props.topState} onSetInfo={this.props.onSetInfo} key={idx}/>
             );
         }).bind(this))
         return (
@@ -1165,12 +1171,11 @@ var DefinitionInDetails = React.createClass({
             phrase = this.props.topState.shownPhraseData.phrase,
             apparentVote = matches[1],
             effectiveVote = apparentVote,
-            voteInfo;
+            voteInfo,
+            m = this.messages.DefinitionInDetails;
         if (!loginInfo) {
-            // @TODO: prompt user to login/sign up
-            this.props.onVote({
-                info: <div title="jaja">os la habeis arrancao</div>
-            });
+            //var displayedInfo = this.messages
+            this.props.onSetInfo(m.loginRequiredToVote);
             return false;
         }
         if (('up' === userVote && 'up' === apparentVote) || ('down' === userVote && 'down' === apparentVote)) {
@@ -1666,7 +1671,7 @@ var PhraseSearchResults = React.createClass({
                 <div className="phraseSearchResultsList">
                     {infiniteScroll}
                 </div>
-                <AddPhraseForm onSubmitAddPhrase={this.props.onSubmitAddPhrase} topState={this.state}/>
+                <AddPhraseForm onSubmitAddPhrase={this.props.onSubmitAddPhrase} onSetInfo={this.props.onSetInfo} topState={this.state}/>
             </div>
         );
     }
@@ -1833,8 +1838,15 @@ var DefinitionInList = React.createClass({
 var AddPhraseForm = React.createClass({
     mixins: [I18nMixin],
     handleSubmit: function (e) {
-        var newPhrase = this.refs.newPhrase.getDOMNode().value;
+        var newPhrase = this.refs.newPhrase.getDOMNode().value,
+            loginInfo = this.props.topState.loginInfo,
+            m = this.messages.AddPhraseForm;
         e.preventDefault();
+        if (!loginInfo) {
+            //var displayedInfo = this.messages
+            this.props.onSetInfo(m.loginRequired);
+            return false;
+        }
         this.props.onSubmitAddPhrase(newPhrase);
     },
     render: function () {

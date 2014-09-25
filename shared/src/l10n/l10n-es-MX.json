@@ -65,14 +65,16 @@
         "AddPhraseForm": {
             "addPhrase": "Introduce una frase",
             "newPhrasePlaceHolder": "introduce una nueva frase aquí",
-            "submitPhrase": "enviar"
+            "submitPhrase": "enviar",
+            "loginRequired": "se necesita entrar al sistema para poder añadir frases o palabras"
         },
         "AddDefinitionForm": {
             "addDefinition": "Agrega una definición",
             "addDefinitionPlaceHolder": "introduce un nuevo significado o definición para \"{phrase}\" aquí",
             "addDefinitionExamplesPlaceHolder": "introduce ejemplos de cómo usar la frase \"{phrase}\" aquí",
             "addDefinitionTagsPlaceHolder": "introduce \"etiquetas\" o \"palabras clave\" que creas que están relacionadas con la frase \"{phrase}\" aquí",
-            "submitDefinition": "enviar"
+            "submitDefinition": "enviar",
+            "loginRequired": "se necesita entrar al sistema para poder añadir definiciones"
         },
         "NavBar": {
             "home": "Inicio",
@@ -89,7 +91,8 @@
             "thumbsUpMessage": "{numVotes, plural, =0 {no hay votos positivos} =1 {hay un voto positivo} other {hay # votos positivos}}",
             "thumbsDownMessage": "{numVotes, plural, =0 {no hay votos negativos} =1 {hay un voto negativo} other {hay # votos negativos}}",
             "thumbsUpTitle": "{currentVote, select, up {haz clic para eliminar tu voto anterior} other {vota a favor}}",
-            "thumbsDownTitle": "{currentVote, select, down {haz clic para eliminar tu voto anterior} other {vota en contra}}"
+            "thumbsDownTitle": "{currentVote, select, down {haz clic para eliminar tu voto anterior} other {vota en contra}}",
+            "loginRequiredToVote": "para poder votar, debes primero entrar con tu cuenta de usuario"
         },
         "ContributorActivityItem": {
             "goToPhraseLink": "Ir",
