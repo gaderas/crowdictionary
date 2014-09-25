@@ -32,7 +32,7 @@ var pRequest,
 var Layout = bs.Layout;
 var Widget = bs.Widget;
 var mainReactComponentMounted = false;
-var PHRASES_PAGE_SIZE = 2;
+var PHRASES_PAGE_SIZE = 25;
 
 
 _.mixin(require('./lodash_mixin.js'));
@@ -718,13 +718,11 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     console.error("handleLogIn(). invalid credentials");
                     this.setState({
-                        error: res[1].errno
+                        error: 'errno'+res[1].errno
                     });
+                    return;
                 }
-                console.log("login success!");
-                console.log("res is: " + JSON.stringify(res, ' ', 4));
                 var rObj = res[1];
-                console.log("rObj: " + JSON.stringify(rObj, ' ', 4));
                 var searchTerm = this.state.searchTerm || '';
                 var fragment = '';
                 if ('' !== searchTerm) {
@@ -732,11 +730,6 @@ var CrowDictionary = React.createClass({
                 }
                 Router.navigate(fragment, {trigger: true, replace: false});
             }).bind(this))
-            /*.then((function (newState) {
-                newState.showLoginPrompt = false;
-                this.replaceState(newState);
-                this.forceUpdate();
-            }).bind(this))*/
             .fail(function (err) {
                 console.error("handleLogIn(). failed with error: " + err);
                 this.setState({
@@ -879,6 +872,15 @@ var CrowDictionary = React.createClass({
         });
     },
     handleDefinitionVote: function (voteInfo) {
+        try {
+            this.getLoggedInInfo(true);
+        } catch (err) {
+            console.error("got an error: " + err);
+            this.setState({
+                error: "generic"
+            });
+            return;
+        }
         /*if (voteInfo.error) {
             this.setState(voteInfo);
             return;

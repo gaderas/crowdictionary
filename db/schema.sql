@@ -46,7 +46,7 @@ CREATE TABLE `vote` (
 
 CREATE TABLE `contributor` (
     `id` int AUTO_INCREMENT NOT NULL,
-    `status` enum('pendingVerification', 'active', 'suspended', 'admin') NOT NULL DEFAULT 'pendingVerification',
+    `status` enum('new', 'pendingVerification', 'active', 'suspended', 'admin') NOT NULL DEFAULT 'new',
     `preferred_langs` varchar(2048) NOT NULL DEFAULT '',
     `first_name` varchar(32) NOT NULL DEFAULT '',
     `last_name` varchar(32) NOT NULL DEFAULT '',

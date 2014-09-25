@@ -14,8 +14,8 @@
             "errno3": "no hay un usuario con el correo electrónico introducido",
             "errno4": "sucedió un problema al tratar de marcar ésta cuenta de usuario como verificada",
             "errno5": "no pudimos leer la información de la cuenta para verificar si el código que introduciste es válido",
-            "errno6": "correo electrónico ausente del cuerpo de la petición HTTP",
-            "errno7": "contraseña ausente del cuerpo de la petición HTTP",
+            "errno6": "correo electrónico ausente",
+            "errno7": "contraseña ausente",
             "errno8": "contraseña incorrecta",
             "errno9": "algo ha salido mal y falló tu entrada al sistema"
         },
