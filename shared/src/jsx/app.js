@@ -989,10 +989,11 @@ var CrowDictionary = React.createClass({
               <link href="/static/css/main.css" rel="stylesheet" />
             </head>
             <body>
-            <div>
+            <main>
                 <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} onToMyActivity={this.handleToMyActivity} onToLink={this.handleToLink} topState={this.state} ref="topBar" />
                 {mainContent}
-            </div>
+            </main>
+            <footer>{this.messages.Footer.copyrightNotice}</footer>
             <script src="/static/js/app.js" />
             </body>
             </html>
@@ -1316,10 +1317,10 @@ var TopBar = React.createClass({
     },
     render: function () {
         return (
-            <div>
+            <header className="TopBar">
                 <SearchBar onUserInput={this.props.onUserInput} topState={this.props.topState} ref="searchBar" />
                 <NavBar onGlobalLangChange={this.props.onGlobalLangChange} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} topState={this.props.topState} onToMyActivity={this.props.onToMyActivity} onToLink={this.props.onToLink} />
-            </div>
+            </header>
         );
     }
 });
@@ -1346,7 +1347,7 @@ var SearchBar = React.createClass({
         //this.loadMessages();
         var placeholder = this.fmt(this.msg(this.messages.SearchBar.placeHolder));
         return (
-            <form>
+            <form className="SearchBar">
             <input type="text" defaultValue={this.props.topState.searchTerm} placeholder={placeholder} ref="searchInput" onChange={this.handleChange}/>
             </form>
         );
@@ -1362,13 +1363,10 @@ var NavBar = React.createClass({
             jobs = this.fmt(this.msg(this.messages.NavBar.jobs)),
             homeUrl = aUrl("/", this.props.topState.shortLangCode);
         return (
-            <div>
+            <nav className="NavBar">
                 <span><a onClick={this.handleToLink.bind(this, homeUrl)} href={homeUrl}>{home}</a></span>
-                <span>{about}</span>
-                <span>{jobs}</span>
                 <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} onToMyActivity={this.props.onToMyActivity}/>
-                <GlobalLangPicker onGlobalLangChange={this.props.onGlobalLangChange} topState={this.props.topState}/>
-            </div>
+            </nav>
         );
     }
 });
@@ -1395,9 +1393,10 @@ var LoginStatus = React.createClass({
             shortLangCode = this.props.topState.shortLangCode;
         console.log("loginInfo...: " + JSON.stringify(loginInfo, ' ', 4));
         if (undefined === loginInfo) {
-            var greeting = this.fmt(this.msg(this.messages.LoginStatus.notLoggedInGreeting));
+            var greeting = this.fmt(this.msg(this.messages.LoginStatus.notLoggedInGreeting)),
+                loginUrl = aUrl("/login", shortLangCode);
             return (
-                <span onClick={this.handleClick}>{greeting}</span>
+                <span><a href={aUrl("/login", shortLangCode)} onClick={this.handleClick}>{greeting}</a></span>
             );
         } else {
             var greeting = this.fmt(this.msg(this.messages.LoginStatus.loggedInGreeting), {username: loginInfo.email}),
@@ -1623,23 +1622,6 @@ var SignupForm = React.createClass({
     },
 });
 
-var GlobalLangPicker = React.createClass({
-    handleChange: function () {
-        console.log('in GlobalLangPicker::handleChange()');
-        var newLang = this.refs.globalLang.getDOMNode().value;
-        console.log("global lang changed to: " + newLang);
-        this.props.onGlobalLangChange(newLang);
-    },
-    render: function () {
-        return (
-            <select ref="globalLang" onChange={this.handleChange} defaultValue={this.props.topState.globalLang}>
-                <option value="en-US">U.S. - English</option>
-                <option value="fr-FR">France - Français</option>
-                <option value="es-MX">México - Español</option>
-            </select>
-        );
-    }
-});
 
 var PhraseSearchResults = React.createClass({
     mixins: [LifecycleDebug({displayName: 'PhraseSearchResults'})],
@@ -1899,53 +1881,7 @@ var AddPhraseForm = React.createClass({
 });
 
 
-var FooComponent = React.createClass({
-    'render': function () {
-        var router = this.props.router,
-            clientOrServer = this.props.clientOrServer;
-
-        return (
-            <p>client or server, you ask? "{clientOrServer}"</p>
-        );
-    }
-});
-
-var BarComponent = React.createClass({
-    'render': function () {
-        var router = this.props.router,
-            clientOrServer = this.props.clientOrServer;
-
-        return (
-            <p>client or server, you ask? "{clientOrServer}"</p>
-        );
-    }
-});
-
-var InterfaceComponent = React.createClass({
-    'render': function () {
-        var router = this.props.router,
-            clientOrServer = this.props.clientOrServer;
-
-        return (
-            <Layout router={router}>
-                <table>
-                <tr>
-                <td>
-                    <FooComponent router={router} clientOrServer={clientOrServer} />
-                </td>
-                <td>
-                    <BarComponent router={router} clientOrServer={clientOrServer} />
-                </td>
-                </tr>
-                </table>
-            </Layout>
-        );
-    }
-});
-
-
 module.exports.bs = bs;
-module.exports.InterfaceComponent = InterfaceComponent;
 module.exports.routesInfo = routesInfo;
 module.exports.getNormalizedRouteInfo = getNormalizedRouteInfo;
 module.exports.setupRoute = setupRoute;

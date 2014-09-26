@@ -1,3 +1,26 @@
+@import "breakpoint";
+@import "susy";
+@import "compass/utilities/general/clearfix";
+
+/*// body { @include container(50em); }
+// Setting up the Magic Grid
+//$susy: (
+    //total-columns: 10, // 10 columns
+    //column-width: 4em, // columns are 4em wide
+    //gutter-width: 1em, // with 1em gutters
+    //grid-padding: 1em // and 1em padding on the grid container
+    //container-width: 50em
+//);*/
+
+body {
+    @include breakpoint(600px) {
+        @include container;
+        @include clearfix;
+        border: 1px solid red;
+    }
+}
+
+
 .thumbs.container {
     position: relative;
 }

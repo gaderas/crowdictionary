@@ -11,16 +11,27 @@ module.exports = function(grunt) {
                 dest: 'client/build/js/<%= pkg.name %>.min.js'
             }
         },
-        sass: {
+        compass: {
             dist: {
                 options: {
-                    style: 'expanded'
+                    outputStyle: 'expanded',
+                    require: ['susy', 'breakpoint'],
+                    sassDir: 'client/src/css',
+                    cssDir: 'client/build/css'
+                }
+            }
+        },
+        /*sass: {
+            dist: {
+                options: {
+                    style: 'expanded',
+                    require: ['susy', 'breakpoint', 'sass-compass']
                 },
                 files: {
                     'client/build/css/main.css': 'client/src/css/main.scss'
                 }
             }
-        },
+        },*/
         copy: {
             main: {
                 cwd: 'client/src/html/',
@@ -80,6 +91,8 @@ module.exports = function(grunt) {
 
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    // Load Compass plugin.
+    grunt.loadNpmTasks('grunt-contrib-compass');
     // Load Sass plugin.
     grunt.loadNpmTasks('grunt-contrib-sass');
     // Load copy plugin.
@@ -100,7 +113,7 @@ module.exports = function(grunt) {
     grunt.registerTask('bower', ['bower-install-simple', 'concat']);
     grunt.registerTask('jsx', ['shell:jsx-shared', 'shell:jsx-server', 'shell:jsx-client']);
     // Default task(s).
-    grunt.registerTask('default', ['jsonlint', 'uglify', 'sass', 'copy', 'bower', 'jsx', 'browserify']);
+    grunt.registerTask('default', ['jsonlint', 'uglify', 'compass', 'copy', 'bower', 'jsx', 'browserify']);
 };
 
 /* vim: expandtab:tabstop=4:softtabstop=4:shiftwidth=4:set filetype=javascript: */

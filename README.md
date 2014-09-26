@@ -20,8 +20,8 @@ TODO Performance Improvements
 TODO Features
 ----
 
+*   Make definitions linkable
 *   Create (editable) user profile page
-*   Add social network links, avatar to user profile
 *   ~~Add 'examples', 'tags' fields to definitions~~
 *   ~~Don't let users overwrite phrases/definitions submitted by others~~
 *   Implement redirect when hitting URLs with no shortLangCode, and cross links to other languages
@@ -31,6 +31,7 @@ TODO Features
 *   ~~Eliminate remaining pieces of code that still don't use route-based states (except infinite scrolling ones)~~
 *   Style (mobile first)
 *   Test on mobile
+*   Add social network links, avatar to user profile
 *   Allow anonymous voting (guard by IP)
 *   Allow Google/Facebook/Twitter login
 

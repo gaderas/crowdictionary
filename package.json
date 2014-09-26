@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "browser-request": "^0.3.2",
+    "grunt-contrib-compass": "^1.0.1",
     "intl": "^0.1.4",
     "intl-messageformat": "^1.0.0-rc-2",
     "keygrip": "^1.0.1",

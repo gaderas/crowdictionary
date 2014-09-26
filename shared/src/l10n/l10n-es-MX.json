@@ -24,6 +24,9 @@
             "infono2": "se ha ingresado al sistema con éxito",
             "infono3": "se ha salido del sistema con éxito"
         },
+        "Footer": {
+            "copyrightNotice": "Copyright (c). Todos los derechos reservados. 2014."
+        },
         "SearchBar": {
             "placeHolder": "busca..."
         },
