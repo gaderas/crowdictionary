@@ -989,10 +989,10 @@ var CrowDictionary = React.createClass({
               <link href="/static/css/main.css" rel="stylesheet" />
             </head>
             <body>
-            <main>
+            <div>
                 <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} onToMyActivity={this.handleToMyActivity} onToLink={this.handleToLink} topState={this.state} ref="topBar" />
                 {mainContent}
-            </main>
+            </div>
             <footer>{this.messages.Footer.copyrightNotice}</footer>
             <script src="/static/js/app.js" />
             </body>
@@ -1318,8 +1318,8 @@ var TopBar = React.createClass({
     render: function () {
         return (
             <header className="TopBar">
-                <SearchBar onUserInput={this.props.onUserInput} topState={this.props.topState} ref="searchBar" />
                 <NavBar onGlobalLangChange={this.props.onGlobalLangChange} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} topState={this.props.topState} onToMyActivity={this.props.onToMyActivity} onToLink={this.props.onToLink} />
+                <SearchBar onUserInput={this.props.onUserInput} topState={this.props.topState} ref="searchBar" />
             </header>
         );
     }
@@ -1347,9 +1347,11 @@ var SearchBar = React.createClass({
         //this.loadMessages();
         var placeholder = this.fmt(this.msg(this.messages.SearchBar.placeHolder));
         return (
-            <form className="SearchBar">
+            <section className="SearchBar">
+            <form className="SearchBar oi" data-glyph="magnifying-glass">
             <input type="text" defaultValue={this.props.topState.searchTerm} placeholder={placeholder} ref="searchInput" onChange={this.handleChange}/>
             </form>
+            </section>
         );
     }
 });
@@ -1364,7 +1366,7 @@ var NavBar = React.createClass({
             homeUrl = aUrl("/", this.props.topState.shortLangCode);
         return (
             <nav className="NavBar">
-                <span><a onClick={this.handleToLink.bind(this, homeUrl)} href={homeUrl}>{home}</a></span>
+                <h2 className="home"><a onClick={this.handleToLink.bind(this, homeUrl)} href={homeUrl}>{home}</a></h2>
                 <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} onToMyActivity={this.props.onToMyActivity}/>
             </nav>
         );
@@ -1396,7 +1398,7 @@ var LoginStatus = React.createClass({
             var greeting = this.fmt(this.msg(this.messages.LoginStatus.notLoggedInGreeting)),
                 loginUrl = aUrl("/login", shortLangCode);
             return (
-                <span><a href={aUrl("/login", shortLangCode)} onClick={this.handleClick}>{greeting}</a></span>
+                <h2 className="login-info"><a href={aUrl("/login", shortLangCode)} onClick={this.handleClick}>{greeting}</a></h2>
             );
         } else {
             var greeting = this.fmt(this.msg(this.messages.LoginStatus.loggedInGreeting), {username: loginInfo.email}),
@@ -1404,7 +1406,7 @@ var LoginStatus = React.createClass({
                 logOutMessage = this.fmt(this.msg(this.messages.LoginStatus.logOutMessage)),
                 logOutUrl = aUrl("/logout", shortLangCode);
             return (
-                <span><a href={myActivityUrl} onClick={this.handleToMyActivity}>{greeting}</a> <a href={logOutUrl} onClick={this.handleLogOut}>{logOutMessage}</a></span>
+                <h2 className="login-info"><a href={myActivityUrl} onClick={this.handleToMyActivity}>{greeting}</a> <a href={logOutUrl} onClick={this.handleLogOut}>{logOutMessage}</a></h2>
             );
         }
     }
@@ -1680,13 +1682,13 @@ var PhraseSearchResults = React.createClass({
                 {phraseSearchResults}
             </InfiniteScroll>
         return (
-            <div>
+            <main>
                 <TopSearchCaption topState={this.state}/>
-                <div className="phraseSearchResultsList">
+                <dl className="phraseSearchResultsList">
                     {infiniteScroll}
-                </div>
+                </dl>
                 <AddPhraseForm onSubmitAddPhrase={this.props.onSubmitAddPhrase} onSetInfo={this.props.onSetInfo} topState={this.state}/>
-            </div>
+            </main>
         );
     }
 });
@@ -1801,11 +1803,14 @@ var TopSearchCaption = React.createClass({
     mixins: [I18nMixin],
     render: function () {
         //this.loadMessages();
-        var showingResultsForSearchTerm = this.fmt(this.msg(this.messages.TopSearchCaption.showingResultsForSearchTerm), {searchTerm: this.props.topState.searchTerm});
+        var resultsHeading;
+        if (this.props.topState.searchTerm) {
+            resultsHeading = this.fmt(this.msg(this.messages.TopSearchCaption.showingResultsForSearchTerm), {searchTerm: this.props.topState.searchTerm});
+        } else {
+            resultsHeading = '';
+        }
         return (
-            <div>
-                {showingResultsForSearchTerm}
-            </div>
+            <h2 className="results-heading">{resultsHeading}</h2>
         );
     }
 });
@@ -1813,10 +1818,8 @@ var TopSearchCaption = React.createClass({
 var PhraseSearchResult = React.createClass({
     render: function () {
         return (
-            <div>
                 <PhraseInList searchResult={this.props.searchResult} onSelectPhrase={this.props.onSelectPhrase} topState={this.props.topState}/>
                 <DefinitionInList searchResult={this.props.searchResult}/>
-            </div>
         );
     }
 });
