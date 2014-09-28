@@ -20,6 +20,7 @@ TODO Performance Improvements
 TODO Features
 ----
 
+*   Style (mobile first)
 *   Make definitions linkable
 *   Create (editable) user profile page
 *   ~~Add 'examples', 'tags' fields to definitions~~
@@ -29,7 +30,6 @@ TODO Features
 *   ~~User page (come up with queries, rollup tables)~~
 *   Users leaderboard (come up with queries, rollup tables)
 *   ~~Eliminate remaining pieces of code that still don't use route-based states (except infinite scrolling ones)~~
-*   Style (mobile first)
 *   Test on mobile
 *   Add social network links, avatar to user profile
 *   Allow anonymous voting (guard by IP)
