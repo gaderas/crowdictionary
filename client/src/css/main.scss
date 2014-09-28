@@ -2,6 +2,7 @@
 @import "susy";
 @import "compass/utilities/general/clearfix";
 @import "open-iconic";
+@import "compass/reset";
 
 /*// body { @include container(50em); }
 // Setting up the Magic Grid
@@ -35,7 +36,7 @@ form.SearchBar
 //$gutter-width: 1em; // with 1em gutters
 //$grid-padding: 1em; // and 1em padding on the grid container
 //            $total-columns: 4; // 10 columns
-            $column-width: 1em; // columns are 4em wide
+            //$column-width: 1em; // columns are 4em wide
 //            $gutter-width: 0; // with 1em gutters
 //            $grid-padding: 0; // and 1em padding on the grid container
 

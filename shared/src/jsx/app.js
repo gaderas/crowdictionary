@@ -1684,9 +1684,9 @@ var PhraseSearchResults = React.createClass({
         return (
             <main>
                 <TopSearchCaption topState={this.state}/>
-                <dl className="phraseSearchResultsList">
+                <ul className="phraseSearchResultsList">
                     {infiniteScroll}
-                </dl>
+                </ul>
                 <AddPhraseForm onSubmitAddPhrase={this.props.onSubmitAddPhrase} onSetInfo={this.props.onSetInfo} topState={this.state}/>
             </main>
         );
@@ -1818,8 +1818,10 @@ var TopSearchCaption = React.createClass({
 var PhraseSearchResult = React.createClass({
     render: function () {
         return (
+            <div>
                 <PhraseInList searchResult={this.props.searchResult} onSelectPhrase={this.props.onSelectPhrase} topState={this.props.topState}/>
                 <DefinitionInList searchResult={this.props.searchResult}/>
+            </div>
         );
     }
 });
@@ -1834,9 +1836,9 @@ var PhraseInList = React.createClass({
     render: function () {
         var phraseUrl = aUrl(util.format("/phrases/%s", this.props.searchResult.phrase), this.props.topState.shortLangCode);
         return (
-            <div onClick={this.handleClick}>
+            <dt onClick={this.handleClick}>
                 <a href={phraseUrl}>{this.props.searchResult.phrase}</a>
-            </div>
+            </dt>
         );
     }
 });
@@ -1845,9 +1847,9 @@ var DefinitionInList = React.createClass({
     render: function () {
         var definition = this.props.searchResult.topDefinition.definition;
         return (
-            <div>
+            <dd>
                 {definition}
-            </div>
+            </dd>
         );
     }
 });

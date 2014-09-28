@@ -85,7 +85,7 @@
             "jobs": "Empleos"
         },
         "TopSearchCaption": {
-            "showingResultsForSearchTerm": "Buscaste: \"{searchTerm}\""
+            "showingResultsForSearchTerm": "Buscaste: <span>\"{searchTerm}\"</span>"
         },
         "LoggedInMixin": {
             "requiredLoginMissing": "se intentó realizar una operación para la cual es necesario haber entrado al sistema como usuario registrado, sin haberlo hecho"
