@@ -249,6 +249,18 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
             .then(function (l) {
                 return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
             });
+    } else if ('/addPhrase' === nRouteInfo.route) {
+        // "add phrase" page
+        return pL10nForLang
+            .then(function (l) {
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+            });
+    } else if ('/addDefinition' === nRouteInfo.route) {
+        // "add definition" page
+        return pL10nForLang
+            .then(function (l) {
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+            });
     }
 };
 
@@ -533,6 +545,76 @@ var routesInfo = [
                 loginStateUrl = baseRoot + "/v1/login";
             return pRequest({method: "GET", url: loginStateUrl, json: true})
                 .then(function (loginStateRes) {
+                    // add login information if we got it
+                    if (200 === loginStateRes[0].statusCode) {
+                        reactState.loginInfo = loginStateRes[1];
+                    }
+                    return reactState;
+                });
+            // if above promise fails, return here
+            return reactState;
+        }
+    },
+    {
+        serverRoute: '/addPhrase',
+        serverParamNames: [],
+        clientRoute: 'addPhrase',
+        clientRouterFunc: clientRouterFunc,
+        clientRouterFuncName: '/addPhrase',
+        calculateStateFunc: function (overrides, nRouteInfo) {
+            var lang = (overrides && overrides.globalLang) || 'es-MX',
+                l10nData = (overrides && overrides.l10nData) || {},
+                shortLangCode = nRouteInfo.shortLangCode,
+                reactState = {
+                    globalLang: lang,
+                    shortLangCode: shortLangCode,
+                    l10nData: l10nData,
+                    showAddPhrase: true
+                },
+                loginStateUrl = baseRoot + "/v1/login";
+            return pRequest({method: "GET", url: loginStateUrl, json: true})
+                .then(function (loginStateRes) {
+                    // add login information if we got it
+                    if (200 === loginStateRes[0].statusCode) {
+                        reactState.loginInfo = loginStateRes[1];
+                    }
+                    return reactState;
+                });
+            // if above promise fails, return here
+            return reactState;
+        }
+    },
+    {
+        serverRoute: '/addDefinition',
+        serverParamNames: ['phrase'],
+        clientRoute: 'addDefinition',
+        clientRouterFunc: clientRouterFunc,
+        clientRouterFuncName: '/addDefinition',
+        calculateStateFunc: function (overrides, nRouteInfo) {
+            var lang = (overrides && overrides.globalLang) || 'es-MX',
+                l10nData = (overrides && overrides.l10nData) || {},
+                shortLangCode = nRouteInfo.shortLangCode,
+                reactState = {
+                    globalLang: lang,
+                    shortLangCode: shortLangCode,
+                    l10nData: l10nData,
+                    showAddDefinition: false
+                },
+                phrase = nRouteInfo.query.phrase,
+                loginStateUrl = baseRoot + "/v1/login",
+                phraseUrl = baseRoot + util.format("/v1/lang/%s/phrases/%s", lang, phrase);
+            if ("string" !== typeof phrase || _.isEmpty(phrase)) {
+                throw Error("phrase not provided in URL");
+            }
+            return Q.all([pRequest({url: phraseUrl, json: true}), pRequest({url: loginStateUrl, json: true})])
+                .spread(function (phraseRes, loginStateRes) {
+                    if (200 !== phraseRes[0].statusCode) {
+                        throw Error("couldn't fetch phrase");
+                    }
+                    if (!phraseRes[1].length) {
+                        throw Error("phrase not found");
+                    }
+                    reactState.showAddDefinition = phraseRes[1][0];
                     // add login information if we got it
                     if (200 === loginStateRes[0].statusCode) {
                         reactState.loginInfo = loginStateRes[1];
@@ -949,10 +1031,6 @@ var CrowDictionary = React.createClass({
                 });
             }).bind(this));
     },
-    handleToLink: function (e) {
-        e.preventDefault();
-        console.log("target: " + util.inspect(e.target));
-    },
     render: function () {
         //console.log("on render, with state: " + JSON.stringify(this.state));
         var mainContent;
@@ -972,11 +1050,16 @@ var CrowDictionary = React.createClass({
             // log out
             mainContent = <LogOutOutcome topState={this.state} doLogOut={this.doLogOut} />
         } else if (this.state.shownPhraseData) {
-            mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} onSubmitAddDefinition={this.handleSubmitAddDefinition} getSearchTermFromDOM={this.getSearchTermFromDOM} onSetInfo={this.handleSetInfo}/>;
+            mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} getSearchTermFromDOM={this.getSearchTermFromDOM} onSetInfo={this.handleSetInfo}/>;
         } else if (!_.isEmpty(this.state.contributorActivity)) {
             mainContent = <ContributorActivity topState={this.state} onClickActivityItem={this.handleSelectPhrase}/>;
+        } else if (this.state.showAddPhrase){
+            mainContent = <AddPhraseForm onSubmitAddPhrase={this.handleSubmitAddPhrase} onSetInfo={this.handleSetInfo} topState={this.state}/>;
+        } else if (this.state.showAddDefinition) {
+            // showAddDefinition itself is a phrase object
+            mainContent = <AddDefinitionForm phraseData={this.state.showAddDefinition} topState={this.state} onSubmitAddDefinition={this.handleSubmitAddDefinition} onSetInfo={this.handleSetInfo}/>;
         } else {
-            mainContent = <PhraseSearchResults topState={this.state} onSubmitAddPhrase={this.handleSubmitAddPhrase} onSelectPhrase={this.handleSelectPhrase} onSetInfo={this.handleSetInfo}/>;
+            mainContent = <PhraseSearchResults topState={this.state} onSelectPhrase={this.handleSelectPhrase} onSetInfo={this.handleSetInfo}/>;
         }
         //manifest="/static/assets/global_cache.manifest"
         return (
@@ -990,7 +1073,7 @@ var CrowDictionary = React.createClass({
             </head>
             <body>
             <div>
-                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} onToMyActivity={this.handleToMyActivity} onToLink={this.handleToLink} topState={this.state} ref="topBar" />
+                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} onToMyActivity={this.handleToMyActivity} topState={this.state} ref="topBar" />
                 {mainContent}
             </div>
             <footer>{this.messages.Footer.copyrightNotice}</footer>
@@ -1121,7 +1204,6 @@ var PhraseDetails = React.createClass({
             <div>
                 phrase: <PhraseInDetails topState={this.props.topState} />
                 definitions: <DefinitionsInDetails onVote={this.props.onVote} topState={this.props.topState} onSetInfo={this.props.onSetInfo}/>
-                <AddDefinitionForm topState={this.props.topState} onSubmitAddDefinition={this.props.onSubmitAddDefinition} onSetInfo={this.props.onSetInfo}/>
                 <div>
                     <a href={backToSearchResultsUrl} onClick={this.handleBack}>{backToSearchResultsCaption}</a>
                 </div>
@@ -1137,20 +1219,21 @@ var AddDefinitionForm = React.createClass({
             examples = this.refs.examples.getDOMNode().value,
             tags = this.refs.tags.getDOMNode().value,
             loginInfo = this.props.topState.loginInfo,
+            phraseData = this.props.phraseData,
             m = this.messages.AddDefinitionForm;
         e.preventDefault();
         if (!loginInfo) {
             this.props.onSetInfo(m.loginRequired);
             return false;
         }
-        this.props.onSubmitAddDefinition(this.props.topState.shownPhraseData.phrase, newDefinition, examples, tags);
+        this.props.onSubmitAddDefinition(this.props.phraseData.phrase, newDefinition, examples, tags);
     },
     render: function () {
         //this.loadMessages();
         var addDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinition)),
-            placeholderDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionPlaceHolder), {phrase: this.props.topState.shownPhraseData.phrase}),
-            placeholderExamples = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionExamplesPlaceHolder), {phrase: this.props.topState.shownPhraseData.phrase}),
-            placeholderTags = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionTagsPlaceHolder), {phrase: this.props.topState.shownPhraseData.phrase}),
+            placeholderDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionPlaceHolder), {phrase: this.props.phraseData.phrase}),
+            placeholderExamples = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionExamplesPlaceHolder), {phrase: this.props.phraseData.phrase}),
+            placeholderTags = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionTagsPlaceHolder), {phrase: this.props.phraseData.phrase}),
             submit = this.fmt(this.msg(this.messages.AddDefinitionForm.submitDefinition));
         return (
             <div>
@@ -1318,7 +1401,7 @@ var TopBar = React.createClass({
     render: function () {
         return (
             <header className="TopBar">
-                <NavBar onGlobalLangChange={this.props.onGlobalLangChange} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} topState={this.props.topState} onToMyActivity={this.props.onToMyActivity} onToLink={this.props.onToLink} />
+                <NavBar onGlobalLangChange={this.props.onGlobalLangChange} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} topState={this.props.topState} onToMyActivity={this.props.onToMyActivity} />
                 <SearchBar onUserInput={this.props.onUserInput} topState={this.props.topState} ref="searchBar" />
             </header>
         );
@@ -1366,10 +1449,48 @@ var NavBar = React.createClass({
             homeUrl = aUrl("/", this.props.topState.shortLangCode);
         return (
             <nav className="NavBar">
-                <h2 className="home"><a onClick={this.handleToLink.bind(this, homeUrl)} href={homeUrl}>{home}</a></h2>
-                <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut} onToMyActivity={this.props.onToMyActivity}/>
+                <h2 className="home"><a className="oi" data-glyph="home" title={home} onClick={this.handleToLink.bind(this, homeUrl)} href={homeUrl}></a></h2>
+                <UserLinks phraseData={this.props.topState.shownPhraseData} topState={this.props.topState} onToMyActivity={this.props.onToMyActivity}/>
+                <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut}/>
             </nav>
         );
+    }
+});
+
+var UserLinks = React.createClass({
+    mixins: [I18nMixin, LinksMixin],
+    handleToMyActivity: function (e) {
+        e.preventDefault();
+        this.props.onToMyActivity();
+    },
+    render: function () {
+        var loginInfo = this.props.topState.loginInfo,
+            shortLangCode = this.props.topState.shortLangCode;
+        if (undefined === loginInfo) {
+            return (
+                <h2 className="user-links"></h2>
+            );
+        } else {
+            var addMessage,
+                addUrl,
+                myActivityMessage = this.messages.UserLinks.myActivity,
+                myActivityUrl = aUrl(util.format("/contributors/%s/activity", loginInfo.id), shortLangCode);
+            if (!this.props.phraseData) {
+                // viewing list of phrases. show option to add a phrase.
+                addMessage = this.messages.UserLinks.addPhrase;
+                addUrl = aUrl("/addPhrase");
+            } else {
+                var phrase = this.props.phraseData.phrase;
+                addMessage = this.fmt(this.msg(this.messages.UserLinks.addDefinition), {phrase: phrase});
+                addUrl = aUrl("/addDefinition?phrase="+phrase);
+            }
+            return (
+                <h2 className="user-links">
+                    <a className="oi" data-glyph="person" title={myActivityMessage} href={myActivityUrl} onClick={this.handleToMyActivity}></a>
+                    <a className="oi" data-glyph="plus" title={addMessage} href={addUrl} onClick={this.handleToLink.bind(this, addUrl)}></a>
+                </h2>
+            );
+        }
     }
 });
 
@@ -1385,28 +1506,27 @@ var LoginStatus = React.createClass({
         });*/
         this.props.onLogOut();
     },
-    handleToMyActivity: function (e) {
-        e.preventDefault();
-        this.props.onToMyActivity();
-    },
     render: function () {
         //this.loadMessages();
         var loginInfo = this.props.topState.loginInfo,
             shortLangCode = this.props.topState.shortLangCode;
         console.log("loginInfo...: " + JSON.stringify(loginInfo, ' ', 4));
         if (undefined === loginInfo) {
-            var greeting = this.fmt(this.msg(this.messages.LoginStatus.notLoggedInGreeting)),
+            var greeting = this.messages.LoginStatus.notLoggedInGreeting,
                 loginUrl = aUrl("/login", shortLangCode);
             return (
-                <h2 className="login-info"><a href={aUrl("/login", shortLangCode)} onClick={this.handleClick}>{greeting}</a></h2>
+                <h2 className="login-info"><a className="oi" data-glyph="account-login" title={greeting} href={aUrl("/login", shortLangCode)} onClick={this.handleClick}></a></h2>
             );
         } else {
-            var greeting = this.fmt(this.msg(this.messages.LoginStatus.loggedInGreeting), {username: loginInfo.email}),
-                myActivityUrl = aUrl(util.format("/contributors/%s/activity", loginInfo.id), shortLangCode);
+            var //greeting = this.fmt(this.msg(this.messages.LoginStatus.loggedInGreeting), {username: loginInfo.email}),
                 logOutMessage = this.fmt(this.msg(this.messages.LoginStatus.logOutMessage)),
-                logOutUrl = aUrl("/logout", shortLangCode);
+                logOutUrl = aUrl("/logout", shortLangCode),
+                addMessage,
+                addUrl;
             return (
-                <h2 className="login-info"><a href={myActivityUrl} onClick={this.handleToMyActivity}>{greeting}</a> <a href={logOutUrl} onClick={this.handleLogOut}>{logOutMessage}</a></h2>
+                <h2 className="login-info">
+                    <a className="oi" data-glyph="account-logout" title={logOutMessage} href={logOutUrl} onClick={this.handleLogOut}></a>
+                </h2>
             );
         }
     }
@@ -1687,7 +1807,6 @@ var PhraseSearchResults = React.createClass({
                 <ul className="phraseSearchResultsList">
                     {infiniteScroll}
                 </ul>
-                <AddPhraseForm onSubmitAddPhrase={this.props.onSubmitAddPhrase} onSetInfo={this.props.onSetInfo} topState={this.state}/>
             </main>
         );
     }
@@ -1816,12 +1935,20 @@ var TopSearchCaption = React.createClass({
 });
 
 var PhraseSearchResult = React.createClass({
+    mixins: [I18nMixin],
     render: function () {
+        var definitionOrMessage,
+            missingDefinitionMessage = this.messages.PhraseSearchResult.missingDefinition;
+        if (this.props.searchResult && this.props.searchResult.topDefinition && this.props.searchResult.topDefinition.definition) {
+            definitionOrMessage = <DefinitionInList searchResult={this.props.searchResult}/>;
+        } else {
+            definitionOrMessage = <div className="missing-definition">{missingDefinitionMessage}</div>
+        }
         return (
-            <div>
+            <dl>
                 <PhraseInList searchResult={this.props.searchResult} onSelectPhrase={this.props.onSelectPhrase} topState={this.props.topState}/>
-                <DefinitionInList searchResult={this.props.searchResult}/>
-            </div>
+                {definitionOrMessage}
+            </dl>
         );
     }
 });
@@ -1848,7 +1975,9 @@ var DefinitionInList = React.createClass({
         var definition = this.props.searchResult.topDefinition.definition;
         return (
             <dd>
-                {definition}
+                <span className="oi" data-glyph="double-quote-serif-left"/>
+                    {definition}
+                <span className="oi" data-glyph="double-quote-serif-right"/>
             </dd>
         );
     }

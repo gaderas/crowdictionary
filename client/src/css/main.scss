@@ -62,10 +62,22 @@ div {
             //font-family: "Open Sans",sans-serif;
             //background-color: #EAEAEA;
             h2.home {
-                @include span(1 of 2);
+                @include span(1 of 3);
+                * {
+                    padding: 0 .4em;
+                }
+            }
+            h2.user-links {
+                @include span(1 of 3);
+                * {
+                    padding: 0 .4em;
+                }
             }
             h2.login-info {
-                @include span(1 of 2 last);
+                @include span(1 of 3 last);
+                * {
+                    padding: 0 .4em;
+                }
             }
             h2 {
                 //@include with-layout(gutters 0);
@@ -80,7 +92,7 @@ div {
 }
 section.SearchBar {
     @include span(1 of 1 last);
-    @include hr-with-shadow(1px);
+    @include hr-with-shadow(2px);
     text-align: center;
     padding: 1em 0;
 }
@@ -107,9 +119,20 @@ main {
     h2.results-heading {
         @include span(1 of 1 last);
     }
-    article.phraseSearchResultsList {
+    ul.phraseSearchResultsList {
         @include span(1 of 1 last);
         @include container;
+        dl {
+            @include hr-with-shadow(1px);
+            padding: 1em 0;
+            dt {
+            }
+            dd {
+                margin: 0.6em 0 0 0;
+            }
+            div.missing-definition {
+            }
+        }
     }
 }
 

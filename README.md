@@ -21,6 +21,7 @@ TODO Features
 ----
 
 *   Style (mobile first)
+*   Use icons: account-{login,logout}, person, people, plus, pencil, thumb-up, thumb-down, random, menu?, home, double-quote-{sans,serif}-{left,right}
 *   Make definitions linkable
 *   Create (editable) user profile page
 *   ~~Add 'examples', 'tags' fields to definitions~~

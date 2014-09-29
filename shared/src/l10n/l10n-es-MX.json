@@ -30,6 +30,11 @@
         "SearchBar": {
             "placeHolder": "busca..."
         },
+        "UserLinks": {
+            "addPhrase": "agrega una nueva frase o palabra",
+            "addDefinition": "agrega tu propia definición de la frase/palabra \"{phrase}\"",
+            "myActivity": "ver mi historial"
+        },
         "LoginStatus": {
             "loggedInGreeting": "¡Hola {username}!",
             "notLoggedInGreeting": "¡entrá!",
@@ -85,7 +90,7 @@
             "jobs": "Empleos"
         },
         "TopSearchCaption": {
-            "showingResultsForSearchTerm": "Buscaste: <span>\"{searchTerm}\"</span>"
+            "showingResultsForSearchTerm": "Buscaste: \"{searchTerm}\""
         },
         "LoggedInMixin": {
             "requiredLoginMissing": "se intentó realizar una operación para la cual es necesario haber entrado al sistema como usuario registrado, sin haberlo hecho"
@@ -105,6 +110,9 @@
         },
         "PhraseDetails": {
             "backToSearchResults": "regresar a los resultados de búsqueda"
+        },
+        "PhraseSearchResult": {
+            "missingDefinition": "esta palabra o frase aún no cuenta con definiciones"
         },
         "VerificationPrompt": {
             "formTitle": "Verificación de nueva cuenta de usuario",
