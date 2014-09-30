@@ -41,11 +41,18 @@ form.SearchBar
 //            $grid-padding: 0; // and 1em padding on the grid container
 
 body {
+    @include container;
     background: none repeat scroll 0% 0% #2F2F2F;
     font-family: "Ubuntu","Lucida Grande","Lucida Sans",Tahoma,sans-serif;
 }
 body, a:link {
     color: #C6C6C6;
+}
+body > footer {
+    @include span(1 of 1);
+    font-size: smaller;
+    margin-top: 2em;
+    text-align: center;
 }
 a:link {
     text-decoration: none;
@@ -54,7 +61,8 @@ a:link {
     box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.07);
     border-bottom: $width solid #121212;
 }
-div {
+body > div {
+    @include span(1 of 1);
     header.TopBar {
         @include hr-with-shadow(4px);
         nav.NavBar {
@@ -113,26 +121,85 @@ form.SearchBar {
     padding: 1em 0;
     display: inline-block;
 }
-main {
+main.phrase-list {
     @include span(1 of 1 last);
     @include container;
     h2.results-heading {
         @include span(1 of 1 last);
+        margin-top: 0.4em;
+        font-style: italic;
     }
     ul.phraseSearchResultsList {
         @include span(1 of 1 last);
-        @include container;
         dl {
             @include hr-with-shadow(1px);
             padding: 1em 0;
             dt {
+                margin: 0 0 0 0.4em;
             }
             dd {
-                margin: 0.6em 0 0 0;
+                margin: 0.6em 0 0 0.9em;
+                span::before {
+                    padding: 0 0.2em;
+                }
             }
             div.missing-definition {
+                font-size: xx-small;
+                margin: 0.4em 0 0 0;
+                text-align: center;
             }
         }
+    }
+}
+main.phrase-details {
+    @include span(1 of 1 last);
+    //@include with-layout(gutters 0);
+    @include container;
+    > h2 {
+        @include span(1 of 1 last);
+        margin-top: 0.4em;
+        font-style: italic;
+    }
+    > ul {
+        @include span(1 of 1 last);
+        margin-bottom: 0.5em;
+        counter-reset: defNum;
+        > li {
+            @include hr-with-shadow(1px);
+            > * {
+                margin-left: 0.9em;
+            }
+            padding: 0.6em 0;
+            .votes.container {
+            }
+            dt {
+                text-decoration: underline;
+            }
+            dd.definition {
+            }
+            dd.examples {
+            }
+            dd.tags {
+                a {
+                }
+            }
+            position: relative;
+            &::before {
+                color: rgba(60, 60, 60, 1);
+                counter-increment: defNum;
+                content: counter(defNum)".";
+                position:absolute;
+                right: 0;
+                font-size: 5em;
+                font-family: "Georgia","sans-serif",serif;
+                z-index: -1;
+            }
+        }
+    }
+    > div a.back::before {
+        padding-left: 0.4em;
+        padding-right: 0.6em;
+        display: inline;
     }
 }
 

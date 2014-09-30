@@ -20,6 +20,7 @@ TODO Performance Improvements
 TODO Features
 ----
 
+*   convert tags into links to phrases. if logged in and phrases don't exist, it's clickable with pre-filled new phrase form.
 *   Style (mobile first)
 *   Use icons: account-{login,logout}, person, people, plus, pencil, thumb-up, thumb-down, random, menu?, home, double-quote-{sans,serif}-{left,right}
 *   Make definitions linkable

@@ -25,7 +25,7 @@
             "infono3": "se ha salido del sistema con éxito"
         },
         "Footer": {
-            "copyrightNotice": "Copyright (c). Todos los derechos reservados. 2014."
+            "copyrightNotice": "Copyright, derechos reservados © gaderas.com 2014."
         },
         "SearchBar": {
             "placeHolder": "busca..."
@@ -112,7 +112,7 @@
             "backToSearchResults": "regresar a los resultados de búsqueda"
         },
         "PhraseSearchResult": {
-            "missingDefinition": "esta palabra o frase aún no cuenta con definiciones"
+            "missingDefinition": "-- esta palabra o frase aún no cuenta con definiciones --"
         },
         "VerificationPrompt": {
             "formTitle": "Verificación de nueva cuenta de usuario",

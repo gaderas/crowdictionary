@@ -1201,13 +1201,13 @@ var PhraseDetails = React.createClass({
             backToSearchResultsRelativeUrl = searchTerm ? '?q=' + searchTerm : '',
             backToSearchResultsUrl = aUrl(backToSearchResultsRelativeUrl, shortLangCode);
         return (
-            <div>
-                phrase: <PhraseInDetails topState={this.props.topState} />
-                definitions: <DefinitionsInDetails onVote={this.props.onVote} topState={this.props.topState} onSetInfo={this.props.onSetInfo}/>
+            <main className="phrase-details">
+                <PhraseInDetails topState={this.props.topState} />
+                <DefinitionsInDetails onVote={this.props.onVote} topState={this.props.topState} onSetInfo={this.props.onSetInfo}/>
                 <div>
-                    <a href={backToSearchResultsUrl} onClick={this.handleBack}>{backToSearchResultsCaption}</a>
+                    <a href={backToSearchResultsUrl} onClick={this.handleBack} className="back oi" data-glyph="arrow-thick-left">{backToSearchResultsCaption}</a>
                 </div>
-            </div>
+            </main>
         );
     }
 });
@@ -1252,7 +1252,7 @@ var AddDefinitionForm = React.createClass({
 var PhraseInDetails = React.createClass({
     render: function () {
         return (
-            <div>{this.props.topState.shownPhraseData.phrase}</div>
+            <h2>{this.props.topState.shownPhraseData.phrase}</h2>
         );
     }
 });
@@ -1265,7 +1265,7 @@ var DefinitionsInDetails = React.createClass({
             );
         }).bind(this))
         return (
-            <div>{definitionElements}</div>
+            <ul>{definitionElements}</ul>
         );
     }
 });
@@ -1352,14 +1352,15 @@ var DefinitionInDetails = React.createClass({
         //this.refs.thumbsDown.addEventListener('click', this.handleVoteDown);
     },
     componentDidMount: function () {
-        this.setupThumbsDOM(true);
+        //this.setupThumbsDOM(true);
     },
     componentDidUpdate: function () {
-        this.setupThumbsDOM(false);
+        //this.setupThumbsDOM(false);
     },
     render: function () {
         var userVote = this.getCurrentUserVote(),
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
+            phrase = this.props.topState.shownPhraseData.phrase,
             definition = definitionObj.definition,
             examples = definitionObj.examples,
             tags = definitionObj.tags,
@@ -1370,25 +1371,22 @@ var DefinitionInDetails = React.createClass({
             thumbsUpTitle = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsUpTitle), {currentVote: userVote}),
             thumbsDownTitle = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsDownTitle), {currentVote: userVote});
         return (
-            <div>
-                <div className="definition">{definition}</div>
-                <div className="examples">{examples}</div>
-                <div className="tags">{tags}</div>
+            <li>
+                <dl>
+                    <dt>{phrase}</dt>
+                    <dd className="definition">{definition}</dd>
+                    <dd className="examples">{examples}</dd>
+                    <dd className="tags">{tags}</dd>
+                </dl>
                 <div className="votes up container">
-                    <div className="thumbs up container">
-                        <object ref="thumbsUp" data="/static/assets/img/designmodo_linecons_free-like.svg" type="image/svg+xml"/>
-                        <div className="thumbs up overlay" onClick={this.handleVote} title={thumbsUpTitle}> </div>
-                    </div>
-                    <div className="">{thumbsUpMessage}</div>
+                    <a className="up oi" href="#" data-glyph="thumb-up" title={thumbsUpTitle} onClick={this.handleVote}></a>
+                    <p>{thumbsUpMessage}</p>
                 </div>
                 <div className="votes down container">
-                    <div className="thumbs down container">
-                        <object ref="thumbsDown" data="/static/assets/img/designmodo_linecons_free-like.svg" type="image/svg+xml"/>
-                        <div className="thumbs down overlay" onClick={this.handleVote} title={thumbsDownTitle}> </div>
-                    </div>
-                    <div className="">{thumbsDownMessage}</div>
+                    <a className="down oi" href="#" data-glyph="thumb-down" title={thumbsDownTitle} onClick={this.handleVote}></a>
+                    <p>{thumbsDownMessage}</p>
                 </div>
-            </div>
+            </li>
         );
     }
 });
@@ -1802,7 +1800,7 @@ var PhraseSearchResults = React.createClass({
                 {phraseSearchResults}
             </InfiniteScroll>
         return (
-            <main>
+            <main className="phrase-list">
                 <TopSearchCaption topState={this.state}/>
                 <ul className="phraseSearchResultsList">
                     {infiniteScroll}
