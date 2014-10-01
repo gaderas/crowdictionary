@@ -134,6 +134,34 @@ Data.prototype.searchPhrase = function (params) {
 };
 
 /**
+ * Similar to getPhrases(), and searchPhrase(). This function
+ * takes in an array of searched phrases and returns *exact matches only*.
+ */
+Data.prototype.searchPhrases = function (params) {
+    var pQuery = this.pQuery,
+        existingParams = _.reduce(params, function (result, val, key) {
+            if (val) {
+                result[key] = val;
+            }
+            return result;
+        }, {}),
+        splitParams = appUtil.splitObject(existingParams, ['start', 'limit']),
+        fake = console.log('splitParams: ' + JSON.stringify(splitParams)),
+        actualParams = splitParams[0],
+        actualLimits = splitParams[1],
+        start = parseInt(actualLimits && actualLimits.start, 10) || 0,
+        limit = parseInt(actualLimits && actualLimits.limit, 10) || 2;
+    if (!actualParams.lang) {
+        throw Error("error. tried to query phrases without specifying 'lang'");
+    }
+    if (_.isEmpty(actualParams.phrase) || !_.isArray(actualParams.phrase)) {
+        throw Error("no phrases to search were specified");
+    }
+    // @TODO eventually introduce LIMIT for safety reasons more than anything else
+    return pQuery("SELECT * FROM `phrase` WHERE ? AND phrase in (?) ORDER BY lang, phrase ASC", [{lang: actualParams.lang}, actualParams.phrase]);
+};
+
+/**
  * since the table's UNIQUE INDEX doesn't contain `contributor_id`, we
  * must perform a check here to see if the phrase previously existed, and
  * allow overwriting only if performed by the same contributor.

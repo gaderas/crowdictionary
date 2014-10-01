@@ -14,6 +14,8 @@ Running a development instance
 TODO Performance Improvements
 ----
 
+*   Implement Infinite Scroll on Definitions page
+*   LIMIT all SELECTs to prevent long executing queries attacks
 *   Don't query the /v1/login endpoint on nearly every state change
 *   Don't query phrase details when navigating from phrase list (where we already have the data)
 
@@ -59,6 +61,8 @@ Sample requests
     `curl -H "Accept: application/json" "http://localhost:3000/v1/lang/es-MX/phrases"`
     Search is supported e.g. by performing the following request:
     `curl -H "Accept: application/json" "http://localhost:3000/v1/lang/es-MX/phrases?search=o"`
+    Looking for multiple exact phrase matches in one single request can be done as follows:
+    `curl -H "Accept: application/json" "http://localhost:3000/v1/lang/es-MX/phrases?phrase=foo&phrase=bar&phrase=baz"`
 *   GET phrase - get a specific phrase
     `curl -H "Accept: application/json" "http://localhost:3000/v1/lang/es-MX/phrases/hola"`
 *   PUT phrase - create/update a phrase - spaces in term must be URIEncoded (%20) in the URI

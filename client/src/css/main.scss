@@ -40,13 +40,20 @@ form.SearchBar
 //            $gutter-width: 0; // with 1em gutters
 //            $grid-padding: 0; // and 1em padding on the grid container
 
+$base-font-size: 30px;
+$base-color: #C6C6C6;
+
 body {
     @include container;
     background: none repeat scroll 0% 0% #2F2F2F;
     font-family: "Ubuntu","Lucida Grande","Lucida Sans",Tahoma,sans-serif;
+    font-size: $base-font-size;
 }
-body, a:link {
-    color: #C6C6C6;
+body, a:link, a:visited {
+    color: $base-color;
+}
+a:hover, a:active {
+    color: darken($base-color, 10%);
 }
 body > footer {
     @include span(1 of 1);
@@ -94,6 +101,9 @@ body > div {
                 padding: .2em 0;
                 text-align: center;
                 //background-color: #E7E7E7;
+                *::before, ::before {
+                    font-size: $base-font-size * 4;
+                }
             }
         }
     }
@@ -102,21 +112,27 @@ section.SearchBar {
     @include span(1 of 1 last);
     @include hr-with-shadow(2px);
     text-align: center;
+    vertical-align: center;
     padding: 1em 0;
 }
 form.SearchBar {
     color: #6E6E6E;
+    width: 75%;
     box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.1), 0px 1px 7px 0px rgba(0, 0, 0, 0.8) inset;
     background: none repeat scroll 0% 0% rgba(0, 0, 0, 0.3);
     border-radius: 4px;
     border: 0px none;
     font-size: 0.8em;
-    &:before {
+    text-align: left;
+    &::before {
+        display: inline-block;
     }
     input[type="text"] {
+        display: inline-block;
         color: #6E6E6E;
         background: none repeat scroll 0% 0% rgba(0, 0, 0, 0);
         border: 0px none;
+        font-size: 2em;
     }
     padding: 1em 0;
     display: inline-block;
@@ -232,4 +248,19 @@ main.phrase-details {
 
 input.error {
     background-color: red;
+}
+
+.main-enter {
+    opacity: 0.01;
+    transition: opacity .5s ease-in;
+}
+.main-enter.main-enter-active {
+    opacity: 1;
+}
+.main-leave {
+    opacity: 1;
+    transition: opacity 1s ease-in;
+}
+.main-leave.main-leave-active {
+    opacity: 0.01;
 }

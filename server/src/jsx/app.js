@@ -260,10 +260,13 @@ appWs.put('/contributors', function *(next) {
 appWs.get('/lang/:lang/phrases', function *(next) {
     //yield next;
     console.log('query string: ' + JSON.stringify(this.query));
-    var params = appUtil.getObjectWithoutProps(this.query, ['lang', 'phrase']);
+    var params = appUtil.getObjectWithoutProps(this.query, ['lang']);
     params.lang = this.params.lang;
-    if (undefined !== params.search) {
+    if (_.isString(params.search)) {
         this.body = yield mockData.searchPhrase(params);
+    } else if (undefined !== params.phrase) {
+        params.phrase = (_.isString(params.phrase) && [params.phrase]) || params.phrase; // if only one term is specified, convert into array
+        this.body = yield mockData.searchPhrases(params);
     } else {
         this.body = yield mockData.getPhrases(params);
     }

@@ -3,6 +3,7 @@
 var Q = require('q');
 var appUtil = require('./util.js');
 var React = require('react/addons');
+var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 var LifecycleDebug = require('react-lifecycle-debug');
 var InfiniteScroll = require('react-infinite-scroll')(React, [LifecycleDebug({displayName: 'InfiniteScroll'})]);
 var l10n = require('./l10n.js');
@@ -402,34 +403,59 @@ var routesInfo = [
             if ("string" !== typeof phrase || _.isEmpty(phrase)) {
                 throw Error("phrase not provided in URL");
             }
-            return Q.all([pRequest(phraseUrl), pRequest(loginStateUrl)])
+            return Q.all([pRequest({url: phraseUrl, json: true}), pRequest({url: loginStateUrl, json: true})])
                 .spread(function (phraseRes, loginStateRes) {
                     if (200 !== phraseRes[0].statusCode) {
                         throw Error("couldn't fetch phrase");
                     }
-                    var rObj = JSON.parse(phraseRes[1]),
+                    var shownPhraseData = (phraseRes[1].length && phraseRes[1][0]) || null,
+                        rObj = phraseRes[1],
                         reactState = {
                             globalLang: lang,
                             shortLangCode: shortLangCode,
                             l10nData: l10nData,
-                            shownPhraseData: rObj[0]
+                            shownPhraseData: shownPhraseData
                         };
                     // add login information if we got it
                     if (200 === loginStateRes[0].statusCode) {
-                        reactState.loginInfo = JSON.parse(loginStateRes[1]);
+                        reactState.loginInfo = loginStateRes[1];
                     }
 
-                    var phraseIds = [rObj[0].id];
+                    if (!shownPhraseData) {
+                        // return here if no phrase data, no point in fetching any definitions
+                        return reactState;
+                    }
+                    var phraseIds = [shownPhraseData.id];
 
-                    return pRequest(baseRoot + "/v1/definitions?phraseIds=" + phraseIds.join(','))
+                    return pRequest({url: baseRoot + "/v1/definitions?phraseIds=" + phraseIds.join(','), json: true})
                         .then(function (res) {
                             if (200 !== res[0].statusCode) {
                                 throw Error("couldn't fetch definitions");
                             }
-                            var rObj = JSON.parse(res[1]);
-                            reactState.shownPhraseData.definitions = rObj;
-                            //reactState.shownPhraseData.definitions[].topDefinition
-                            return reactState;
+                            var definitions = res[1],
+                                allTags = _.union(_.map(definitions, function (definition) {
+                                    return _.map(definition.tags.split(/[,\n]/), function (tag) {
+                                        return tag.replace(/(^\s*|\s*$)/, '');
+                                    });
+                                }))[0],
+                                qs = _.map(allTags, function (tag) {
+                                    return "phrase=" + tag;
+                                }).join('&');
+
+                            reactState.shownPhraseData.definitions = definitions;
+                            return pRequest({url: baseRoot + "/v1/lang/"+lang+"/phrases?"+qs, json: true})
+                                .then(function (res) {
+                                    if (200 !== res[0].statusCode) {
+                                        console.error("couldn't fetch phrases corresponding to tags... continuing without them");
+                                        reactState.shownPhraseData.existingPhraseTags = {};
+                                        return reactState;
+                                    }
+                                    reactState.shownPhraseData.existingPhraseTags = _.zipObject(_.map(res[1], function (phrase) {
+                                        return [phrase.phrase, phrase];
+                                    }));
+                                    console.log("we shall return reactState: " + JSON.stringify(reactState));
+                                    return reactState;
+                                });
                         });
                 });
         }
@@ -1050,16 +1076,16 @@ var CrowDictionary = React.createClass({
             // log out
             mainContent = <LogOutOutcome topState={this.state} doLogOut={this.doLogOut} />
         } else if (this.state.shownPhraseData) {
-            mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} getSearchTermFromDOM={this.getSearchTermFromDOM} onSetInfo={this.handleSetInfo}/>;
+            mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} getSearchTermFromDOM={this.getSearchTermFromDOM} onSetInfo={this.handleSetInfo} key="PhraseDetails"/>;
         } else if (!_.isEmpty(this.state.contributorActivity)) {
             mainContent = <ContributorActivity topState={this.state} onClickActivityItem={this.handleSelectPhrase}/>;
         } else if (this.state.showAddPhrase){
             mainContent = <AddPhraseForm onSubmitAddPhrase={this.handleSubmitAddPhrase} onSetInfo={this.handleSetInfo} topState={this.state}/>;
         } else if (this.state.showAddDefinition) {
             // showAddDefinition itself is a phrase object
-            mainContent = <AddDefinitionForm phraseData={this.state.showAddDefinition} topState={this.state} onSubmitAddDefinition={this.handleSubmitAddDefinition} onSetInfo={this.handleSetInfo}/>;
+            mainContent = <AddDefinitionForm phraseData={this.state.showAddDefinition} topState={this.state} onSubmitAddDefinition={this.handleSubmitAddDefinition} onSetInfo={this.handleSetInfo} key="AddDefinitionForm"/>;
         } else {
-            mainContent = <PhraseSearchResults topState={this.state} onSelectPhrase={this.handleSelectPhrase} onSetInfo={this.handleSetInfo}/>;
+            mainContent = <PhraseSearchResults topState={this.state} onSelectPhrase={this.handleSelectPhrase} onSetInfo={this.handleSetInfo} key="PhraseSearchResults"/>;
         }
         //manifest="/static/assets/global_cache.manifest"
         return (
@@ -1074,7 +1100,9 @@ var CrowDictionary = React.createClass({
             <body>
             <div>
                 <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} onToMyActivity={this.handleToMyActivity} topState={this.state} ref="topBar" />
-                {mainContent}
+                <ReactCSSTransitionGroup transitionName="main">
+                    {mainContent}
+                </ReactCSSTransitionGroup>
             </div>
             <footer>{this.messages.Footer.copyrightNotice}</footer>
             <script src="/static/js/app.js" />
@@ -1363,7 +1391,9 @@ var DefinitionInDetails = React.createClass({
             phrase = this.props.topState.shownPhraseData.phrase,
             definition = definitionObj.definition,
             examples = definitionObj.examples,
-            tags = definitionObj.tags,
+            tags = _.map(definitionObj.tags.split(/[,\n]/), function (tag, idx) {
+                return <DefinitionTag topState={this.props.topState} tag={tag.replace(/(^\s*|\s*$)/, '')} key={idx}/>
+            }.bind(this)),
             votesUpCount = _.filter(definitionObj.votes, {vote: "up"}).length,
             votesDownCount = _.filter(definitionObj.votes, {vote: "down"}).length,
             thumbsUpMessage = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsUpMessage), {numVotes: votesUpCount}),
@@ -1376,7 +1406,7 @@ var DefinitionInDetails = React.createClass({
                     <dt>{phrase}</dt>
                     <dd className="definition">{definition}</dd>
                     <dd className="examples">{examples}</dd>
-                    <dd className="tags">{tags}</dd>
+                    <dd className="tags"><ul>{tags}</ul></dd>
                 </dl>
                 <div className="votes up container">
                     <a className="up oi" href="#" data-glyph="thumb-up" title={thumbsUpTitle} onClick={this.handleVote}></a>
@@ -1387,6 +1417,30 @@ var DefinitionInDetails = React.createClass({
                     <p>{thumbsDownMessage}</p>
                 </div>
             </li>
+        );
+    }
+});
+
+var DefinitionTag = React.createClass({
+    mixins: [I18nMixin, LinksMixin],
+    render: function () {
+        var tag = this.props.tag,
+            existingPhraseTag = this.props.topState.shownPhraseData.existingPhraseTags[tag],
+            phraseUrl = existingPhraseTag && aUrl("/phrases/"+tag, this.props.topState.shortLangCode),
+            loginInfo = this.props.topState.loginInfo;
+            
+        if (phraseUrl) {
+            return (
+                <li className="exists"><a className="tag" href={phraseUrl} onClick={this.handleToLink.bind(this, phraseUrl)}>{tag}</a></li>
+            );
+        } else if (loginInfo) {
+            phraseUrl = aUrl("/addPhrase?phrase="+tag);
+            return (
+                <li className="not-exists"><a className="tag" href={phraseUrl} onClick={this.handleToLink.bind(this, phraseUrl)}>{tag}</a></li>
+            );
+        }
+        return (
+            <li><span className="tag">{tag}</span></li>
         );
     }
 });
@@ -1417,6 +1471,9 @@ var SearchBar = React.createClass({
             return "";
         }
     },
+    handleSubmit: function (e) {
+        e.preventDefault();
+    },
     handleChange: function () {
         console.log('in SearchBar::handleChange()');
         var searchTerm = this.refs.searchInput.getDOMNode().value;
@@ -1426,11 +1483,12 @@ var SearchBar = React.createClass({
     render: function () {
         console.log("this.handleChange: " + this.handleChange);
         //this.loadMessages();
-        var placeholder = this.fmt(this.msg(this.messages.SearchBar.placeHolder));
+        var placeholder = this.fmt(this.msg(this.messages.SearchBar.placeHolder)),
+            value = this.props.topState.searchTerm || "";
         return (
             <section className="SearchBar">
-            <form className="SearchBar oi" data-glyph="magnifying-glass">
-            <input type="text" defaultValue={this.props.topState.searchTerm} placeholder={placeholder} ref="searchInput" onChange={this.handleChange}/>
+            <form onSubmit={this.handleSubmit} className="SearchBar oi" data-glyph="magnifying-glass">
+            <input type="text" value={value} placeholder={placeholder} ref="searchInput" onChange={this.handleChange}/>
             </form>
             </section>
         );
