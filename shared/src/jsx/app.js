@@ -1399,22 +1399,34 @@ var DefinitionInDetails = React.createClass({
             thumbsUpMessage = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsUpMessage), {numVotes: votesUpCount}),
             thumbsDownMessage = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsDownMessage), {numVotes: votesDownCount}),
             thumbsUpTitle = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsUpTitle), {currentVote: userVote}),
-            thumbsDownTitle = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsDownTitle), {currentVote: userVote});
+            thumbsDownTitle = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsDownTitle), {currentVote: userVote}),
+            definitionAbbr = this.messages.Abbreviations.definition,
+            exampleAbbr = this.messages.Abbreviations.example;
         return (
             <li>
                 <dl>
                     <dt>{phrase}</dt>
-                    <dd className="definition">{definition}</dd>
-                    <dd className="examples">{examples}</dd>
+                    <dd className="definition">
+                        <span className="abbr">{definitionAbbr}</span>
+                        {definition}
+                    </dd>
+                    <dd className="examples">
+                        <span className="abbr">{exampleAbbr}</span>
+                        <span className="oi" data-glyph="double-quote-serif-left"/>
+                            {examples}
+                        <span className="oi" data-glyph="double-quote-serif-right"/>
+                    </dd>
                     <dd className="tags"><ul>{tags}</ul></dd>
                 </dl>
-                <div className="votes up container">
-                    <a className="up oi" href="#" data-glyph="thumb-up" title={thumbsUpTitle} onClick={this.handleVote}></a>
-                    <p>{thumbsUpMessage}</p>
-                </div>
-                <div className="votes down container">
-                    <a className="down oi" href="#" data-glyph="thumb-down" title={thumbsDownTitle} onClick={this.handleVote}></a>
-                    <p>{thumbsDownMessage}</p>
+                <div className="votes">
+                    <div className="up">
+                        <a className="up oi" href="#" data-glyph="thumb-up" title={thumbsUpTitle} onClick={this.handleVote}></a>
+                        <p>{thumbsUpMessage}</p>
+                    </div>
+                    <div className="down">
+                        <a className="down oi" href="#" data-glyph="thumb-down" title={thumbsDownTitle} onClick={this.handleVote}></a>
+                        <p>{thumbsDownMessage}</p>
+                    </div>
                 </div>
             </li>
         );
@@ -2002,7 +2014,7 @@ var PhraseSearchResult = React.createClass({
         var definitionOrMessage,
             missingDefinitionMessage = this.messages.PhraseSearchResult.missingDefinition;
         if (this.props.searchResult && this.props.searchResult.topDefinition && this.props.searchResult.topDefinition.definition) {
-            definitionOrMessage = <DefinitionInList searchResult={this.props.searchResult}/>;
+            definitionOrMessage = <DefinitionInList searchResult={this.props.searchResult} topState={this.props.topState}/>;
         } else {
             definitionOrMessage = <div className="missing-definition">{missingDefinitionMessage}</div>
         }
@@ -2033,10 +2045,13 @@ var PhraseInList = React.createClass({
 });
 
 var DefinitionInList = React.createClass({
+    mixins: [I18nMixin],
     render: function () {
-        var definition = this.props.searchResult.topDefinition.definition;
+        var definition = this.props.searchResult.topDefinition.definition,
+            definitionAbbr = this.messages.Abbreviations.definition;
         return (
             <dd>
+                <span className="abbr">{definitionAbbr}</span>
                 <span className="oi" data-glyph="double-quote-serif-left"/>
                     {definition}
                 <span className="oi" data-glyph="double-quote-serif-right"/>

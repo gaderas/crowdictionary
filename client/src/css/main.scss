@@ -44,6 +44,27 @@ form.SearchBar
 $base-font-size: 60px;
 $base-color: #C6C6C6;
 $base-background-color: #2F2F2F;
+$main-heading-margin: 0.4em 0 0 0;
+@mixin hr-with-shadow($width) {
+    box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.07);
+    border-bottom: $width solid #121212;
+}
+@mixin main-heading-base() {
+    margin: $main-heading-margin;
+    border: solid lighten($base-background-color, 10%);
+    border-width: 2px 0;
+    background-color: lighten($base-background-color, 5%);
+    font-style: none;
+    text-indent: 3%;
+}
+.quote-padding {
+    padding: 0 0.4em;
+}
+span.abbr {
+    font-size: 50%;
+    font-weight: bold;
+    font-style: normal;
+}
 
 body {
     @include container;
@@ -66,10 +87,7 @@ body > footer {
 a:link {
     text-decoration: none;
 }
-@mixin hr-with-shadow($width) {
-    box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.07);
-    border-bottom: $width solid #121212;
-}
+
 body > div {
     @include span(1 of 1);
     header.TopBar {
@@ -155,13 +173,8 @@ main.phrase-list {
     @include span(1 of 1 last);
     @include container;
     h2.results-heading {
-        //@include span(98% last center);
-        margin-top: 0.4em;
-        border: solid lighten($base-background-color, 10%);
-        border-width: 2px 0;
-        background-color: lighten($base-background-color, 5%);
+        @include main-heading-base;
         font-style: italic;
-        text-indent: 1em;
     }
     ul.phraseSearchResultsList {
         @include span(1 of 1 last);
@@ -185,7 +198,7 @@ main.phrase-list {
             dd {
                 margin: 0.6em 0 0 0.9em;
                 span::before {
-                    padding: 0 0.2em;
+                    @extend .quote-padding;
                 }
             }
             div.missing-definition {
@@ -202,9 +215,10 @@ main.phrase-details {
     //@include with-layout(gutters 0);
     @include container;
     > h2 {
-        @include span(1 of 1 last);
-        margin-top: 0.4em;
-        font-style: italic;
+        @include main-heading-base;
+        font-size: 140%;
+        font-style: none;
+        font-weight: bold;
     }
     > ul {
         @include span(1 of 1 last);
@@ -212,21 +226,78 @@ main.phrase-details {
         counter-reset: defNum;
         > li {
             @include hr-with-shadow(1px);
+            margin: 1em;
+            border: 1px solid lighten($base-background-color, 10%);
+            border-radius: 20px;
+            box-shadow: 0 0 20px 10px darken($base-background-color, 3%) inset;
+            line-height: 1.4em;
+            text-align: center;
             > * {
-                margin-left: 0.9em;
+                //margin-left: 0.9em;
+                display: inline-block;
+                width: 90%;
+                text-align: left;
             }
             padding: 0.6em 0;
-            .votes.container {
+            .votes {
+                display: inline-block;
+                text-align: right;
+                .up, .down {
+                    display: inline-block;
+                    text-align: center;
+                }
+                .up {
+                    margin-right: 15px;
+                }
+                .down {
+                    margin-left: 15px;
+                }
+                p {
+                    font-size: 50%;
+                }
             }
             dt {
-                text-decoration: underline;
+                font-weight: bold;
             }
             dd.definition {
+                span.abbr {
+                    @extend .quote-padding;
+                    padding-left: 0;
+                }
             }
             dd.examples {
+                font-style: italic;
+                span::before {
+                    @extend .quote-padding;
+                }
             }
             dd.tags {
-                a {
+                margin: 20px 0;
+                padding: 20px;
+                box-shadow: 0 0 20px 10px darken($base-background-color, 3%) inset;
+                border: 1px solid darken($base-background-color, 10%);
+                background-color: darken($base-background-color, 4%);
+                border-radius: 20px;
+                li {
+                    display: inline-block;
+                    padding: 0 8px;
+                    margin-right: 24px;
+                    &.exists {
+                        font-weight: bold;
+                        background-color: lighten($base-background-color, 10%);
+                        color: darken($base-color, 10%);
+                        border: 1px none;
+                        border-radius: 10px;
+                        a {
+                        }
+                    }
+                    &.not-exists {
+                        a {
+                            border-bottom: 2px dotted $base-color;
+                        }
+                    }
+                    span {
+                    }
                 }
             }
             position: relative;
@@ -236,6 +307,7 @@ main.phrase-details {
                 content: counter(defNum)".";
                 position:absolute;
                 right: 0;
+                top: 10%; /* had to set it to something, otherwise on android chrome it renders outside of the box*/
                 font-size: 5em;
                 font-family: "Georgia","sans-serif",serif;
                 z-index: -1;
