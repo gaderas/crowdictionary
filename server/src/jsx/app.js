@@ -31,6 +31,7 @@ nconf.argv().env().file({file: './config/'+NODE_ENV+'.config.json'});
 console.log('nconf.get("NODE_ENV"): ' + nconf.get('NODE_ENV'));
 
 var mockData = dsFactory(nconf);
+var dbip = new DBIP(nconf.get("data:dbip:dbConfig"));
 
 console.log('mockData: ' + mockData);
 
@@ -450,7 +451,6 @@ appWs.get('/langDetect', function *(next) {
         referrer = this.header.referrer || this.query.referrer || '',
         localeRootMap = nconf.get("localeRootMap"),
         ipDbLocaleMap = nconf.get("ipDbLocaleMap"),
-        dbip = new DBIP(nconf.get("data:dbip:dbConfig")),
         parsedReferrer,
         receivedDomain,
         receivedShortLangCode,

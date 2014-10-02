@@ -3,6 +3,7 @@
 @import "compass/utilities/general/clearfix";
 @import "open-iconic";
 @import "compass/reset";
+@import "placeholder";
 
 /*// body { @include container(50em); }
 // Setting up the Magic Grid
@@ -40,12 +41,13 @@ form.SearchBar
 //            $gutter-width: 0; // with 1em gutters
 //            $grid-padding: 0; // and 1em padding on the grid container
 
-$base-font-size: 30px;
+$base-font-size: 60px;
 $base-color: #C6C6C6;
+$base-background-color: #2F2F2F;
 
 body {
     @include container;
-    background: none repeat scroll 0% 0% #2F2F2F;
+    background: none repeat scroll 0% 0% $base-background-color;
     font-family: "Ubuntu","Lucida Grande","Lucida Sans",Tahoma,sans-serif;
     font-size: $base-font-size;
 }
@@ -73,36 +75,41 @@ body > div {
     header.TopBar {
         @include hr-with-shadow(4px);
         nav.NavBar {
-            @include container;
-            //font-family: "Open Sans",sans-serif;
-            //background-color: #EAEAEA;
-            h2.home {
-                @include span(1 of 3);
-                * {
-                    padding: 0 .4em;
+            @include with-layout((gutters: 0)) {
+                @include container;
+                //font-family: "Open Sans",sans-serif;
+                //background-color: #EAEAEA;
+                h2.home {
+                    @include span(1 of 3);
+                    * {
+                        padding: 0 .4em;
+                    }
                 }
-            }
-            h2.user-links {
-                @include span(1 of 3);
-                * {
-                    padding: 0 .4em;
+                h2.user-links {
+                    //$map: (
+                        //sprea
+                    //);
+                    @include span(1 of 3);
+                    * {
+                        padding: 0 .4em;
+                    }
                 }
-            }
-            h2.login-info {
-                @include span(1 of 3 last);
-                * {
-                    padding: 0 .4em;
+                h2.login-info {
+                    @include span(1 of 3 last);
+                    * {
+                        padding: 0 .4em;
+                    }
                 }
-            }
-            h2 {
-                //@include with-layout(gutters 0);
-                //margin: 0;
-                //font-size: 2.5em;
-                padding: .2em 0;
-                text-align: center;
-                //background-color: #E7E7E7;
-                *::before, ::before {
-                    font-size: $base-font-size * 4;
+                h2 {
+                    //@include with-layout(gutters 0);
+                    //margin: 0;
+                    //font-size: 2.5em;
+                    padding: .2em 0;
+                    text-align: center;
+                    //background-color: #E7E7E7;
+                    ::before {
+                        font-size: $base-font-size * 1.5;
+                    }
                 }
             }
         }
@@ -116,42 +123,64 @@ section.SearchBar {
     padding: 1em 0;
 }
 form.SearchBar {
-    color: #6E6E6E;
+    color: darken($base-color, 40%);
     width: 75%;
     box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.1), 0px 1px 7px 0px rgba(0, 0, 0, 0.8) inset;
     background: none repeat scroll 0% 0% rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
+    border-radius: 10px;
     border: 0px none;
     font-size: 0.8em;
     text-align: left;
     &::before {
+        font-size: $base-font-size;
         display: inline-block;
+        vertical-align: middle!important;
     }
     input[type="text"] {
         display: inline-block;
-        color: #6E6E6E;
+        vertical-align: middle;
+        width: 80%;
+        color: darken($base-color, 40%);
         background: none repeat scroll 0% 0% rgba(0, 0, 0, 0);
         border: 0px none;
-        font-size: 2em;
+        font-size: 1.5em;
+        @include placeholder {
+            color: darken($base-color, 60%);
+        }
     }
-    padding: 1em 0;
+    padding: 1em 0.3em;
     display: inline-block;
 }
 main.phrase-list {
     @include span(1 of 1 last);
     @include container;
     h2.results-heading {
-        @include span(1 of 1 last);
+        //@include span(98% last center);
         margin-top: 0.4em;
+        border: solid lighten($base-background-color, 10%);
+        border-width: 2px 0;
+        background-color: lighten($base-background-color, 5%);
         font-style: italic;
+        text-indent: 1em;
     }
     ul.phraseSearchResultsList {
         @include span(1 of 1 last);
         dl {
-            @include hr-with-shadow(1px);
-            padding: 1em 0;
+            @include hr-with-shadow(2px);
+            $search-result-padding: 1em;
+            padding: $search-result-padding 0;
+            position: relative;
             dt {
+                //position: relative;
                 margin: 0 0 0 0.4em;
+                a::before {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    top: 0;
+                    left: 0;
+                    content: "";
+                }
             }
             dd {
                 margin: 0.6em 0 0 0.9em;
@@ -160,7 +189,8 @@ main.phrase-list {
                 }
             }
             div.missing-definition {
-                font-size: xx-small;
+                font-size: 60%;
+                font-style: italic;
                 margin: 0.4em 0 0 0;
                 text-align: center;
             }
@@ -251,16 +281,21 @@ input.error {
 }
 
 .main-enter {
+    visibility: show;
     opacity: 0.01;
     transition: opacity .5s ease-in;
 }
 .main-enter.main-enter-active {
+    visibility: show;
     opacity: 1;
 }
 .main-leave {
-    opacity: 1;
-    transition: opacity 1s ease-in;
+    // don't want this animation, but need it because disabling it in JS breaks iOS
+    visibility: hidden;
+    opacity: 0.0000001;
+    transition: opacity 0.000001s ease-in;
 }
 .main-leave.main-leave-active {
-    opacity: 0.01;
+    visibility: hidden;
+    opacity: 0;
 }

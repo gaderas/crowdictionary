@@ -112,7 +112,7 @@
             "backToSearchResults": "regresar a los resultados de búsqueda"
         },
         "PhraseSearchResult": {
-            "missingDefinition": "-- esta palabra o frase aún no cuenta con definiciones --"
+            "missingDefinition": "esta palabra o frase aún no cuenta con definiciones"
         },
         "VerificationPrompt": {
             "formTitle": "Verificación de nueva cuenta de usuario",

@@ -3,6 +3,7 @@ var phpjs = require('./phpjs-funcs');
 var mysql = require('mysql');
 var _ = require('lodash');
 var Q = require('q');
+var appUtil = require('../../../shared/build/js/util.js');
 
 /**
  * Based on DB-IP.com's "dbip-phpsrc-1.4/dbip.class.php" file.
@@ -13,6 +14,8 @@ var Q = require('q');
  */
 
 var Data = function (dbConfig) {
+    this.table = dbConfig.table;
+    dbConfig = appUtil.getObjectWithoutProps(dbConfig, ['table']);
     console.log('using mysql ds with config: ' + JSON.stringify(dbConfig, ' ', 4));
     this.pool = mysql.createPool(dbConfig);
     this.query = (function () {
@@ -25,7 +28,6 @@ var Data = function (dbConfig) {
                 return res[0];
             });
     }).bind(this);
-    this.table = dbConfig.table;
 };
 
 Data.prototype.pLookup = function (ip) {

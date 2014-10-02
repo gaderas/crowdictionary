@@ -1461,7 +1461,7 @@ var TopBar = React.createClass({
 });
 
 var SearchBar = React.createClass({
-    mixins: [I18nMixin],
+    mixins: [I18nMixin, LinksMixin],
     getSearchTerm: function () {
         try {
             // React quirk: this throws when called on the server side, so we try/catch it...
@@ -1472,7 +1472,10 @@ var SearchBar = React.createClass({
         }
     },
     handleSubmit: function (e) {
+        var url = aUrl("/?q=" + this.refs.searchInput.getDOMNode().value, this.props.topState.shortLangCode);
+        this.refs.searchInput.getDOMNode().blur();
         e.preventDefault();
+        this.handleToLink(url, e);
     },
     handleChange: function () {
         console.log('in SearchBar::handleChange()');
@@ -1484,11 +1487,12 @@ var SearchBar = React.createClass({
         console.log("this.handleChange: " + this.handleChange);
         //this.loadMessages();
         var placeholder = this.fmt(this.msg(this.messages.SearchBar.placeHolder)),
-            value = this.props.topState.searchTerm || "";
+            value = this.props.topState.searchTerm || "",
+            formActionUrl = aUrl("/", this.props.topState.shortLangCode);
         return (
             <section className="SearchBar">
-            <form onSubmit={this.handleSubmit} className="SearchBar oi" data-glyph="magnifying-glass">
-            <input type="text" value={value} placeholder={placeholder} ref="searchInput" onChange={this.handleChange}/>
+            <form action={formActionUrl} onSubmit={this.handleSubmit} className="SearchBar oi" data-glyph="magnifying-glass">
+            <input type="text" defaultValue={value} placeholder={placeholder} ref="searchInput"/>
             </form>
             </section>
         );
@@ -1856,10 +1860,12 @@ var PhraseSearchResults = React.createClass({
                 resetPageStart={this.state.resetPageStart}
             >
                 {phraseSearchResults}
-            </InfiniteScroll>
+            </InfiniteScroll>,
+            searchTerm = this.props.topState.searchTerm,
+            topSearchCaption = (searchTerm && <TopSearchCaption topState={this.props.topState}/>) || "" ;
         return (
             <main className="phrase-list">
-                <TopSearchCaption topState={this.state}/>
+                {topSearchCaption}
                 <ul className="phraseSearchResultsList">
                     {infiniteScroll}
                 </ul>
