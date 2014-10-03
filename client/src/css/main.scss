@@ -201,13 +201,9 @@ form.SearchBar {
         display: inline-block;
         vertical-align: middle;
         width: 80%;
-        color: $more-contrast-1;
         background: none repeat scroll 0% 0% rgba(0, 0, 0, 0);
         border: 0px none;
         font-size: 1.5em;
-        @include placeholder {
-            color: $less-contrast-2;
-        }
     }
     padding: 1em 0.3em;
     display: inline-block;
@@ -240,8 +236,9 @@ main.phrase-list {
             }
             dd {
                 margin: 0.6em 0 0 0.9em;
-                span::before {
+                span.abbr {
                     @extend .quote-padding;
+                    padding-left: 0;
                 }
             }
             div.missing-definition {
@@ -337,12 +334,9 @@ main.phrase-details {
                     padding: 0 8px;
                     margin-right: 24px;
                     &.exists {
-                        font-weight: bold;
-                        background-color: $less-contrast-2;
-                        color: $base-color;
-                        border: 1px none;
-                        border-radius: 10px;
                         a {
+                            font-weight: bold;
+                            border-bottom: 2px solid $base-color;
                         }
                     }
                     &.not-exists {
@@ -389,7 +383,6 @@ main.add-phrase {
                 @extend .base-legend;
             }
             input[type="text"] {
-                @extend .base-text-input;
                 width: 90%;
                 height: 1.1em;
                 line-height: 1em;
@@ -443,14 +436,13 @@ main.login {
                 margin-bottom: 1em;
             }
             input[type="text"], input[type="password"] {
-                @extend .base-text-input;
                 width: 90%;
                 height: 1.1em;
                 line-height: 1em;
             }
             input[type="submit"] {
                 @extend .base-submit-input;
-                margin-top: 1.7em;
+                margin-top: 1.4em;
             }
             input {
                 display: block;
@@ -458,15 +450,6 @@ main.login {
             }
         }
     }
-}
-.base-text-input {
-    color: $less-contrast-2;
-    //background: darken($base-background-color, 10%);
-    border: 1px solid $more-contrast-1;
-    border-radius: 10px;
-    //box-shadow: 0 0 10px 0 lighten($base-background-color, 5%) inset, 0 0 10px 0 darken($base-background-color, 5%);
-    box-shadow: 0px 1px 0px rgba($more-contrast-2, 0.1), 0px 1px 7px 0px rgba($base-background-color, 0.8) inset;
-    background: none repeat scroll 0% 0% rgba($less-contrast-1, 0.3);
 }
 .base-submit-input {
     color: $less-contrast-2;
@@ -518,6 +501,19 @@ main.login {
 input.error, p.global.error {
     background-color: complement($base-background-color)!important;
     color: complement($base-color);
+}
+input[type="text"], input[type="password"], textarea {
+    color: $more-contrast-1;
+
+    border: 1px solid $more-contrast-1;
+    border-radius: 10px;
+    //box-shadow: 0 0 10px 0 lighten($base-background-color, 5%) inset, 0 0 10px 0 darken($base-background-color, 5%);
+    box-shadow: 0px 1px 0px rgba($more-contrast-2, 0.1), 0px 1px 7px 0px rgba($base-background-color, 0.8) inset;
+    background: none repeat scroll 0% 0% rgba($less-contrast-1, 0.3);
+
+    @include placeholder {
+        color: $less-contrast-2;
+    }
 }
 
 .main-enter {

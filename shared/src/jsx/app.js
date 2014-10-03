@@ -1188,7 +1188,7 @@ var ErrorMessage = React.createClass({
         return (
             <div>
                 <div>{errorMessage}</div>
-                <div onClick={this.handleClearError}>{OK}</div>
+                <a href="#" onClick={this.handleClearError}>{OK}</a>
             </div>
         );
     }
@@ -1210,7 +1210,7 @@ var InfoMessage = React.createClass({
         return (
             <div>
                 <div>{message}</div>
-                <div onClick={this.handleClearInfo}>{OK}</div>
+                <a onClick={this.handleClearInfo}>{OK}</a>
             </div>
         );
     }
@@ -2055,9 +2055,7 @@ var DefinitionInList = React.createClass({
         return (
             <dd>
                 <span className="abbr">{definitionAbbr}</span>
-                <span className="oi" data-glyph="double-quote-serif-left"/>
-                    {definition}
-                <span className="oi" data-glyph="double-quote-serif-right"/>
+                {definition}
             </dd>
         );
     }

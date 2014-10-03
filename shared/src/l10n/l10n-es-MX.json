@@ -55,7 +55,7 @@
         },
         "SignupForm": {
             "formTitle": "Crear una cuenta",
-            "formDescription": "Introduce algunos datos para crear una nueva cuenta de usuario.",
+            "formDescription": "Es muy fácil unirse y empezar a escribir nuevas palabras y significados. ¡Solo llena este sencillo formulario!",
             "usernameFieldPlaceholder": "correo electrónico",
             "passwordFieldPlaceholder": "contraseña",
             "nicknameFieldPlaceholder": "Alias o apodo",

@@ -22,22 +22,23 @@ TODO Performance Improvements
 TODO Features
 ----
 
-*   convert tags into links to phrases. if logged in and phrases don't exist, it's clickable with pre-filled new phrase form.
-*   Style (mobile first)
-*   Use icons: account-{login,logout}, person, people, plus, pencil, thumb-up, thumb-down, random, menu?, home, double-quote-{sans,serif}-{left,right}
+*   Use # anchors to fix scroll position upon clicking on links
+*   User page (come up with queries, rollup tables)
+*   Users leaderboard (come up with queries, rollup tables)
 *   Make definitions linkable
 *   Create (editable) user profile page
-*   ~~Add 'examples', 'tags' fields to definitions~~
-*   ~~Don't let users overwrite phrases/definitions submitted by others~~
 *   Implement redirect when hitting URLs with no shortLangCode, and cross links to other languages
 *   Finish email account creation/verification flow
-*   ~~User page (come up with queries, rollup tables)~~
-*   Users leaderboard (come up with queries, rollup tables)
-*   ~~Eliminate remaining pieces of code that still don't use route-based states (except infinite scrolling ones)~~
-*   Test on mobile
 *   Add social network links, avatar to user profile
 *   Allow anonymous voting (guard by IP)
 *   Allow Google/Facebook/Twitter login
+*   ~~Style (mobile first)~~
+*   ~~convert tags into links to phrases. if logged in and phrases don't exist, it's clickable with pre-filled new phrase form.~~
+*   ~~Add 'examples', 'tags' fields to definitions~~
+*   ~~Don't let users overwrite phrases/definitions submitted by others~~
+*   ~~Eliminate remaining pieces of code that still don't use route-based states (except infinite scrolling ones)~~
+*   ~~Use icons: account-{login,logout}, person, people, plus, pencil, thumb-up, thumb-down, random, menu?, home, double-quote-{sans,serif}-{left,right}~~
+*   ~~Test on mobile~~
 
 BUGS
 ----
