@@ -71,9 +71,9 @@
             "signupSuccess": "Tu cuenta ha sido creada. A continuación te enviaremos un correo de verificación con una liga que deberás seguir para finalizar tu proceso de registro."
         },
         "AddPhraseForm": {
-            "addPhrase": "Introduce una frase",
-            "newPhrasePlaceHolder": "introduce una nueva frase aquí",
-            "submitPhrase": "enviar",
+            "addPhrase": "Nueva frase o palabra",
+            "newPhrasePlaceHolder": "",
+            "submitPhrase": "Agregar",
             "loginRequired": "se necesita entrar al sistema para poder añadir frases o palabras"
         },
         "AddDefinitionForm": {
@@ -100,7 +100,8 @@
             "thumbsDownMessage": "{numVotes, plural, =0 {no hay votos} =1 {un voto} other {# votos}}",
             "thumbsUpTitle": "{currentVote, select, up {haz clic para eliminar tu voto anterior} other {vota a favor}}",
             "thumbsDownTitle": "{currentVote, select, down {haz clic para eliminar tu voto anterior} other {vota en contra}}",
-            "loginRequiredToVote": "para poder votar, debes primero entrar con tu cuenta de usuario"
+            "loginRequiredToVote": "para poder votar, debes primero entrar con tu cuenta de usuario",
+            "tags": "Etiquetas:"
         },
         "ContributorActivityItem": {
             "goToPhraseLink": "Ir",

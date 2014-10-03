@@ -595,7 +595,7 @@ var routesInfo = [
                     globalLang: lang,
                     shortLangCode: shortLangCode,
                     l10nData: l10nData,
-                    showAddPhrase: true
+                    showAddPhrase: nRouteInfo.query.phrase || true
                 },
                 loginStateUrl = baseRoot + "/v1/login";
             return pRequest({method: "GET", url: loginStateUrl, json: true})
@@ -1061,26 +1061,26 @@ var CrowDictionary = React.createClass({
         //console.log("on render, with state: " + JSON.stringify(this.state));
         var mainContent;
         if (this.state.error) {
-            mainContent = <ErrorMessage onClearError={this.handleClearError} topState={this.state}/>;
+            mainContent = <ErrorMessage onClearError={this.handleClearError} topState={this.state} key="ErrorMessage"/>;
         } else if (this.state.info) {
-            mainContent = <InfoMessage onClearInfo={this.handleClearInfo} topState={this.state}/>;
+            mainContent = <InfoMessage onClearInfo={this.handleClearInfo} topState={this.state} key="InfoMessage"/>;
         } else if (this.state.showLoginPrompt) {
-            mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn} onSignup={this.handleSignup} onSetInfo={this.handleSetInfo} onClearInfo={this.handleClearInfo}/>;
+            mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn} onSignup={this.handleSignup} onSetInfo={this.handleSetInfo} onClearInfo={this.handleClearInfo} key="LoginPrompt"/>;
         } else if (this.state.showVerificationPrompt) {
             // display form where verification code can be entered
-            mainContent = <VerificationPrompt topState={this.state}/>
+            mainContent = <VerificationPrompt topState={this.state} key="VerificationPrompt"/>
         } else if (this.state.validateVerification) {
             // we got the code. let's check if it's valid and display the result
-            mainContent = <VerificationOutcome topState={this.state} submitVerification={this.submitVerification} />
+            mainContent = <VerificationOutcome topState={this.state} submitVerification={this.submitVerification} key="VerificationOutcome"/>
         } else if (this.state.doLogOut) {
             // log out
-            mainContent = <LogOutOutcome topState={this.state} doLogOut={this.doLogOut} />
+            mainContent = <LogOutOutcome topState={this.state} doLogOut={this.doLogOut} key="LogOutOutcome"/>
         } else if (this.state.shownPhraseData) {
             mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} getSearchTermFromDOM={this.getSearchTermFromDOM} onSetInfo={this.handleSetInfo} key="PhraseDetails"/>;
         } else if (!_.isEmpty(this.state.contributorActivity)) {
-            mainContent = <ContributorActivity topState={this.state} onClickActivityItem={this.handleSelectPhrase}/>;
+            mainContent = <ContributorActivity topState={this.state} onClickActivityItem={this.handleSelectPhrase} key="ContributorActivity"/>;
         } else if (this.state.showAddPhrase){
-            mainContent = <AddPhraseForm onSubmitAddPhrase={this.handleSubmitAddPhrase} onSetInfo={this.handleSetInfo} topState={this.state}/>;
+            mainContent = <AddPhraseForm onSubmitAddPhrase={this.handleSubmitAddPhrase} onSetInfo={this.handleSetInfo} topState={this.state} key="AddPhraseForm"/>;
         } else if (this.state.showAddDefinition) {
             // showAddDefinition itself is a phrase object
             mainContent = <AddDefinitionForm phraseData={this.state.showAddDefinition} topState={this.state} onSubmitAddDefinition={this.handleSubmitAddDefinition} onSetInfo={this.handleSetInfo} key="AddDefinitionForm"/>;
@@ -1305,6 +1305,7 @@ var DefinitionsInDetails = React.createClass({
 var DefinitionInDetails = React.createClass({
     mixins: [I18nMixin],
     handleVote: function (e) {
+        e.preventDefault();
         console.log("annnd they voted...");
         console.log("on: " + e.target);
         console.log("is a: " + e.target.className);
@@ -1401,7 +1402,11 @@ var DefinitionInDetails = React.createClass({
             thumbsUpTitle = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsUpTitle), {currentVote: userVote}),
             thumbsDownTitle = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsDownTitle), {currentVote: userVote}),
             definitionAbbr = this.messages.Abbreviations.definition,
-            exampleAbbr = this.messages.Abbreviations.example;
+            exampleAbbr = this.messages.Abbreviations.example,
+            tagsCaption = this.messages.DefinitionInDetails.tags,
+            cx = React.addons.classSet,
+            upClasses = ('up' === userVote && cx({up: true, voted: true})) || cx({up: true}),
+            downClasses = ('down' === userVote && cx({down: true, voted: true})) || cx({down: true});
         return (
             <li>
                 <dl>
@@ -1416,14 +1421,14 @@ var DefinitionInDetails = React.createClass({
                             {examples}
                         <span className="oi" data-glyph="double-quote-serif-right"/>
                     </dd>
-                    <dd className="tags"><ul>{tags}</ul></dd>
+                    <dd className="tags"><span>{tagsCaption}</span><ul>{tags}</ul></dd>
                 </dl>
                 <div className="votes">
-                    <div className="up">
+                    <div className={upClasses}>
                         <a className="up oi" href="#" data-glyph="thumb-up" title={thumbsUpTitle} onClick={this.handleVote}></a>
                         <p>{thumbsUpMessage}</p>
                     </div>
-                    <div className="down">
+                    <div className={downClasses}>
                         <a className="down oi" href="#" data-glyph="thumb-down" title={thumbsDownTitle} onClick={this.handleVote}></a>
                         <p>{thumbsDownMessage}</p>
                     </div>
@@ -1617,8 +1622,8 @@ var LoginPrompt = React.createClass({
             style = {display: display},
             messages = this.messages.LoginPrompt;
         return (
-            <div>
-                <form onSubmit={this.handleLogIn}>
+            <main className="login">
+                <form className="login" onSubmit={this.handleLogIn}>
                     <fieldset>
                         <legend>{messages.loginFormTitle}</legend>
                         <p>{messages.loginFormDescription}</p>
@@ -1637,7 +1642,7 @@ var LoginPrompt = React.createClass({
                     </fieldset>
                 </form>
                 <SignupForm topState={this.props.topState} onSignup={this.props.onSignup} onSetInfo={this.props.onSetInfo} onClearInfo={this.props.onClearInfo}/>
-            </div>
+            </main>
         );
     }
 });
@@ -1779,39 +1784,37 @@ var SignupForm = React.createClass({
         console.log("classNames: " + JSON.stringify(classNames));
         console.log("labels: " + JSON.stringify(labels));
         return (
-            <div>
-                <form onSubmit={this.handleSignup}>
-                    <fieldset>
-                        <legend>{messages.formTitle}</legend>
-                        <p className={classNames.globalError} ref="globalError">{this.state.errors.globalError}</p>
-                        <p>{messages.formDescription}</p>
-                        <label className="username">
-                            {labels.email}
-                            <input className={classNames.email} title={titles.email} ref="email" type="text" placeholder={placeholders.email}/>
-                        </label>
-                        <label className="password">
-                            {labels.passhash}
-                            <input className={classNames.passhash} title={titles.passhash} ref="passhash" type="password" placeholder={placeholders.passhash}/>
-                        </label>
-                        <label className="nickname">
-                            {labels.nickname}
-                            <input className={classNames.nickname} title={titles.nickname} ref="nickname" type="text" placeholder={placeholders.nickname}/>
-                        </label>
-                        <label className="firstName">
-                            {labels.first_name}
-                            <input className={classNames.first_name} title={titles.first_name} ref="first_name" type="text" placeholder={placeholders.first_name}/>
-                        </label>
-                        <label className="lastName">
-                            {labels.last_name}
-                            <input className={classNames.last_name} title={titles.last_name} ref="last_name" type="text" placeholder={placeholders.last_name}/>
-                        </label>
-                        <label className="submit">
-                            {messages.submitButtonLabel}
-                            <input type="submit" value={messages.submitButtonValue}/>
-                        </label>
-                    </fieldset>
-                </form>
-            </div>
+            <form className="signup" onSubmit={this.handleSignup}>
+                <fieldset>
+                    <legend>{messages.formTitle}</legend>
+                    <p className={classNames.globalError} ref="globalError">{this.state.errors.globalError}</p>
+                    <p>{messages.formDescription}</p>
+                    <label className="username">
+                        {labels.email}
+                        <input className={classNames.email} title={titles.email} ref="email" type="text" placeholder={placeholders.email}/>
+                    </label>
+                    <label className="password">
+                        {labels.passhash}
+                        <input className={classNames.passhash} title={titles.passhash} ref="passhash" type="password" placeholder={placeholders.passhash}/>
+                    </label>
+                    <label className="nickname">
+                        {labels.nickname}
+                        <input className={classNames.nickname} title={titles.nickname} ref="nickname" type="text" placeholder={placeholders.nickname}/>
+                    </label>
+                    <label className="firstName">
+                        {labels.first_name}
+                        <input className={classNames.first_name} title={titles.first_name} ref="first_name" type="text" placeholder={placeholders.first_name}/>
+                    </label>
+                    <label className="lastName">
+                        {labels.last_name}
+                        <input className={classNames.last_name} title={titles.last_name} ref="last_name" type="text" placeholder={placeholders.last_name}/>
+                    </label>
+                    <label className="submit">
+                        {messages.submitButtonLabel}
+                        <input type="submit" value={messages.submitButtonValue}/>
+                    </label>
+                </fieldset>
+            </form>
         );
     },
 });
@@ -2076,17 +2079,21 @@ var AddPhraseForm = React.createClass({
     },
     render: function () {
         //this.loadMessages();
-        var addPhrase = this.fmt(this.msg(this.messages.AddPhraseForm.addPhrase)),
+        var showAddPhrase = this.props.topState.showAddPhrase,
+            initialPhrase = (_.isString(showAddPhrase) && showAddPhrase) || "";
+            addPhrase = this.fmt(this.msg(this.messages.AddPhraseForm.addPhrase)),
             placeholder = this.fmt(this.msg(this.messages.AddPhraseForm.newPhrasePlaceHolder)),
             submit = this.fmt(this.msg(this.messages.AddPhraseForm.submitPhrase));
         return (
-            <div>
+            <main className="add-phrase">
                 <form onSubmit={this.handleSubmit}>
-                    <span>{addPhrase}</span>
-                    <textarea placeholder={placeholder} ref="newPhrase"/>
-                    <input type="submit" value={submit}/>
+                    <fieldset>
+                        <legend>{addPhrase}</legend>
+                        <input type="text" placeholder={placeholder} ref="newPhrase" defaultValue={initialPhrase}/>
+                        <input type="submit" value={submit}/>
+                    </fieldset>
                 </form>
-            </div>
+            </main>
         );
     }
 });

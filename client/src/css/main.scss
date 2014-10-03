@@ -230,7 +230,7 @@ main.phrase-details {
             border: 1px solid lighten($base-background-color, 10%);
             border-radius: 20px;
             box-shadow: 0 0 20px 10px darken($base-background-color, 3%) inset;
-            line-height: 1.4em;
+            line-height: 1.8em;
             text-align: center;
             > * {
                 //margin-left: 0.9em;
@@ -252,6 +252,12 @@ main.phrase-details {
                 .down {
                     margin-left: 15px;
                 }
+                .up.voted a {
+                    color: green;
+                }
+                .down.voted a {
+                    color: red;
+                }
                 p {
                     font-size: 50%;
                 }
@@ -267,6 +273,7 @@ main.phrase-details {
             }
             dd.examples {
                 font-style: italic;
+                line-height: 1em;
                 span::before {
                     @extend .quote-padding;
                 }
@@ -278,6 +285,10 @@ main.phrase-details {
                 border: 1px solid darken($base-background-color, 10%);
                 background-color: darken($base-background-color, 4%);
                 border-radius: 20px;
+                line-height: 1em;
+                > span {
+                    font-size: 75%;
+                }
                 li {
                     display: inline-block;
                     padding: 0 8px;
@@ -320,6 +331,114 @@ main.phrase-details {
         display: inline;
     }
 }
+main.add-phrase {
+    @include span(1 of 1 last);
+    //@include with-layout(gutters 0);
+    @include container;
+    form {
+        @include span(1 of 1 last);
+        text-align: center;
+        fieldset {
+            @extend .base-fieldset;
+            width: 60%;
+            display: inline-block;
+            legend {
+                @extend .base-legend;
+            }
+            input[type="text"] {
+                @extend .base-text-input;
+                width: 90%;
+                height: 1.1em;
+                line-height: 1em;
+                margin-bottom: 2em;
+            }
+            input[type="submit"] {
+                @extend .base-submit-input;
+            }
+            input {
+                display: block;
+                font-size: $base-font-size;
+            }
+        }
+    }
+}
+main.login {
+    @include span(1 of 1 last);
+    //@include with-layout(gutters 0);
+    @include container;
+    form.login {
+        @include span(1 of 1 last);
+        text-align: center;
+        fieldset {
+            width: 70%;
+            display: inline-block;
+        }
+    }
+    form.signup {
+        @include span(1 of 1 last);
+        text-align: center;
+        fieldset {
+            width: 70%;
+            display: inline-block;
+        }
+    }
+    form.login, form.signup {
+        font-size: $base-font-size;
+        fieldset {
+            @extend .base-fieldset;
+            padding: 1em!important;
+            text-align: left;
+            > p {
+                font-size: 70%;
+                margin-bottom: 1em;
+            }
+            legend {
+                @extend .base-legend;
+            }
+            input[type="text"], input[type="password"] {
+                @extend .base-text-input;
+                width: 90%;
+                height: 1.1em;
+                line-height: 1em;
+            }
+            input[type="submit"] {
+                @extend .base-submit-input;
+            }
+            input {
+                display: block;
+                font-size: $base-font-size;
+            }
+        }
+    }
+}
+.base-text-input {
+    color: darken($base-color, 3%);
+    //background: darken($base-background-color, 10%);
+    border: 1px solid darken($base-color, 50%);
+    border-radius: 10px;
+    //box-shadow: 0 0 10px 0 lighten($base-background-color, 5%) inset, 0 0 10px 0 darken($base-background-color, 5%);
+    box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.1), 0px 1px 7px 0px rgba(0, 0, 0, 0.8) inset;
+    background: none repeat scroll 0% 0% rgba(0, 0, 0, 0.3);
+}
+.base-submit-input {
+    color: darken($base-color, 3%);
+    background: lighten($base-background-color, 10%);
+    border: 1px outset darken($base-color, 50%);
+    border-radius: 10px;
+    box-shadow: 0 0 10px 0 darken($base-background-color, 5%) inset, 0 0 10px 0 lighten($base-background-color, 5%);
+}
+.base-legend {
+    color: darken($base-color, 10%);
+    text-align: left;
+    font-size: 80%;
+}
+.base-fieldset {
+    border: 1px solid lighten($base-background-color, 3%);
+    border-radius: 20px;
+    box-shadow: 0px 1px 30px 0 darken($base-background-color, 5%);
+    padding: 2em;
+    margin-top: 25px;
+}
 
 
 .thumbs.container {
@@ -348,8 +467,9 @@ main.phrase-details {
     display: none;
 }
 
-input.error {
-    background-color: red;
+input.error, p.global.error {
+    background-color: red!important;
+    color: black;
 }
 
 .main-enter {
