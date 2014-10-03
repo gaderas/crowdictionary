@@ -58,7 +58,7 @@
             "formDescription": "Introduce algunos datos para crear una nueva cuenta de usuario.",
             "usernameFieldPlaceholder": "correo electrónico",
             "passwordFieldPlaceholder": "contraseña",
-            "nicknameFieldPlaceholder": "Alias, apodo o nombre abreviado",
+            "nicknameFieldPlaceholder": "Alias o apodo",
             "firstNameFieldPlaceholder": "nombre",
             "lastNameFieldPlaceholder": "apellidos",
             "submitButtonValue": "Crear",

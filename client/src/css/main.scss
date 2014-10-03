@@ -41,19 +41,64 @@ form.SearchBar
 //            $gutter-width: 0; // with 1em gutters
 //            $grid-padding: 0; // and 1em padding on the grid container
 
+/*$primary-0: rgba( 59, 54,125,1);
+$primary-1: rgba(149,147,177,1);
+$primary-2: rgba( 97, 93,151,1);
+$primary-3: rgba( 37, 32,106,1);
+$primary-4: rgba( 12,  7, 74,1);
+
+$rgba-complement-0: rgba(180,152, 61,1);
+$rgba-complement-1: rgba(254,243,204,1);
+$rgba-complement-2: rgba(217,195,120,1);
+$rgba-complement-3: rgba(152,124, 29,1);
+$rgba-complement-4: rgba(107, 82,  0,1);*/
+
+
+/* gray on white 
+$ondark: false;
+$base-background-color: #FAFAFA;
+$base-saturation-contrast: 0%;
+$base-lightness-contrast: 60%;
+/* /gray on white */
+
+/* dark blue on light blue */
+$ondark: false;
+$base-background-color: hsl(250, 30%, 95%); // un-saturated, bright
+$base-saturation-contrast: 30%;
+$base-lightness-contrast: 60%;
+/* /dark blue on light blue */
+
+/* gray on black 
+$ondark: true;
+$base-background-color: #0A0A0A;
+$base-saturation-contrast: 0%;
+$base-lightness-contrast: 60%;
+/* /gray on white */
+
+$saturation-contrast-sign: if($ondark, -1, 1);
+$lightness-contrast-sign: if($ondark, 1, -1);
+
 $base-font-size: 60px;
-$base-color: #C6C6C6;
-$base-background-color: #2F2F2F;
+//$base-color: #C6C6C6;
+//$base-background-color: #2F2F2F;
+//$base-background-color: hsl(250, 80%, 90%); // light, saurated
+$base-color: adjust-color($base-background-color, $saturation: $saturation-contrast-sign*$base-saturation-contrast, $lightness: $lightness-contrast-sign*$base-lightness-contrast);
+$less-contrast-1: adjust-color($base-background-color, $saturation: $saturation-contrast-sign*$base-saturation-contrast/3, $lightness: $lightness-contrast-sign*$base-lightness-contrast/3);
+$less-contrast-2: adjust-color($base-background-color, $saturation: $saturation-contrast-sign*$base-saturation-contrast*2/3, $lightness: $lightness-contrast-sign*$base-lightness-contrast*2/3);
+$more-contrast-1: adjust-color($base-background-color, $saturation: $saturation-contrast-sign*$base-saturation-contrast*4/3, $lightness: $lightness-contrast-sign*$base-lightness-contrast*4/3);
+$more-contrast-2: adjust-color($base-background-color, $saturation: $saturation-contrast-sign*$base-saturation-contrast*5/3, $lightness: $lightness-contrast-sign*$base-lightness-contrast*5/3);
+//$base-color: hsl(250, 100%, 80%);
+//$base-background-color: desaturate(darken($base-color, 40%), 20%);
 $main-heading-margin: 0.4em 0 0 0;
 @mixin hr-with-shadow($width) {
-    box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.07);
-    border-bottom: $width solid #121212;
+    box-shadow: 0px 1px 0px rgba($more-contrast-2, 0.07);
+    border-bottom: $width solid $less-contrast-1;
 }
 @mixin main-heading-base() {
     margin: $main-heading-margin;
-    border: solid lighten($base-background-color, 10%);
+    border: solid $less-contrast-2;
     border-width: 2px 0;
-    background-color: lighten($base-background-color, 5%);
+    background-color: $less-contrast-1;
     font-style: none;
     text-indent: 3%;
 }
@@ -76,7 +121,7 @@ body, a:link, a:visited {
     color: $base-color;
 }
 a:hover, a:active {
-    color: darken($base-color, 10%);
+    color: $less-contrast-2;
 }
 body > footer {
     @include span(1 of 1);
@@ -96,7 +141,6 @@ body > div {
             @include with-layout((gutters: 0)) {
                 @include container;
                 //font-family: "Open Sans",sans-serif;
-                //background-color: #EAEAEA;
                 h2.home {
                     @include span(1 of 3);
                     * {
@@ -124,7 +168,6 @@ body > div {
                     //font-size: 2.5em;
                     padding: .2em 0;
                     text-align: center;
-                    //background-color: #E7E7E7;
                     ::before {
                         font-size: $base-font-size * 1.5;
                     }
@@ -141,10 +184,10 @@ section.SearchBar {
     padding: 1em 0;
 }
 form.SearchBar {
-    color: darken($base-color, 40%);
+    color: $more-contrast-1;
     width: 75%;
-    box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.1), 0px 1px 7px 0px rgba(0, 0, 0, 0.8) inset;
-    background: none repeat scroll 0% 0% rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 1px 0px rgba($more-contrast-2, 0.1), 0px 1px 7px 0px rgba($less-contrast-1, 0.8) inset;
+    background: none repeat scroll 0% 0% rgba($less-contrast-1, 0.3);
     border-radius: 10px;
     border: 0px none;
     font-size: 0.8em;
@@ -158,12 +201,12 @@ form.SearchBar {
         display: inline-block;
         vertical-align: middle;
         width: 80%;
-        color: darken($base-color, 40%);
+        color: $more-contrast-1;
         background: none repeat scroll 0% 0% rgba(0, 0, 0, 0);
         border: 0px none;
         font-size: 1.5em;
         @include placeholder {
-            color: darken($base-color, 60%);
+            color: $less-contrast-2;
         }
     }
     padding: 1em 0.3em;
@@ -227,9 +270,9 @@ main.phrase-details {
         > li {
             @include hr-with-shadow(1px);
             margin: 1em;
-            border: 1px solid lighten($base-background-color, 10%);
+            border: 1px solid $less-contrast-1;
             border-radius: 20px;
-            box-shadow: 0 0 20px 10px darken($base-background-color, 3%) inset;
+            box-shadow: 0 0 40px 10px $base-color inset;
             line-height: 1.8em;
             text-align: center;
             > * {
@@ -281,9 +324,9 @@ main.phrase-details {
             dd.tags {
                 margin: 20px 0;
                 padding: 20px;
-                box-shadow: 0 0 20px 10px darken($base-background-color, 3%) inset;
-                border: 1px solid darken($base-background-color, 10%);
-                background-color: darken($base-background-color, 4%);
+                box-shadow: 0 0 20px 10px $less-contrast-1 inset;
+                border: 1px solid $less-contrast-2;
+                background-color: $less-contrast-1;
                 border-radius: 20px;
                 line-height: 1em;
                 > span {
@@ -295,8 +338,8 @@ main.phrase-details {
                     margin-right: 24px;
                     &.exists {
                         font-weight: bold;
-                        background-color: lighten($base-background-color, 10%);
-                        color: darken($base-color, 10%);
+                        background-color: $less-contrast-2;
+                        color: $base-color;
                         border: 1px none;
                         border-radius: 10px;
                         a {
@@ -313,7 +356,7 @@ main.phrase-details {
             }
             position: relative;
             &::before {
-                color: rgba(60, 60, 60, 1);
+                color: $less-contrast-1;
                 counter-increment: defNum;
                 content: counter(defNum)".";
                 position:absolute;
@@ -395,6 +438,10 @@ main.login {
             legend {
                 @extend .base-legend;
             }
+            label {
+                line-height: 1.5em;
+                margin-bottom: 1em;
+            }
             input[type="text"], input[type="password"] {
                 @extend .base-text-input;
                 width: 90%;
@@ -412,30 +459,30 @@ main.login {
     }
 }
 .base-text-input {
-    color: darken($base-color, 3%);
+    color: $less-contrast-2;
     //background: darken($base-background-color, 10%);
-    border: 1px solid darken($base-color, 50%);
+    border: 1px solid $more-contrast-1;
     border-radius: 10px;
     //box-shadow: 0 0 10px 0 lighten($base-background-color, 5%) inset, 0 0 10px 0 darken($base-background-color, 5%);
-    box-shadow: 0px 1px 0px rgba(255, 255, 255, 0.1), 0px 1px 7px 0px rgba(0, 0, 0, 0.8) inset;
-    background: none repeat scroll 0% 0% rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 1px 0px rgba($more-contrast-2, 0.1), 0px 1px 7px 0px rgba($base-background-color, 0.8) inset;
+    background: none repeat scroll 0% 0% rgba($less-contrast-1, 0.3);
 }
 .base-submit-input {
-    color: darken($base-color, 3%);
-    background: lighten($base-background-color, 10%);
+    color: $less-contrast-2;
+    background: $less-contrast-1;
     border: 1px outset darken($base-color, 50%);
     border-radius: 10px;
     box-shadow: 0 0 10px 0 darken($base-background-color, 5%) inset, 0 0 10px 0 lighten($base-background-color, 5%);
 }
 .base-legend {
-    color: darken($base-color, 10%);
+    color: $less-contrast-2;
     text-align: left;
     font-size: 80%;
 }
 .base-fieldset {
-    border: 1px solid lighten($base-background-color, 3%);
+    border: 1px solid $less-contrast-1;
     border-radius: 20px;
-    box-shadow: 0px 1px 30px 0 darken($base-background-color, 5%);
+    box-shadow: 0px 1px 30px 0 $less-contrast-2;
     padding: 2em;
     margin-top: 25px;
 }
@@ -468,8 +515,8 @@ main.login {
 }
 
 input.error, p.global.error {
-    background-color: red!important;
-    color: black;
+    background-color: complement($base-background-color)!important;
+    color: complement($base-color);
 }
 
 .main-enter {
