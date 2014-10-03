@@ -450,6 +450,7 @@ main.login {
             }
             input[type="submit"] {
                 @extend .base-submit-input;
+                margin-top: 1.7em;
             }
             input {
                 display: block;
