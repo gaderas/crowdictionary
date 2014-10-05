@@ -23,6 +23,7 @@ TODO Features
 ----
 
 *   Use # anchors to fix scroll position upon clicking on links
+*   Put pagination links on phrases list (home, search) for SEO purposes.
 *   User page (come up with queries, rollup tables)
 *   Users leaderboard (come up with queries, rollup tables)
 *   Make definitions linkable
