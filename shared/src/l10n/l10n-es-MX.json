@@ -101,7 +101,8 @@
             "thumbsUpTitle": "{currentVote, select, up {haz clic para eliminar tu voto anterior} other {vota a favor}}",
             "thumbsDownTitle": "{currentVote, select, down {haz clic para eliminar tu voto anterior} other {vota en contra}}",
             "loginRequiredToVote": "para poder votar, debes primero entrar con tu cuenta de usuario",
-            "tags": "Etiquetas:"
+            "tags": "Etiquetas:",
+            "by": "Por:"
         },
         "ContributorActivityItem": {
             "goToPhraseLink": "Ir",

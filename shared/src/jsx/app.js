@@ -1404,6 +1404,7 @@ var DefinitionInDetails = React.createClass({
             definitionAbbr = this.messages.Abbreviations.definition,
             exampleAbbr = this.messages.Abbreviations.example,
             tagsCaption = this.messages.DefinitionInDetails.tags,
+            byCaption = this.messages.DefinitionInDetails.by,
             cx = React.addons.classSet,
             upClasses = ('up' === userVote && cx({up: true, voted: true})) || cx({up: true}),
             downClasses = ('down' === userVote && cx({down: true, voted: true})) || cx({down: true});
@@ -1423,6 +1424,9 @@ var DefinitionInDetails = React.createClass({
                     </dd>
                     <dd className="tags"><span>{tagsCaption}</span><ul>{tags}</ul></dd>
                 </dl>
+                <div className="author">
+                    <span className="by">{byCaption} {authorProfileLink}</span>
+                </div>
                 <div className="votes">
                     <div className={upClasses}>
                         <a className="up oi" href="#" data-glyph="thumb-up" title={thumbsUpTitle} onClick={this.handleVote}></a>
