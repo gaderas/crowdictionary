@@ -438,20 +438,36 @@ var routesInfo = [
                                         return tag.replace(/(^\s*|\s*$)/, '');
                                     });
                                 }))[0],
-                                qs = _.map(allTags, function (tag) {
+                                allContributors = _.union([shownPhraseData.contributor_id], _.map(definitions, function (definition) {
+                                    return definition.contributor_id;
+                                })),
+                                tagsQs = _.map(allTags, function (tag) {
                                     return "phrase=" + tag;
-                                }).join('&');
+                                }).join('&'),
+                                contributorsQs = _.map(allContributors, function (contributor_id) {
+                                    return "id=" + contributor_id;
+                                }).join('&'),
+                                getPhrasesUrl = baseRoot + "/v1/lang/"+lang+"/phrases?"+tagsQs,
+                                getContributorsUrl = baseRoot + "/v1/contributors?"+contributorsQs;
 
                             reactState.shownPhraseData.definitions = definitions;
-                            return pRequest({url: baseRoot + "/v1/lang/"+lang+"/phrases?"+qs, json: true})
-                                .then(function (res) {
-                                    if (200 !== res[0].statusCode) {
+                            console.log("getContributorsUrl: " + getContributorsUrl);
+                            return Q.all([pRequest({url: getPhrasesUrl, json: true}), pRequest({url: getContributorsUrl, json: true})])
+                                .spread(function (phrasesRes, contributorsRes) {
+                                    if (200 !== phrasesRes[0].statusCode) {
                                         console.error("couldn't fetch phrases corresponding to tags... continuing without them");
                                         reactState.shownPhraseData.existingPhraseTags = {};
                                         return reactState;
                                     }
-                                    reactState.shownPhraseData.existingPhraseTags = _.zipObject(_.map(res[1], function (phrase) {
+                                    if (200 !== contributorsRes[0].statusCode) {
+                                        console.error("couldn't fetch phrase and definitions contributors... fail");
+                                        throw Error("couldn't fetch phrase and definitions contributors... fail");
+                                    }
+                                    reactState.shownPhraseData.existingPhraseTags = _.zipObject(_.map(phrasesRes[1], function (phrase) {
                                         return [phrase.phrase, phrase];
+                                    }));
+                                    reactState.shownPhraseData.contributorsInfo = _.zipObject(_.map(contributorsRes[1], function (contributorInfo) {
+                                        return [contributorInfo.id, contributorInfo];
                                     }));
                                     console.log("we shall return reactState: " + JSON.stringify(reactState));
                                     return reactState;
@@ -624,11 +640,13 @@ var routesInfo = [
                     globalLang: lang,
                     shortLangCode: shortLangCode,
                     l10nData: l10nData,
-                    showAddDefinition: false
+                    showAddDefinition: false,
+                    alreadyAddedDefinition: false
                 },
                 phrase = nRouteInfo.query.phrase,
                 loginStateUrl = baseRoot + "/v1/login",
-                phraseUrl = baseRoot + util.format("/v1/lang/%s/phrases/%s", lang, phrase);
+                phraseUrl = baseRoot + util.format("/v1/lang/%s/phrases/%s", lang, phrase),
+                definitionUrl = baseRoot + util.format("/v1/lang/%s/phrases/%s", lang, phrase);
             if ("string" !== typeof phrase || _.isEmpty(phrase)) {
                 throw Error("phrase not provided in URL");
             }
@@ -645,6 +663,23 @@ var routesInfo = [
                     if (200 === loginStateRes[0].statusCode) {
                         reactState.loginInfo = loginStateRes[1];
                     }
+
+                    if (nRouteInfo.query.confirmOverwrite) {
+                        reactState.confirmOverwrite = true;
+                        return reactState;
+                    }
+
+                    var existingDefinitionUrl = baseRoot + util.format("/v1/lang/%s/phrases/%s/definitions?contributor_id=" + reactState.loginInfo.id);
+                    return pRequest({url: existingDefinitionUrl, json: true})
+                        .then(function (definitionsRes) {
+                            if (200 !== definitionsRes[0].statusCode) {
+                                throw Error("couldn't fetch existing definitions to check if user already has one");
+                            }
+                            if (definitionsRes[1].length) {
+                                reactState.alreadyAddedDefinition = true;
+                            }
+                            return reactState;
+                        });
                     return reactState;
                 });
             // if above promise fails, return here
@@ -979,6 +1014,35 @@ var CrowDictionary = React.createClass({
             clearInfoCallback: cb
         });
     },
+    handleYesnoYes: function () {
+        console.log("user said 'Yes'...");
+        if (this.state.yesCallback) {
+            this.state.yesCallback();
+            // invoke the callback (most likely Router.navigate), and we're done!
+            return;
+        }
+        this.setState({
+            yesno: undefined
+        });
+    },
+    handleYesnoNo: function () {
+        console.log("user said 'No'...");
+        if (this.state.noCallback) {
+            this.state.noCallback();
+            // invoke the callback (most likely Router.navigate), and we're done!
+            return;
+        }
+        this.setState({
+            yesno: undefined
+        });
+    },
+    handleSetYesno: function (yesno, yesCb, noCb) {
+        this.setState({
+            yesno: yesno,
+            yesCallback: yesCb,
+            noCallback: noCb
+        });
+    },
     handleDefinitionVote: function (voteInfo) {
         try {
             this.getLoggedInInfo(true);
@@ -1064,6 +1128,8 @@ var CrowDictionary = React.createClass({
             mainContent = <ErrorMessage onClearError={this.handleClearError} topState={this.state} key="ErrorMessage"/>;
         } else if (this.state.info) {
             mainContent = <InfoMessage onClearInfo={this.handleClearInfo} topState={this.state} key="InfoMessage"/>;
+        } else if (this.state.yesno) {
+            mainContent = <YesnoMessage onYes={this.handleYesnoYes} onNo={this.handleYesnoNo} topState={this.state} key="YesnoMessage"/>;
         } else if (this.state.showLoginPrompt) {
             mainContent = <LoginPrompt topState={this.state} onLogIn={this.handleLogIn} onSignup={this.handleSignup} onSetInfo={this.handleSetInfo} onClearInfo={this.handleClearInfo} key="LoginPrompt"/>;
         } else if (this.state.showVerificationPrompt) {
@@ -1082,8 +1148,8 @@ var CrowDictionary = React.createClass({
         } else if (this.state.showAddPhrase){
             mainContent = <AddPhraseForm onSubmitAddPhrase={this.handleSubmitAddPhrase} onSetInfo={this.handleSetInfo} topState={this.state} key="AddPhraseForm"/>;
         } else if (this.state.showAddDefinition) {
-            // showAddDefinition itself is a phrase object
-            mainContent = <AddDefinitionForm phraseData={this.state.showAddDefinition} topState={this.state} onSubmitAddDefinition={this.handleSubmitAddDefinition} onSetInfo={this.handleSetInfo} key="AddDefinitionForm"/>;
+            // showAddDefinition itself is a phrase object. alreadyAddedDefinition and confirmOverwrite are booleans (or undefined)
+            mainContent = <AddDefinitionForm phraseData={this.state.showAddDefinition} topState={this.state} onSubmitAddDefinition={this.handleSubmitAddDefinition} onSetInfo={this.handleSetInfo} setYesno={this.handleSetYesno} key="AddDefinitionForm"/>;
         } else {
             mainContent = <PhraseSearchResults topState={this.state} onSelectPhrase={this.handleSelectPhrase} onSetInfo={this.handleSetInfo} key="PhraseSearchResults"/>;
         }
@@ -1216,6 +1282,33 @@ var InfoMessage = React.createClass({
     }
 });
 
+/**
+ * the 'yesno' property on the state that triggers this is a string
+ */
+var YesnoMessage = React.createClass({
+    mixins: [I18nMixin],
+    componentWillMount: function () {
+    },
+    handleYes: function () {
+        this.props.onYes();
+    },
+    handleNo: function () {
+        this.props.onNo();
+    },
+    render: function () {
+        var message = this.props.topState.info,
+            yes = this.messages.Errors.yes,
+            no = this.messages.Errors.no;
+        return (
+            <div>
+                <div>{message}</div>
+                <a onClick={this.handleYes}>{yes}</a>
+                <a onClick={this.handleNo}>{no}</a>
+            </div>
+        );
+    }
+});
+
 var PhraseDetails = React.createClass({
     mixins: [I18nMixin],
     handleBack: function (e) {
@@ -1242,6 +1335,21 @@ var PhraseDetails = React.createClass({
 
 var AddDefinitionForm = React.createClass({
     mixins: [I18nMixin],
+    componentWillMount: function () {
+        if (this.props.topState.alreadyAddedDefinition && !this.props.topState.confirmOverwrite) {
+            // show confirmation prompt
+            //mainContent = <InfoMessage onClearInfo={this.handleClearInfo} topState={this.state} key="InfoMessage"/>;
+            this.props.setYesno(
+                "are you sure you want to overwrite?",
+                function () {
+                    router.navigate("addDefinition?confirmOverwrite=true", {trigger: true, replace: false});
+                },
+                function () {
+                    window.history.back();
+                }
+            );
+        }
+    },
     handleSubmit: function (e) {
         var newDefinition = this.refs.newDefinition.getDOMNode().value,
             examples = this.refs.examples.getDOMNode().value,
@@ -1263,13 +1371,14 @@ var AddDefinitionForm = React.createClass({
             placeholderExamples = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionExamplesPlaceHolder), {phrase: this.props.phraseData.phrase}),
             placeholderTags = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionTagsPlaceHolder), {phrase: this.props.phraseData.phrase}),
             submit = this.fmt(this.msg(this.messages.AddDefinitionForm.submitDefinition));
+
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
                     <span>{addDefinition}</span>
-                    <textarea placeholder={placeholderDefinition} ref="newDefinition"/>
-                    <textarea placeholder={placeholderExamples} ref="examples"/>
-                    <textarea placeholder={placeholderTags} ref="tags"/>
+                    <textarea placeholder={placeholderDefinition} ref="newDefinition" autocorrect="off" autocapitalize="none" spellcheck="false"/>
+                    <textarea placeholder={placeholderExamples} ref="examples" autocorrect="off" autocapitalize="none" spellcheck="false"/>
+                    <textarea placeholder={placeholderTags} ref="tags" autocorrect="off" autocapitalize="none" spellcheck="false"/>
                     <input type="submit" value={submit}/>
                 </form>
             </div>
@@ -1303,7 +1412,7 @@ var DefinitionsInDetails = React.createClass({
  * so all svg transformations (e.g.: rotation) have to take this into account.
  */
 var DefinitionInDetails = React.createClass({
-    mixins: [I18nMixin],
+    mixins: [I18nMixin, LinksMixin],
     handleVote: function (e) {
         e.preventDefault();
         console.log("annnd they voted...");
@@ -1405,6 +1514,8 @@ var DefinitionInDetails = React.createClass({
             exampleAbbr = this.messages.Abbreviations.example,
             tagsCaption = this.messages.DefinitionInDetails.tags,
             byCaption = this.messages.DefinitionInDetails.by,
+            authorNick = this.props.topState.shownPhraseData.contributorsInfo[definitionObj.contributor_id].nickname || "??",
+            authorProfileUrl = aUrl(util.format("/contributors/%s/activity", definitionObj.contributor_id), this.props.topState.shortLangCode),
             cx = React.addons.classSet,
             upClasses = ('up' === userVote && cx({up: true, voted: true})) || cx({up: true}),
             downClasses = ('down' === userVote && cx({down: true, voted: true})) || cx({down: true});
@@ -1425,7 +1536,7 @@ var DefinitionInDetails = React.createClass({
                     <dd className="tags"><span>{tagsCaption}</span><ul>{tags}</ul></dd>
                 </dl>
                 <div className="author">
-                    <span className="by">{byCaption} {authorProfileLink}</span>
+                    <span className="by">{byCaption} <a href={authorProfileUrl} onClick={this.handleToLink.bind(this, authorProfileUrl)}>{authorNick}</a></span>
                 </div>
                 <div className="votes">
                     <div className={upClasses}>
@@ -1513,7 +1624,7 @@ var SearchBar = React.createClass({
         return (
             <section className="SearchBar">
             <form action={formActionUrl} onSubmit={this.handleSubmit} className="SearchBar oi" data-glyph="magnifying-glass">
-            <input type="text" defaultValue={value} placeholder={placeholder} ref="searchInput"/>
+            <input type="search" defaultValue={value} placeholder={placeholder} ref="searchInput"/>
             </form>
             </section>
         );
@@ -1795,7 +1906,7 @@ var SignupForm = React.createClass({
                     <p>{messages.formDescription}</p>
                     <label className="username">
                         {labels.email}
-                        <input className={classNames.email} title={titles.email} ref="email" type="text" placeholder={placeholders.email}/>
+                        <input className={classNames.email} title={titles.email} ref="email" type="email" placeholder={placeholders.email}/>
                     </label>
                     <label className="password">
                         {labels.passhash}
@@ -1803,15 +1914,15 @@ var SignupForm = React.createClass({
                     </label>
                     <label className="nickname">
                         {labels.nickname}
-                        <input className={classNames.nickname} title={titles.nickname} ref="nickname" type="text" placeholder={placeholders.nickname}/>
+                        <input className={classNames.nickname} title={titles.nickname} ref="nickname" type="text" placeholder={placeholders.nickname} autocorrect="off" autocapitalize="none" spellcheck="false"/>
                     </label>
                     <label className="firstName">
                         {labels.first_name}
-                        <input className={classNames.first_name} title={titles.first_name} ref="first_name" type="text" placeholder={placeholders.first_name}/>
+                        <input className={classNames.first_name} title={titles.first_name} ref="first_name" type="text" placeholder={placeholders.first_name} autocorrect="off" spellcheck="false"/>
                     </label>
                     <label className="lastName">
                         {labels.last_name}
-                        <input className={classNames.last_name} title={titles.last_name} ref="last_name" type="text" placeholder={placeholders.last_name}/>
+                        <input className={classNames.last_name} title={titles.last_name} ref="last_name" type="text" placeholder={placeholders.last_name} autocorrect="off" spellcheck="false"/>
                     </label>
                     <label className="submit">
                         {messages.submitButtonLabel}
@@ -2091,7 +2202,7 @@ var AddPhraseForm = React.createClass({
                 <form onSubmit={this.handleSubmit}>
                     <fieldset>
                         <legend>{addPhrase}</legend>
-                        <input type="text" placeholder={placeholder} ref="newPhrase" defaultValue={initialPhrase}/>
+                        <input type="text" placeholder={placeholder} ref="newPhrase" defaultValue={initialPhrase} autocorrect="off" autocapitalize="none" spellcheck="false"/>
                         <input type="submit" value={submit}/>
                     </fieldset>
                 </form>

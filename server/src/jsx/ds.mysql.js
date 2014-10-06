@@ -34,8 +34,29 @@ Data.prototype.getContributors = function (params) {
         splitParams = appUtil.splitObject(existingParams, ['start', 'limit']),
         fake = console.log('splitParams: ' + JSON.stringify(splitParams)),
         actualParams = splitParams[0],
-        actualLimits = splitParams[1];
-    return pQuery("SELECT * FROM `contributor` WHERE ?", actualParams);
+        actualLimits = splitParams[1],
+        searchedKey;
+    if (actualParams.id) {
+        searchedKey = 'id';
+        if (_.isString(actualParams.id)) {
+            actualParams.id = [actualParams.id];
+        }
+    }
+    if (actualParams.email) {
+        searchedKey = 'email';
+        if (_.isString(actualParams.email)) {
+            actualParams.email = [actualParams.email];
+        }
+    }
+    if ('id' === searchedKey) {
+        actualParams.id = _.map(actualParams.id, function (id) {
+            return parseInt(id, 10);
+        });
+    }
+    if (undefined !== actualParams.id && undefined !== actualParams.email) {
+        throw Error("can't specify both email and id parameters (just one or the other)");
+    }
+    return pQuery("SELECT * FROM `contributor` WHERE ?? IN (?)", [searchedKey, actualParams[searchedKey]]);
 };
 
 Data.prototype.createContributor = function (params, payload) {
@@ -195,7 +216,9 @@ Data.prototype.getDefinitions = function (params) {
         splitParams = appUtil.splitObject(existingParams, ['start', 'limit']),
         fake = console.log('splitParams: ' + JSON.stringify(splitParams)),
         actualParams = splitParams[0],
-        actualLimits = splitParams[1];
+        actualLimits = splitParams[1],
+        filterAnds = [],
+        filterParams = [];
     if (!actualParams.phrase && !actualParams.phraseIds) {
         throw Error("error. tried to query definitions without specifying 'phrase' or 'phraseIds'");
     }
@@ -205,11 +228,17 @@ Data.prototype.getDefinitions = function (params) {
     if (actualParams.phrase && actualParams.phraseIds) {
         throw Error("error. tried to query definitions specifying both 'phrase' and 'phraseIds'. only one of the two should be specified.");
     }
+    // additional filtering:
+    if (actualParams.contributor_id) {
+        filterAnds.push(" "); // first filter item empty element so that the join below generates valid SQL
+        filterAnds.push("d.contributor_id = ?");
+        filterParams.push(actualParams.contributor_id);
+    }
 
     if (actualParams.phrase) {
-        return pQuery("SELECT d.* FROM `phrase` p LEFT JOIN `definition` d ON p.id = d.phrase_id WHERE ? AND ? ORDER BY d.updated ASC", [{'d.lang': actualParams.lang}, {'p.phrase': actualParams.phrase}]);
+        return pQuery("SELECT d.* FROM `phrase` p LEFT JOIN `definition` d ON p.id = d.phrase_id WHERE ? AND ? " + filterAnds.join(" AND ") + " ORDER BY d.updated ASC", _.union([{'d.lang': actualParams.lang}, {'p.phrase': actualParams.phrase}], filterParams));
     } else {
-        return pQuery("SELECT * FROM `definition` WHERE `phrase_id` IN (?) ORDER BY updated ASC", [actualParams.phraseIds.split(',')]);
+        return pQuery("SELECT d.* FROM `definition` d WHERE `phrase_id` IN (?) ORDER BY updated ASC", _.union([actualParams.phraseIds.split(',')], filterParams));
     }
 };
 

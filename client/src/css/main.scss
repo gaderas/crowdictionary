@@ -435,7 +435,7 @@ main.login {
                 line-height: 1.5em;
                 margin-bottom: 1em;
             }
-            input[type="text"], input[type="password"] {
+            input[type="text"], input[type="password"], input[type="email"] {
                 width: 90%;
                 height: 1.1em;
                 line-height: 1em;
@@ -502,7 +502,7 @@ input.error, p.global.error {
     background-color: complement($base-background-color)!important;
     color: complement($base-color);
 }
-input[type="text"], input[type="password"], textarea {
+input[type="text"], input[type="password"], textarea, input[type="email"], input[type="search"] {
     color: $more-contrast-1;
 
     border: 1px solid $more-contrast-1;
