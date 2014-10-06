@@ -663,20 +663,21 @@ var routesInfo = [
                     if (200 === loginStateRes[0].statusCode) {
                         reactState.loginInfo = loginStateRes[1];
                     }
+                    // @TODO fail if user not logged in. we're gonna fail on submit anyway, so not super urgent
 
                     if (nRouteInfo.query.confirmOverwrite) {
                         reactState.confirmOverwrite = true;
                         return reactState;
                     }
 
-                    var existingDefinitionUrl = baseRoot + util.format("/v1/lang/%s/phrases/%s/definitions?contributor_id=" + reactState.loginInfo.id);
+                    var existingDefinitionUrl = baseRoot + util.format("/v1/lang/%s/phrases/%s/definitions?contributor_id=%s", lang, phrase, reactState.loginInfo.id);
                     return pRequest({url: existingDefinitionUrl, json: true})
                         .then(function (definitionsRes) {
                             if (200 !== definitionsRes[0].statusCode) {
                                 throw Error("couldn't fetch existing definitions to check if user already has one");
                             }
                             if (definitionsRes[1].length) {
-                                reactState.alreadyAddedDefinition = true;
+                                reactState.alreadyAddedDefinition = definitionsRes[1][0];
                             }
                             return reactState;
                         });
@@ -1148,7 +1149,7 @@ var CrowDictionary = React.createClass({
         } else if (this.state.showAddPhrase){
             mainContent = <AddPhraseForm onSubmitAddPhrase={this.handleSubmitAddPhrase} onSetInfo={this.handleSetInfo} topState={this.state} key="AddPhraseForm"/>;
         } else if (this.state.showAddDefinition) {
-            // showAddDefinition itself is a phrase object. alreadyAddedDefinition and confirmOverwrite are booleans (or undefined)
+            // showAddDefinition itself is a phrase object. alreadyAddedDefinition is a definition object. confirmOverwrite is a boolean (or undefined)
             mainContent = <AddDefinitionForm phraseData={this.state.showAddDefinition} topState={this.state} onSubmitAddDefinition={this.handleSubmitAddDefinition} onSetInfo={this.handleSetInfo} setYesno={this.handleSetYesno} key="AddDefinitionForm"/>;
         } else {
             mainContent = <PhraseSearchResults topState={this.state} onSelectPhrase={this.handleSelectPhrase} onSetInfo={this.handleSetInfo} key="PhraseSearchResults"/>;
@@ -1296,7 +1297,7 @@ var YesnoMessage = React.createClass({
         this.props.onNo();
     },
     render: function () {
-        var message = this.props.topState.info,
+        var message = this.props.topState.yesno,
             yes = this.messages.Errors.yes,
             no = this.messages.Errors.no;
         return (
@@ -1335,17 +1336,18 @@ var PhraseDetails = React.createClass({
 
 var AddDefinitionForm = React.createClass({
     mixins: [I18nMixin],
-    componentWillMount: function () {
+    componentDidMount: function () {
+        var phrase = this.props.phraseData.phrase;
         if (this.props.topState.alreadyAddedDefinition && !this.props.topState.confirmOverwrite) {
             // show confirmation prompt
             //mainContent = <InfoMessage onClearInfo={this.handleClearInfo} topState={this.state} key="InfoMessage"/>;
             this.props.setYesno(
-                "are you sure you want to overwrite?",
+                this.messages.AddDefinitionForm.confirmOverwrite,
                 function () {
-                    router.navigate("addDefinition?confirmOverwrite=true", {trigger: true, replace: false});
+                    Router.navigate("addDefinition?phrase=" + phrase + "&confirmOverwrite=true", {trigger: true, replace: false});
                 },
                 function () {
-                    window.history.back();
+                    Router.navigate("phrases/"+phrase, {trigger: true, replace: false});
                 }
             );
         }
@@ -1370,15 +1372,19 @@ var AddDefinitionForm = React.createClass({
             placeholderDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionPlaceHolder), {phrase: this.props.phraseData.phrase}),
             placeholderExamples = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionExamplesPlaceHolder), {phrase: this.props.phraseData.phrase}),
             placeholderTags = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionTagsPlaceHolder), {phrase: this.props.phraseData.phrase}),
-            submit = this.fmt(this.msg(this.messages.AddDefinitionForm.submitDefinition));
-
+            submit = this.fmt(this.msg(this.messages.AddDefinitionForm.submitDefinition)),
+            myPreviousDefinition = this.props.topState.alreadyAddedDefinition,
+            defaultDefinition = (myPreviousDefinition && myPreviousDefinition.definition) || "",
+            defaultExamples = (myPreviousDefinition && myPreviousDefinition.examples) || "",
+            defaultTags = (myPreviousDefinition && myPreviousDefinition.tags) || "";
+console.log("myPreviousDefinition: " + JSON.stringify(myPreviousDefinition));
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
                     <span>{addDefinition}</span>
-                    <textarea placeholder={placeholderDefinition} ref="newDefinition" autocorrect="off" autocapitalize="none" spellcheck="false"/>
-                    <textarea placeholder={placeholderExamples} ref="examples" autocorrect="off" autocapitalize="none" spellcheck="false"/>
-                    <textarea placeholder={placeholderTags} ref="tags" autocorrect="off" autocapitalize="none" spellcheck="false"/>
+                    <textarea placeholder={placeholderDefinition} ref="newDefinition" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultDefinition}/>
+                    <textarea placeholder={placeholderExamples} ref="examples" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultExamples}/>
+                    <textarea placeholder={placeholderTags} ref="tags" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultTags}/>
                     <input type="submit" value={submit}/>
                 </form>
             </div>
@@ -1914,15 +1920,15 @@ var SignupForm = React.createClass({
                     </label>
                     <label className="nickname">
                         {labels.nickname}
-                        <input className={classNames.nickname} title={titles.nickname} ref="nickname" type="text" placeholder={placeholders.nickname} autocorrect="off" autocapitalize="none" spellcheck="false"/>
+                        <input className={classNames.nickname} title={titles.nickname} ref="nickname" type="text" placeholder={placeholders.nickname} autoCorrect="off" autoCapitalize="none" spellCheck="false"/>
                     </label>
                     <label className="firstName">
                         {labels.first_name}
-                        <input className={classNames.first_name} title={titles.first_name} ref="first_name" type="text" placeholder={placeholders.first_name} autocorrect="off" spellcheck="false"/>
+                        <input className={classNames.first_name} title={titles.first_name} ref="first_name" type="text" placeholder={placeholders.first_name} autoCorrect="off" spellCheck="false"/>
                     </label>
                     <label className="lastName">
                         {labels.last_name}
-                        <input className={classNames.last_name} title={titles.last_name} ref="last_name" type="text" placeholder={placeholders.last_name} autocorrect="off" spellcheck="false"/>
+                        <input className={classNames.last_name} title={titles.last_name} ref="last_name" type="text" placeholder={placeholders.last_name} autoCorrect="off" spellCheck="false"/>
                     </label>
                     <label className="submit">
                         {messages.submitButtonLabel}
@@ -2202,7 +2208,7 @@ var AddPhraseForm = React.createClass({
                 <form onSubmit={this.handleSubmit}>
                     <fieldset>
                         <legend>{addPhrase}</legend>
-                        <input type="text" placeholder={placeholder} ref="newPhrase" defaultValue={initialPhrase} autocorrect="off" autocapitalize="none" spellcheck="false"/>
+                        <input type="text" placeholder={placeholder} ref="newPhrase" defaultValue={initialPhrase} autoCorrect="off" autoCapitalize="none" spellCheck="false"/>
                         <input type="submit" value={submit}/>
                     </fieldset>
                 </form>

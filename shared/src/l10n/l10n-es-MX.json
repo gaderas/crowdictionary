@@ -5,7 +5,7 @@
         "Errors": {
             "generic": "algo ha salido mal, lo sentimos...",
             "OK": "OK",
-            "yes": "Yes",
+            "yes": "Sí",
             "no": "No",
             "validationError": "Por favor corrije y/o añade los datos faltantes e intentalo de nuevo.",
             "missingField": "campo faltante",
@@ -84,7 +84,8 @@
             "addDefinitionExamplesPlaceHolder": "introduce ejemplos de cómo usar la frase \"{phrase}\" aquí",
             "addDefinitionTagsPlaceHolder": "introduce \"etiquetas\" o \"palabras clave\" que creas que están relacionadas con la frase \"{phrase}\" aquí",
             "submitDefinition": "enviar",
-            "loginRequired": "se necesita entrar al sistema para poder añadir definiciones"
+            "loginRequired": "se necesita entrar al sistema para poder añadir definiciones",
+            "confirmOverwrite": "Ya nos habías proporcionado una definición para esta frase o palabra. Si decides modificarla se perderán los votos que ya había recibido tu definición anterior. ¿Quieres continuar?"
         },
         "NavBar": {
             "home": "Inicio",

@@ -313,4 +313,17 @@ Data.prototype.putVote = function (payload) {
     return pQuery("INSERT INTO `vote` SET ? ON DUPLICATE KEY UPDATE ?", [payload, payload]);
 };
 
+/**
+ * This function is to be called *after* having authenticated the user through other means.
+ * This function doesn't attempt to authenticate the user and just performs the requested operation.
+ */
+Data.prototype.unsafeResetDefinitionVotes = function (definitionId) {
+    var pQuery = this.pQuery;
+    definitionId = parseInt(definitionId, 10);
+    if (!definitionId) {
+        throw Error("need a definitionId that votes will be reset for");
+    }
+    return pQuery("UPDATE `vote` SET `vote` = 'neutral' WHERE `definition_id` = ?", definitionId);
+};
+
 module.exports = Data;

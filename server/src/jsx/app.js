@@ -399,8 +399,11 @@ appWs.post('/lang/:lang/phrases/:phrase/definitions', function *(next) {
         .then((function (res) {
             this.status = 200;
             console.log("definition create/update res: " + JSON.stringify(res));
-            this.body = {message: "definition created/updated", last_id: res[0].last_id};
-            return;
+            return mockData.unsafeResetDefinitionVotes(res[0].last_id)
+                .then(function (resResetVotes) {
+                    this.body = {message: "definition created/updated", last_id: res[0].last_id};
+                    return;
+                }.bind(this));
         }).bind(this))
         .fail((function (err) {
             this.status = 500;
