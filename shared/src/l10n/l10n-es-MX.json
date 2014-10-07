@@ -79,13 +79,16 @@
             "loginRequired": "se necesita entrar al sistema para poder añadir frases o palabras"
         },
         "AddDefinitionForm": {
-            "addDefinition": "Agrega una definición",
+            "addDefinition": "Agrega una definición para \"{phrase}\"",
             "addDefinitionPlaceHolder": "introduce un nuevo significado o definición para \"{phrase}\" aquí",
             "addDefinitionExamplesPlaceHolder": "introduce ejemplos de cómo usar la frase \"{phrase}\" aquí",
             "addDefinitionTagsPlaceHolder": "introduce \"etiquetas\" o \"palabras clave\" que creas que están relacionadas con la frase \"{phrase}\" aquí",
             "submitDefinition": "enviar",
             "loginRequired": "se necesita entrar al sistema para poder añadir definiciones",
-            "confirmOverwrite": "Ya nos habías proporcionado una definición para esta frase o palabra. Si decides modificarla se perderán los votos que ya había recibido tu definición anterior. ¿Quieres continuar?"
+            "confirmOverwrite": "Ya nos habías proporcionado una definición para esta frase o palabra. Si decides modificarla se perderán los votos que ya había recibido tu definición anterior. ¿Quieres continuar?",
+            "definitionLabel": "Definición",
+            "examplesLabel": "Ejemplos",
+            "tagsLabel": "Etiquetas"
         },
         "NavBar": {
             "home": "Inicio",

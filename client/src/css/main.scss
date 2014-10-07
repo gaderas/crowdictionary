@@ -456,7 +456,7 @@ main.login {
         }
     }
 }
-main.yesno-message {
+main.yesno-message, main.error-message, main.info-message {
     @include span(1 of 1 last);
     @include container;
     section.message {
@@ -482,9 +482,69 @@ main.yesno-message {
         }
     }
 }
-main.add-definition {
-    @include with-layout((gutters: 0)) {
-        @include span(1 of 1 10px split);
+$two-col-fields-layout: layout((1 1.618) 0.05);
+main.add-definition form {
+    @include span(1 of 1);
+    > h2 {
+        @include span(1 of 1);
+        margin-bottom: gutter();
+    }
+    > label {
+        @include span(1 of 1);
+        margin-bottom: gutter();
+        span {
+            @include span(1 at 1 of $two-col-fields-layout);
+        }
+        textarea {
+            @include span(1 at 2 of $two-col-fields-layout);
+            border: 0px none red;
+            padding: 0;
+            height: 250px;
+        }
+    }
+    > section.submit {
+        @include span (1 of 1);
+        input[type="submit"] {
+            @include span(1 at 2 of $two-col-fields-layout);
+            @extend .base-submit-input;
+        }
+    }
+}
+$another-layout: layout((1 2) 0.05);
+main.verification-prompt {
+    @include container;
+    form {
+        @include span(1 of 1);
+        fieldset {
+            @extend .base-base-fieldset;
+            border: 1px solid;
+            @include span(16 at 2 of 20 last);
+            @include pre(1 of 20); //margin
+            @include post(1 of 20); //margin
+            @include prefix(1 of 20); //padding
+            @include suffix(1 of 20); //padding
+            padding-top: span(1 of 20);
+            padding-bottom: span(1 of 20);
+            label {
+                @include span(1 of 1);
+                margin-bottom: span(1 of 20);
+                span {
+                    @include span(1 at 1 of $two-col-fields-layout);
+                }
+                input {
+                    @include span(1 at 2 of $two-col-fields-layout);
+                    border: 0px none red;
+                    padding: 0;
+                }
+            }
+            section.submit {
+                @include span(1 of 1);
+                input[type="submit"] {
+                    @include span(1 at 2 of $two-col-fields-layout);
+                    @extend .base-submit-input;
+                }
+            }
+        }
     }
 }
 .base-submit-input {
@@ -499,10 +559,13 @@ main.add-definition {
     text-align: left;
     font-size: 80%;
 }
-.base-fieldset {
+.base-base-fieldset {
     border: 1px solid $less-contrast-1;
     border-radius: 20px;
     box-shadow: 0px 1px 30px 0 $less-contrast-2;
+}
+.base-fieldset {
+    @extend .base-base-fieldset;
     padding: 2em;
     margin-top: 25px;
 }
@@ -538,8 +601,9 @@ input.error, p.global.error {
     background-color: complement($base-background-color)!important;
     color: complement($base-color);
 }
-input[type="text"], input[type="password"], textarea, input[type="email"], input[type="search"] {
+input[type="text"], input[type="password"], textarea, input[type="email"], input[type="search"], input[type="submit"] {
     color: $more-contrast-1;
+    font-size: $base-font-size;
 
     border: 1px solid $more-contrast-1;
     border-radius: 10px;

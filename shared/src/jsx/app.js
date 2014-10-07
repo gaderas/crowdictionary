@@ -659,14 +659,17 @@ var routesInfo = [
                         throw Error("phrase not found");
                     }
                     reactState.showAddDefinition = phraseRes[1][0];
-                    // add login information if we got it
-                    if (200 === loginStateRes[0].statusCode) {
-                        reactState.loginInfo = loginStateRes[1];
-                    }
-                    // @TODO fail if user not logged in. we're gonna fail on submit anyway, so not super urgent
 
                     if (nRouteInfo.query.confirmOverwrite) {
                         reactState.confirmOverwrite = true;
+                    }
+
+                    if (200 === loginStateRes[0].statusCode) {
+                        // add login information if we got it
+                        reactState.loginInfo = loginStateRes[1];
+                    } else {
+                        // if no login information present, return now
+                        return reactState;
                     }
 
                     var existingDefinitionUrl = baseRoot + util.format("/v1/lang/%s/phrases/%s/definitions?contributor_id=%s", lang, phrase, reactState.loginInfo.id);
@@ -1217,20 +1220,24 @@ var VerificationPrompt = React.createClass({
     render: function () {
         var messages = this.messages.VerificationPrompt;
         return (
-            <form onSubmit={this.handleSubmit}>
-                <fieldset>
-                    <legend>{messages.formTitle}</legend>
-                    <label>
-                        {messages.verificationCodeFieldLabel}
-                        <input ref="validateVerification" placeholder={messages.verificationCodeFieldPlaceholder}/>
-                    </label>
-                    <label>
-                        {messages.emailFieldLabel}
-                        <input ref="email" placeholder={messages.emailFieldPlaceholder}/>
-                    </label>
-                    <input type="submit" value={messages.submit}/>
-                </fieldset>
-            </form>
+            <main className="verification-prompt">
+                <form onSubmit={this.handleSubmit}>
+                    <fieldset>
+                        <legend>{messages.formTitle}</legend>
+                        <label>
+                            <span>{messages.verificationCodeFieldLabel}</span>
+                            <input type="text" ref="validateVerification" placeholder={messages.verificationCodeFieldPlaceholder}/>
+                        </label>
+                        <label>
+                            {messages.emailFieldLabel}
+                            <input type="email" ref="email" placeholder={messages.emailFieldPlaceholder}/>
+                        </label>
+                        <section className="submit">
+                            <input type="submit" value={messages.submit}/>
+                        </section>
+                    </fieldset>
+                </form>
+            </main>
         );
     }
 });
@@ -1252,10 +1259,14 @@ var ErrorMessage = React.createClass({
             errorMessage = this.messages.Errors[error] || "ERROR",
             OK = this.messages.Errors.OK;
         return (
-            <div>
-                <div>{errorMessage}</div>
-                <a href="#" onClick={this.handleClearError}>{OK}</a>
-            </div>
+            <main className="error-message">
+                <section className="message">
+                    <div>{errorMessage}</div>
+                </section>
+                <section className="choices">
+                    <a href="#" onClick={this.handleClearError}>{OK}</a>
+                </section>
+            </main>
         );
     }
 });
@@ -1274,10 +1285,14 @@ var InfoMessage = React.createClass({
         var message = this.props.topState.info,
             OK = this.messages.Errors.OK;
         return (
-            <div>
-                <div>{message}</div>
-                <a onClick={this.handleClearInfo}>{OK}</a>
-            </div>
+            <main className="info-message">
+                <section className="message">
+                    <div>{message}</div>
+                </section>
+                <section className="choices">
+                    <a href="#" onClick={this.handleClearInfo}>{OK}</a>
+                </section>
+            </main>
         );
     }
 });
@@ -1305,8 +1320,8 @@ var YesnoMessage = React.createClass({
                     <p>{message}</p>
                 </section>
                 <section className="choices">
-                    <a onClick={this.handleYes}>{yes}</a>
-                    <a onClick={this.handleNo}>{no}</a>
+                    <a href="#" onClick={this.handleYes}>{yes}</a>
+                    <a href="#" onClick={this.handleNo}>{no}</a>
                 </section>
             </main>
         );
@@ -1371,11 +1386,15 @@ var AddDefinitionForm = React.createClass({
     },
     render: function () {
         //this.loadMessages();
-        var addDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinition)),
-            placeholderDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionPlaceHolder), {phrase: this.props.phraseData.phrase}),
-            placeholderExamples = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionExamplesPlaceHolder), {phrase: this.props.phraseData.phrase}),
-            placeholderTags = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionTagsPlaceHolder), {phrase: this.props.phraseData.phrase}),
-            submit = this.fmt(this.msg(this.messages.AddDefinitionForm.submitDefinition)),
+        var phrase = this.props.phraseData.phrase,
+            addDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinition), {phrase: phrase}),
+            placeholderDefinition = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionPlaceHolder), {phrase: phrase}),
+            placeholderExamples = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionExamplesPlaceHolder), {phrase: phrase}),
+            placeholderTags = this.fmt(this.msg(this.messages.AddDefinitionForm.addDefinitionTagsPlaceHolder), {phrase: phrase}),
+            submit = this.messages.AddDefinitionForm.submitDefinition,
+            definitionLabel = this.messages.AddDefinitionForm.definitionLabel,
+            examplesLabel = this.messages.AddDefinitionForm.examplesLabel,
+            tagsLabel = this.messages.AddDefinitionForm.tagsLabel,
             myPreviousDefinition = this.props.topState.alreadyAddedDefinition,
             defaultDefinition = (myPreviousDefinition && myPreviousDefinition.definition) || "",
             defaultExamples = (myPreviousDefinition && myPreviousDefinition.examples) || "",
@@ -1384,11 +1403,22 @@ console.log("myPreviousDefinition: " + JSON.stringify(myPreviousDefinition));
         return (
             <main className="add-definition">
                 <form onSubmit={this.handleSubmit}>
-                    <span>{addDefinition}</span>
-                    <textarea placeholder={placeholderDefinition} ref="newDefinition" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultDefinition}/>
-                    <textarea placeholder={placeholderExamples} ref="examples" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultExamples}/>
-                    <textarea placeholder={placeholderTags} ref="tags" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultTags}/>
-                    <input type="submit" value={submit}/>
+                    <h2>{addDefinition}</h2>
+                    <label>
+                        <span>{definitionLabel}</span>
+                        <textarea placeholder={placeholderDefinition} ref="newDefinition" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultDefinition}/>
+                    </label>
+                    <label>
+                        <span>{examplesLabel}</span>
+                        <textarea placeholder={placeholderExamples} ref="examples" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultExamples}/>
+                    </label>
+                    <label>
+                        <span>{tagsLabel}</span>
+                        <textarea placeholder={placeholderTags} ref="tags" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultTags}/>
+                    </label>
+                    <section className="submit">
+                        <input type="submit" value={submit}/>
+                    </section>
                 </form>
             </main>
         );

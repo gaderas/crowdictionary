@@ -17,7 +17,8 @@ module.exports = function(grunt) {
                     outputStyle: 'expanded',
                     require: ['susy', 'breakpoint'],
                     sassDir: 'client/src/css',
-                    cssDir: 'client/build/css'
+                    cssDir: 'client/build/css',
+                    watch: true
                 }
             }
         },
@@ -113,7 +114,7 @@ module.exports = function(grunt) {
     grunt.registerTask('bower', ['bower-install-simple', 'concat']);
     grunt.registerTask('jsx', ['shell:jsx-shared', 'shell:jsx-server', 'shell:jsx-client']);
     // Default task(s).
-    grunt.registerTask('default', ['jsonlint', 'uglify', 'compass', 'copy', 'bower', 'jsx', 'browserify']);
+    grunt.registerTask('default', ['jsonlint', 'uglify', 'copy', 'bower', 'jsx', 'browserify', 'compass']);
 };
 
 /* vim: expandtab:tabstop=4:softtabstop=4:shiftwidth=4:set filetype=javascript: */
