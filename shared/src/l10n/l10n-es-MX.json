@@ -130,6 +130,9 @@
         "Abbreviations": {
             "definition": "def.",
             "example": "ej."
+        },
+        "PhraseInDetails": {
+            "addDefinitionCaption": "Agrega una definición"
         }
     }
 }

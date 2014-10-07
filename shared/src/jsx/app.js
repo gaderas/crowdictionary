@@ -667,7 +667,6 @@ var routesInfo = [
 
                     if (nRouteInfo.query.confirmOverwrite) {
                         reactState.confirmOverwrite = true;
-                        return reactState;
                     }
 
                     var existingDefinitionUrl = baseRoot + util.format("/v1/lang/%s/phrases/%s/definitions?contributor_id=%s", lang, phrase, reactState.loginInfo.id);
@@ -1301,11 +1300,15 @@ var YesnoMessage = React.createClass({
             yes = this.messages.Errors.yes,
             no = this.messages.Errors.no;
         return (
-            <div>
-                <div>{message}</div>
-                <a onClick={this.handleYes}>{yes}</a>
-                <a onClick={this.handleNo}>{no}</a>
-            </div>
+            <main className="yesno-message">
+                <section className="message">
+                    <p>{message}</p>
+                </section>
+                <section className="choices">
+                    <a onClick={this.handleYes}>{yes}</a>
+                    <a onClick={this.handleNo}>{no}</a>
+                </section>
+            </main>
         );
     }
 });
@@ -1379,7 +1382,7 @@ var AddDefinitionForm = React.createClass({
             defaultTags = (myPreviousDefinition && myPreviousDefinition.tags) || "";
 console.log("myPreviousDefinition: " + JSON.stringify(myPreviousDefinition));
         return (
-            <div>
+            <main className="add-definition">
                 <form onSubmit={this.handleSubmit}>
                     <span>{addDefinition}</span>
                     <textarea placeholder={placeholderDefinition} ref="newDefinition" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultDefinition}/>
@@ -1387,15 +1390,24 @@ console.log("myPreviousDefinition: " + JSON.stringify(myPreviousDefinition));
                     <textarea placeholder={placeholderTags} ref="tags" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultTags}/>
                     <input type="submit" value={submit}/>
                 </form>
-            </div>
+            </main>
         );
     }
 });
 
 var PhraseInDetails = React.createClass({
+    mixins: [I18nMixin, LinksMixin],
     render: function () {
+        var phrase = this.props.topState.shownPhraseData.phrase,
+            loginInfo = this.props.topState.loginInfo,
+            addDefinitionCaption = this.messages.PhraseInDetails.addDefinitionCaption,
+            addUrl = aUrl(util.format("/addDefinition?phrase=%s", phrase), this.props.topState.shortLangCode),
+            addDefinitionElem = (loginInfo && <p>{addDefinitionCaption}: <a className="oi" data-glyph="plus" title={addDefinitionCaption} href={addUrl} onClick={this.handleToLink.bind(this, addUrl)}></a></p>) || "";
         return (
-            <h2>{this.props.topState.shownPhraseData.phrase}</h2>
+            <section className="phrase-top">
+                <h2>{phrase}</h2>
+                {addDefinitionElem}
+            </section>
         );
     }
 });

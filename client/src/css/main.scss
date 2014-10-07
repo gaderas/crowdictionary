@@ -254,11 +254,16 @@ main.phrase-details {
     @include span(1 of 1 last);
     //@include with-layout(gutters 0);
     @include container;
-    > h2 {
-        @include main-heading-base;
-        font-size: 140%;
-        font-style: none;
-        font-weight: bold;
+    section.phrase-top {
+        h2 {
+            @include main-heading-base;
+            font-size: 140%;
+            font-style: none;
+            font-weight: bold;
+        }
+        p {
+            font-size: 70%;
+        }
     }
     > ul {
         @include span(1 of 1 last);
@@ -449,6 +454,37 @@ main.login {
                 font-size: $base-font-size;
             }
         }
+    }
+}
+main.yesno-message {
+    @include span(1 of 1 last);
+    @include container;
+    section.message {
+        @include span(1 of 1 last);
+        text-align: center;
+        p {
+            margin-top: 1em;
+            display: inline-block;
+            width: 80%;
+            font-size: 60%;
+            text-align: left;
+        }
+    }
+    section.choices {
+        @include span(1 of 1 last);
+        width: 80%;
+        margin: 1em 0;
+        text-align: left;
+        a {
+            @extend .base-submit-input;
+            margin: 1em;
+            padding: 0 12px;
+        }
+    }
+}
+main.add-definition {
+    @include with-layout((gutters: 0)) {
+        @include span(1 of 1 10px split);
     }
 }
 .base-submit-input {
