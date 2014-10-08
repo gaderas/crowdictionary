@@ -110,6 +110,12 @@
             "tags": "Etiquetas:",
             "by": "Por:"
         },
+        "ContributorProfile": {
+            "nickname": "nombre de usuario",
+            "firstName": "nombre",
+            "lastName": "apellidos",
+            "memberSince": "miembro desde"
+        },
         "ContributorActivityItem": {
             "goToPhraseLink": "Ir",
             "phraseActivityEntry": "Contribuíste la frase o palabra \"{phrase}\"",

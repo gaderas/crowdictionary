@@ -483,6 +483,7 @@ main.yesno-message, main.error-message, main.info-message {
     }
 }
 $two-col-fields-layout: layout((1 1.618) 0.05);
+$reverse-two-col-fields-layout: layout((1.618 1) 0.05);
 main.add-definition form {
     @include span(1 of 1);
     > h2 {
@@ -545,6 +546,28 @@ main.verification-prompt {
                 }
             }
         }
+    }
+}
+main.contributor-profile {
+    @include container;
+    section.contributor-info {
+        @include span(1 at 1 of $two-col-fields-layout);
+        position: sticky; // add --webkit
+        position: -webkit-sticky; // add --webkit
+        top: 10px;
+        > dl {
+            @include span(1 of 1);
+            font-size: 50%;
+            dt {
+                @include span(1 at 1 of $reverse-two-col-fields-layout);
+            }
+            dd {
+                @include span(1 at 2 of $reverse-two-col-fields-layout);
+            }
+        }
+    }
+    section.contributor-activity {
+        @include span(1 at 2 of $two-col-fields-layout);
     }
 }
 .base-submit-input {

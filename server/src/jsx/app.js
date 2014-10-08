@@ -157,7 +157,12 @@ appWs.get('/logout', function *(next) {
 appWs.get('/contributors', function *(next) {
     //yield next;
     console.log('query string: ' + JSON.stringify(this.query));
-    this.body = yield mockData.getContributors(this.query);
+    this.body = yield mockData.getContributors(this.query)
+        .then(function (contributors) {
+            return _.map(contributors, function (contributor) {
+                return appUtil.getObjectWithoutProps(contributor, ['email', 'status', 'passhash', 'verification_code', 'verified', 'verification_retries']);
+            });
+        });
 });
 
 appWs.get('/contributors/:contributor_id/activity', function *(next) {

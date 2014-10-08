@@ -500,9 +500,27 @@ var routesInfo = [
                     // add login information if we got it
                     if (200 === loginStateRes[0].statusCode) {
                         reactState.loginInfo = loginStateRes[1];
-                    } else {
-                        // here we could prevent visits to others' activity pages when not logged in
+                        if (reactState.loginInfo.id === contributor_id) {
+                            // user is viewing his/her own profile, therefore no need to fetch anything else
+                            reactState.viewedContributor = reactState.loginInfo;
+                            return reactState;
+                        }
                     }
+                    if (!reactState.viewedContributor) {
+                        var getContributorUrl = baseRoot + "/v1/contributors?id="+contributor_id;
+                        return pRequest({method: "GET", url: getContributorUrl, json: true})
+                            .then(function (contribRes) {
+                                if (200 !== contribRes[0].statusCode) {
+                                    throw Error("failure when calling api endpoint to fetch user metadata for the requested user");
+                                }
+                                if (!contribRes[1].length) {
+                                    throw Error("got an empty set of user info");
+                                }
+                                reactState.viewedContributor = contribRes[1][0];
+                                return reactState;
+                            });
+                    }
+                    // on failure of any of the promises, return basic state
                     return reactState;
                 });
         }
@@ -1147,7 +1165,7 @@ var CrowDictionary = React.createClass({
         } else if (this.state.shownPhraseData) {
             mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} getSearchTermFromDOM={this.getSearchTermFromDOM} onSetInfo={this.handleSetInfo} key="PhraseDetails"/>;
         } else if (!_.isEmpty(this.state.contributorActivity)) {
-            mainContent = <ContributorActivity topState={this.state} onClickActivityItem={this.handleSelectPhrase} key="ContributorActivity"/>;
+            mainContent = <ContributorProfile topState={this.state} key="ContributorActivity"/>;
         } else if (this.state.showAddPhrase){
             mainContent = <AddPhraseForm onSubmitAddPhrase={this.handleSubmitAddPhrase} onSetInfo={this.handleSetInfo} topState={this.state} key="AddPhraseForm"/>;
         } else if (this.state.showAddDefinition) {
@@ -2052,6 +2070,40 @@ var PhraseSearchResults = React.createClass({
     }
 });
 
+var ContributorProfile = React.createClass({
+    mixins: [I18nMixin],
+    render: function () {
+        var showEditLink = false,
+            m = this.messages.ContributorProfile,
+            c = this.props.topState.viewedContributor;
+        if (!_.isEmpty(this.props.topState.loginInfo) && this.props.topState.contributor_id === this.props.topState.loginInfo.id) {
+            // the user is viewing his/her own profile. show edit links, etc.
+            showEditLink = true;
+        }
+        return (
+            <main className="contributor-profile">
+                <section className="contributor-info">
+                    <dl>
+                        <dt>{m.nickname}</dt>
+                        <dd>{c.nickname}</dd>
+                    </dl>
+                    <dl>
+                        <dt>{m.firstName}</dt>
+                        <dd>{c.first_name}</dd>
+                    </dl>
+                    <dl>
+                        <dt>{m.lastName}</dt>
+                        <dd>{c.last_name}</dd>
+                    </dl>
+                </section>
+                <section className="contributor-activity">
+                    <ContributorActivity topState={this.props.topState}/>
+                </section>
+            </main>
+        );
+    }
+});
+
 var ContributorActivity = React.createClass({
     mixins: [LifecycleDebug({displayName: 'ContributorActivity'})],
     hasMore: function (state) {
@@ -2082,7 +2134,7 @@ var ContributorActivity = React.createClass({
         var start = (page * PHRASES_PAGE_SIZE),
             lang = this.props.topState.globalLang,
             shortLangCode = this.props.topState.shortLangCode,
-            contributor_id = this.props.topState.loginInfo.id;
+            contributor_id = this.props.topState.contributor_id;
         console.log('load');
         getContributorActivityReactState({lang: lang, shortLangCode: shortLangCode, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: page})
             .then(function (reactState) {
@@ -2109,7 +2161,7 @@ var ContributorActivity = React.createClass({
                     "vote_id:" + activityObject.vote_id;
                 activityObject.activityType = activityType;
                 activityEntries.push(
-                    <ContributorActivityItem topState={this.props.topState} activityObject={activityObject} onClickActivityItem={this.props.onClickActivityItem} key={key}/>
+                    <ContributorActivityItem topState={this.props.topState} activityObject={activityObject} key={key}/>
                 );
             }).bind(this));
         }.bind(this));
@@ -2132,13 +2184,11 @@ var ContributorActivity = React.createClass({
 });
 
 var ContributorActivityItem = React.createClass({
-    mixins: [I18nMixin],
-    handleClickActivityItem: function () {
-        this.props.onClickActivityItem({phrase: this.props.activityObject.phrase});
-    },
+    mixins: [I18nMixin, LinksMixin],
     render: function () {
         var phraseId = this.props.activityObject.phrase_id,
             phrase = this.props.activityObject.phrase,
+            phraseUrl = aUrl(util.format("/phrases/%s", phrase), this.props.topState.shortLangCode),
             activityType = this.props.activityObject.activityType,
             vote = this.props.activityObject.vote,
             goToPhraseLinkMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.goToPhraseLink)),
@@ -2152,7 +2202,7 @@ var ContributorActivityItem = React.createClass({
         }
         return (
             <div className="activity-item {activityType}">
-                <div>{activityMessage}</div><div onClick={this.handleClickActivityItem}>{goToPhraseLinkMessage}</div>
+                <div>{activityMessage}</div><a href={phraseUrl} onClick={this.handleToLink.bind(this.phraseUrl)}>{goToPhraseLinkMessage}</a>
             </div>
         );
     }
