@@ -295,6 +295,7 @@ var getPhraseSearchReactState = function (params) {
                     globalLang: lang,
                     shortLangCode: shortLangCode,
                     l10nData: l10nData,
+                    page: page,
                     searchTerm: term,
                     searchResults: getReactStatePhraseSearchResults(rawSearchResults)
                 };
@@ -442,11 +443,12 @@ var routesInfo = [
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 term = (overrides && overrides.searchTerm) || '',
                 l10nData = (overrides && overrides.l10nData) || {},
+                page = nRouteInfo.query.page || 0,
                 loginStateUrl = baseRoot + "/v1/login",
                 definitionsUrl,
                 phrasesUrl;
             return Q.all([
-                getPhraseSearchReactState({l10nData: l10nData, lang: lang, shortLangCode: nRouteInfo.shortLangCode, term: term, pageSize: PHRASES_PAGE_SIZE, page: 0}),
+                getPhraseSearchReactState({l10nData: l10nData, lang: lang, shortLangCode: nRouteInfo.shortLangCode, term: term, pageSize: PHRASES_PAGE_SIZE, page: page}),
                 pRequest({method: "GET", url: loginStateUrl, json: true})
             ])
                 .spread(function (reactState, loginStateRes) {
@@ -790,7 +792,7 @@ var routesInfo = [
                 shortLangCode = nRouteInfo.shortLangCode,
                 loginStateUrl = baseRoot + "/v1/login",
                 start = nRouteInfo.query.start || 0,
-                limit = nRouteInfo.query.limit || PHRASES_PAGE_SIZE,
+                limit = PHRASES_PAGE_SIZE,
                 leaderboardUrl = baseRoot + util.format("/v1/contributors/leaderboard?start=%d&limit=%d", start, limit);
             
             return Q.all([getLeaderboardReactState({lang: lang, shortLangCode: shortLangCode, l10nData: l10nData, start: start}), pRequest({url: loginStateUrl, json: true})])
@@ -1252,7 +1254,8 @@ var CrowDictionary = React.createClass({
     },
     render: function () {
         //console.log("on render, with state: " + JSON.stringify(this.state));
-        var mainContent;
+        var mainContent,
+            titleContent = this.messages.Titles.home;
         if (this.state.error) {
             mainContent = <ErrorMessage onClearError={this.handleClearError} topState={this.state} key="ErrorMessage"/>;
         } else if (this.state.info) {
@@ -1271,8 +1274,10 @@ var CrowDictionary = React.createClass({
             // log out
             mainContent = <LogOutOutcome topState={this.state} doLogOut={this.doLogOut} key="LogOutOutcome"/>
         } else if (this.state.shownPhraseData) {
+            titleContent = this.fmt(this.msg(this.messages.Titles.phrase), {phrase: this.state.shownPhraseData.phrase});
             mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} getSearchTermFromDOM={this.getSearchTermFromDOM} onSetInfo={this.handleSetInfo} key="PhraseDetails"/>;
         } else if (!_.isEmpty(this.state.contributorActivity)) {
+            titleContent = this.fmt(this.msg(this.messages.Titles.profile), {nickname: this.state.viewedContributor.nickname});
             mainContent = <ContributorProfile topState={this.state} key="ContributorActivity"/>;
         } else if (this.state.showAddPhrase){
             mainContent = <AddPhraseForm onSubmitAddPhrase={this.handleSubmitAddPhrase} onSetInfo={this.handleSetInfo} topState={this.state} key="AddPhraseForm"/>;
@@ -1281,8 +1286,10 @@ var CrowDictionary = React.createClass({
             mainContent = <AddDefinitionForm phraseData={this.state.showAddDefinition} topState={this.state} onSubmitAddDefinition={this.handleSubmitAddDefinition} onSetInfo={this.handleSetInfo} setYesno={this.handleSetYesno} key="AddDefinitionForm"/>;
         } else if (this.state.showLeaderboard) {
             // showLeaderboard itself is an object containing leaderboard data.
+            titleContent = this.messages.Titles.leaderboard;
             mainContent = <Leaderboard topState={this.state} key="Leaderboard"/>;
         } else {
+            titleContent = this.state.searchTerm ? this.fmt(this.msg(this.messages.Titles.search), {phrase: this.state.searchTerm}) : titleContent;
             mainContent = <PhraseSearchResults topState={this.state} onSelectPhrase={this.handleSelectPhrase} onSetInfo={this.handleSetInfo} key="PhraseSearchResults"/>;
         }
         //manifest="/static/assets/global_cache.manifest"
@@ -1290,8 +1297,9 @@ var CrowDictionary = React.createClass({
             <html lang="en-US" dir="ltr" >
             <head>
               <meta charset="utf-8" />
-              <script src="/static/js/dep/underscore.js" />
+              <title>{titleContent}</title>
               <script src="/static/js/dep/jquery.js" />
+              <script src="/static/js/dep/underscore.js" />
               <script src="/static/js/dep/backbone.js" />
               <link href="/static/css/main.css" rel="stylesheet" />
             </head>
@@ -2113,7 +2121,7 @@ var SignupForm = React.createClass({
 
 
 var PhraseSearchResults = React.createClass({
-    mixins: [LifecycleDebug({displayName: 'PhraseSearchResults'})],
+    mixins: [LifecycleDebug({displayName: 'PhraseSearchResults'}), LinksMixin, I18nMixin],
     hasMore: function (state) {
         return state.searchResults.length >= PHRASES_PAGE_SIZE;
     },
@@ -2151,6 +2159,32 @@ var PhraseSearchResults = React.createClass({
                 });
             }.bind(this));
     },
+    getPagination: function() {
+        console.log("on page: " + page + ", this.hackPagination: " + this.hackPagination);
+        var term = this.state.searchTerm,
+            shortLangCode = this.state.shortLangCode,
+            page = !this.hackPagination ? parseInt(this.state.page, 10) : (parseInt(this.state.page, 10) + 1),
+            links = [];
+        console.log("on page: " + page + ", this.hackPagination: " + this.hackPagination + ", this.state.page: " + this.state.page);
+        this.hackPagination = true; // ugly hack to get around non asynchronous implementation. not very important since we only have pagination for SEO
+        for (var i=page-10; i<page; i++) {
+            if (i >= 0) {
+                var pageUrl = (term && aUrl(util.format("/?q=%s&page=%d", term, i), shortLangCode)) || aUrl(util.format("/?page=%d", i), shortLangCode);
+                links.push(<li><a href={pageUrl} onClick={this.handleToLink.bind(this, pageUrl)} key={i}>{i + 1}</a></li>);
+            }
+        }
+        links.push(<li><span key="current">{page + 1}</span></li>);
+        if (this.state.hasMore) {
+            var nextPage = page + 2,
+                pageUrl = (term && aUrl(util.format("/?q=%s&page=%d", term, nextPage), shortLangCode)) || aUrl(util.format("/?page=%d", nextPage), shortLangCode);
+            links.push(<li><a href={pageUrl} onClick={this.handleToLink.bind(this, pageUrl)} key="next">{nextPage}</a></li>);
+        }
+        return (
+            <ol>
+                {links}
+            </ol>
+        );
+    },
     render: function () {
         console.log("rendering PhraseSearchResults, the state is: " + JSON.stringify(this.state));
         var phraseSearchResults = [];
@@ -2176,6 +2210,10 @@ var PhraseSearchResults = React.createClass({
                 <ul className="phraseSearchResultsList">
                     {infiniteScroll}
                 </ul>
+                <section className="pagination">
+                    <h3>{this.messages.Pagination.pages}</h3>
+                    {this.getPagination()}
+                </section>
             </main>
         );
     }

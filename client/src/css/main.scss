@@ -630,6 +630,26 @@ main.leaderboard {
         }
     }
 }
+section.pagination {
+    @include span(18 at 1 of 20 last);
+    @include pre(1 of 20);
+    @include post(1 of 20);
+    font-size: 80%;
+    margin-top: 0.4em;
+    h3 {
+        display: inline;
+    }
+    ol {
+        display: inline;
+        li {
+            display: inline;
+            &::after {
+                display: inline;
+                content: " "
+            }
+        }
+    }
+}
 .base-submit-input {
     color: $less-contrast-2;
     background: $less-contrast-1;

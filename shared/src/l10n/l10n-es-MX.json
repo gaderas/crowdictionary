@@ -131,6 +131,9 @@
         "PhraseSearchResult": {
             "missingDefinition": "esta palabra o frase aún no cuenta con definiciones"
         },
+        "Pagination": {
+            "pages": "Páginas: "
+        },
         "VerificationPrompt": {
             "formTitle": "Verificación de nueva cuenta de usuario",
             "verificationCodeFieldLabel": "El código que enviamos a tu correo",
@@ -140,8 +143,8 @@
             "submit": "mandar"
         },
         "Abbreviations": {
-            "definition": "def.",
-            "example": "ej."
+            "definition": "def. ",
+            "example": "ej. "
         },
         "PhraseInDetails": {
             "addDefinitionCaption": "Agrega una definición"
@@ -156,6 +159,13 @@
             "leaderboard": "Tabla de puntuación",
             "user": "Usuario",
             "points": "Puntos"
+        },
+        "Titles": {
+            "home": "Significados de palabras, frases, diccionario - MexiOnario",
+            "search": "{phrase}, resultados de búsqueda - MexiOnario",
+            "phrase": "{phrase}, significados - MexiOnario",
+            "leaderboard": "Tabla de puntuación. Palabras, significados, definiciones - MexiOnario",
+            "profile": "{nickname} (perfil) , votos, significados, frases y palabras - MexiOnario"
         }
     }
 }
