@@ -273,6 +273,9 @@ appWs.get('/lang/:lang/phrases', function *(next) {
     } else if (undefined !== params.phrase) {
         params.phrase = (_.isString(params.phrase) && [params.phrase]) || params.phrase; // if only one term is specified, convert into array
         this.body = yield mockData.searchPhrases(params);
+    } else if (undefined !== params.id) {
+        params.id = (_.isString(params.id) && [params.id]) || params.id; // if only one term is specified, convert into array
+        this.body = yield mockData.searchPhrases(params);
     } else {
         this.body = yield mockData.getPhrases(params);
     }

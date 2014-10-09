@@ -170,16 +170,18 @@ Data.prototype.searchPhrases = function (params) {
         fake = console.log('splitParams: ' + JSON.stringify(splitParams)),
         actualParams = splitParams[0],
         actualLimits = splitParams[1],
+        queriedField = (!_.isEmpty(actualParams.phrase) && _.isArray(actualParams.phrase) && 'phrase') || 'id',
+        whereValues = actualParams[queriedField],
         start = parseInt(actualLimits && actualLimits.start, 10) || 0,
         limit = parseInt(actualLimits && actualLimits.limit, 10) || 2;
     if (!actualParams.lang) {
         throw Error("error. tried to query phrases without specifying 'lang'");
     }
-    if (_.isEmpty(actualParams.phrase) || !_.isArray(actualParams.phrase)) {
-        throw Error("no phrases to search were specified");
+    if (_.isEmpty(whereValues) || !_.isArray(whereValues)) {
+        throw Error("no phrases to search (either by phrase or by id) were specified");
     }
-    // @TODO eventually introduce LIMIT for safety reasons more than anything else
-    return pQuery("SELECT * FROM `phrase` WHERE ? AND phrase in (?) ORDER BY lang, phrase ASC", [{lang: actualParams.lang}, actualParams.phrase]);
+    // @TODO eventually introduce LIMIT to prevent abuse
+    return pQuery("SELECT * FROM `phrase` WHERE ? AND ?? in (?) ORDER BY lang, phrase ASC", [{lang: actualParams.lang}, queriedField, whereValues]);
 };
 
 /**
@@ -248,32 +250,25 @@ Data.prototype.getContributorActivity = function (params) {
         splitParams = appUtil.splitObject(existingParams, ['start', 'limit']),
         actualParams = splitParams[0],
         actualLimits = splitParams[1],
+        cid = actualParams.contributor_id,
+        lang = actualParams.lang,
+        activityQuery,
         phrasesQuery,
         definitionsQuery,
         votesQuery,
         start = parseInt(actualLimits && actualLimits.start, 10) || 0,
         limit = parseInt(actualLimits && actualLimits.limit, 10) || 2;
-    if (!actualParams.contributor_id) {
+    if (!cid) {
         throw Error("error. tried to get a contributor's activity without specifying the 'contributor_id'");
     }
-    if (!actualParams.lang) {
+    if (!lang) {
         throw Error("error. tried to get contributor's activity without specifying 'lang'");
     }
-    phrasesQuery = "select *, id as phrase_id from phrase p where contributor_id = ? and p.lang = ? LIMIT ?, ?";
-    definitionsQuery = "select d.*, d.id as definition_id, p.phrase from definition d LEFT JOIN phrase p ON d.phrase_id = p.id where d.contributor_id = ? and d.lang = ? LIMIT ?, ?";
-    votesQuery = "select v.*, v.id as vote_id, d.definition, p.phrase, p.id as phrase_id from vote v LEFT JOIN definition d ON v.definition_id = d.id LEFT JOIN phrase p ON d.phrase_id = p.id where v.contributor_id = ? and d.lang = ? LIMIT ?, ?";
-    return Q.all([
-        pQuery(phrasesQuery, [actualParams.contributor_id, actualParams.lang, start, limit]),
-        pQuery(definitionsQuery, [actualParams.contributor_id, actualParams.lang, start, limit]),
-        pQuery(votesQuery, [actualParams.contributor_id, actualParams.lang, start, limit])
-    ])
-        .spread(function (phrases, definitions, votes) {
-            return {
-                phrases: phrases,
-                definitions: definitions,
-                votes: votes
-            };
-        });
+    activityQuery = "SELECT 'vote' AS type, v.id, IF(v.updated>v.created,v.updated,v.created) AS last_change, v.vote AS val, d.phrase_id FROM vote AS v LEFT JOIN definition AS d ON v.definition_id=d.id WHERE v.contributor_id = ? AND lang = ? ";
+    activityQuery += "UNION SELECT 'definition' AS type, id, IF(updated>created,updated,created) AS last_change, definition AS val, phrase_id FROM definition WHERE contributor_id = ? AND lang = ? ";
+    activityQuery += "UNION SELECT 'phrase' AS type, id, IF(updated>created,updated,created) AS last_change, phrase AS val, id AS phrase_id FROM phrase WHERE contributor_id = ? AND lang = ? ";
+    activityQuery += "ORDER BY last_change DESC LIMIT ?, ?;";
+    return pQuery(activityQuery, [cid, lang, cid, lang, cid, lang, start, limit]);
 };
 
 /*Data.prototype.searchDefinition

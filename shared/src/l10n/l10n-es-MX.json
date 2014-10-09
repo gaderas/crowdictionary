@@ -114,7 +114,10 @@
             "nickname": "nombre de usuario",
             "firstName": "nombre",
             "lastName": "apellidos",
-            "memberSince": "miembro desde"
+            "memberSince": "miembro desde",
+            "phrasesTab": "Frases",
+            "definitionsTab": "Definiciones",
+            "votesTab": "Votos"
         },
         "ContributorActivityItem": {
             "goToPhraseLink": "Ir",

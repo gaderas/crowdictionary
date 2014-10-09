@@ -552,17 +552,27 @@ main.contributor-profile {
     @include container;
     section.contributor-info {
         @include span(1 at 1 of $two-col-fields-layout);
-        position: sticky; // add --webkit
-        position: -webkit-sticky; // add --webkit
-        top: 10px;
+        //position: sticky;
+        //position: -webkit-sticky;
+        //position: -moz-sticky;
+        //position: -ms-sticky;
+        //position: -o-sticky;
+        //top: 10px;
         > dl {
-            @include span(1 of 1);
-            font-size: 50%;
+            @include span(18 of 20);
+            @include pre(1 of 20);
+            @include post(1 of 20);
+            @include hr-with-shadow(1px);
+            line-height: 1.2em;
+            padding-bottom: gutter();
+            margin-bottom: gutter();
+            font-size: 60%;
             dt {
-                @include span(1 at 1 of $reverse-two-col-fields-layout);
+                @include span(1 at 1 of $two-col-fields-layout);
             }
             dd {
-                @include span(1 at 2 of $reverse-two-col-fields-layout);
+                @include span(1 at 2 of $two-col-fields-layout);
+                font-weight: bold;
             }
         }
     }

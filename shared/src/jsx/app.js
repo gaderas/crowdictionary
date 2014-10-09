@@ -327,15 +327,35 @@ var getContributorActivityReactState = function (params) {
                 if (200 !== activityRes[0].statusCode) {
                     throw Error("couldn't fetch activity");
                 }
-                var rObj = activityRes[1],
-                    reactState = {
-                        globalLang: lang,
-                        shortLangCode: shortLangCode,
-                        l10nData: l10nData,
-                        contributorActivity: rObj
-                    };
-
-                return reactState;
+                var activity = activityRes[1],
+                    neededPhraseIds = _.filter(_.map(activity, function (activityItem) {
+                        return 'phrase' !== activityItem.type && activityItem.phrase_id;
+                    })),
+                    phrasesQs = _.map(neededPhraseIds, function (id) {
+                        return 'id='+id;
+                    }).join('&'),
+                    phrasesUrl = baseRoot + util.format("/v1/lang/%s/phrases?%s&start=%d&limit=%d", lang, phrasesQs, 0, pageSize);
+                return pRequest({url: phrasesUrl, json: true})
+                    .then(function (phrasesRes) {
+                        if (200 !== phrasesRes[0].statusCode) {
+                            throw Error("couldn't fetch phrases for activity");
+                        }
+                        var phrases = phrasesRes[1];
+                        _.forEach(activity, function (activityItem) {
+                            if ('phrase' !== activityItem.type) {
+                                activityItem.phrase = _.filter(phrases, {id: activityItem.phrase_id})[0].phrase;
+                            } else {
+                                activityItem.phrase = activityItem.val;
+                            }
+                        });
+                        return {
+                            globalLang: lang,
+                            shortLangCode: shortLangCode,
+                            l10nData: l10nData,
+                            contributor_id: contributor_id,
+                            contributorActivity: activity
+                        };
+                    });
             });
 };
 
@@ -815,6 +835,15 @@ var RouterMixin = {
     },
 };
 
+var HashMixin = {
+    componentDidMount: function () {
+        //if (m = url.match(/(#.*)/)) {
+            //window.location.href = m[1];
+        //}
+        window.location.href = '#main';
+    },
+};
+
 /**
  * depends on I18nMixin
  */
@@ -847,6 +876,7 @@ var CodedMessagesMixin = {
 
 var LinksMixin = {
     handleToLink: function (url, e) {
+        var m;
         e.preventDefault();
         Router.navigate(aPath(url), {trigger: true, replace: false});
     }
@@ -1238,7 +1268,7 @@ var VerificationPrompt = React.createClass({
     render: function () {
         var messages = this.messages.VerificationPrompt;
         return (
-            <main className="verification-prompt">
+            <main className="verification-prompt" id="main">
                 <form onSubmit={this.handleSubmit}>
                     <fieldset>
                         <legend>{messages.formTitle}</legend>
@@ -1277,7 +1307,7 @@ var ErrorMessage = React.createClass({
             errorMessage = this.messages.Errors[error] || "ERROR",
             OK = this.messages.Errors.OK;
         return (
-            <main className="error-message">
+            <main className="error-message" id="main">
                 <section className="message">
                     <div>{errorMessage}</div>
                 </section>
@@ -1303,7 +1333,7 @@ var InfoMessage = React.createClass({
         var message = this.props.topState.info,
             OK = this.messages.Errors.OK;
         return (
-            <main className="info-message">
+            <main className="info-message" id="main">
                 <section className="message">
                     <div>{message}</div>
                 </section>
@@ -1333,7 +1363,7 @@ var YesnoMessage = React.createClass({
             yes = this.messages.Errors.yes,
             no = this.messages.Errors.no;
         return (
-            <main className="yesno-message">
+            <main className="yesno-message" id="main">
                 <section className="message">
                     <p>{message}</p>
                 </section>
@@ -1347,7 +1377,7 @@ var YesnoMessage = React.createClass({
 });
 
 var PhraseDetails = React.createClass({
-    mixins: [I18nMixin],
+    mixins: [I18nMixin, HashMixin],
     handleBack: function (e) {
         e.preventDefault();
         this.props.onClosePhraseDetails();
@@ -1359,7 +1389,7 @@ var PhraseDetails = React.createClass({
             backToSearchResultsRelativeUrl = searchTerm ? '?q=' + searchTerm : '',
             backToSearchResultsUrl = aUrl(backToSearchResultsRelativeUrl, shortLangCode);
         return (
-            <main className="phrase-details">
+            <main className="phrase-details" id="main">
                 <PhraseInDetails topState={this.props.topState} />
                 <DefinitionsInDetails onVote={this.props.onVote} topState={this.props.topState} onSetInfo={this.props.onSetInfo}/>
                 <div>
@@ -1419,7 +1449,7 @@ var AddDefinitionForm = React.createClass({
             defaultTags = (myPreviousDefinition && myPreviousDefinition.tags) || "";
 console.log("myPreviousDefinition: " + JSON.stringify(myPreviousDefinition));
         return (
-            <main className="add-definition">
+            <main className="add-definition" id="main">
                 <form onSubmit={this.handleSubmit}>
                     <h2>{addDefinition}</h2>
                     <label>
@@ -1688,7 +1718,7 @@ var SearchBar = React.createClass({
             value = this.props.topState.searchTerm || "",
             formActionUrl = aUrl("/", this.props.topState.shortLangCode);
         return (
-            <section className="SearchBar">
+            <section className="SearchBar" id="searchbar">
             <form action={formActionUrl} onSubmit={this.handleSubmit} className="SearchBar oi" data-glyph="magnifying-glass">
             <input type="search" defaultValue={value} placeholder={placeholder} ref="searchInput"/>
             </form>
@@ -1803,7 +1833,7 @@ var LoginPrompt = React.createClass({
             style = {display: display},
             messages = this.messages.LoginPrompt;
         return (
-            <main className="login">
+            <main className="login" id="main">
                 <form className="login" onSubmit={this.handleLogIn}>
                     <fieldset>
                         <legend>{messages.loginFormTitle}</legend>
@@ -2060,7 +2090,7 @@ var PhraseSearchResults = React.createClass({
             searchTerm = this.props.topState.searchTerm,
             topSearchCaption = (searchTerm && <TopSearchCaption topState={this.props.topState}/>) || "" ;
         return (
-            <main className="phrase-list">
+            <main className="phrase-list" id="main">
                 {topSearchCaption}
                 <ul className="phraseSearchResultsList">
                     {infiniteScroll}
@@ -2071,17 +2101,20 @@ var PhraseSearchResults = React.createClass({
 });
 
 var ContributorProfile = React.createClass({
-    mixins: [I18nMixin],
+    mixins: [I18nMixin, LinksMixin],
     render: function () {
         var showEditLink = false,
             m = this.messages.ContributorProfile,
-            c = this.props.topState.viewedContributor;
+            c = this.props.topState.viewedContributor,
+            viewDefinitionsUrl = aUrl(util.format("/contributors/%d/activity?view=%s", c.id, 'definitions')),
+            viewPhrasesUrl = aUrl(util.format("/contributors/%d/activity?view=%s", c.id, 'phrases')),
+            viewVotesUrl = aUrl(util.format("/contributors/%d/activity?view=%s", c.id, 'votes'));
         if (!_.isEmpty(this.props.topState.loginInfo) && this.props.topState.contributor_id === this.props.topState.loginInfo.id) {
             // the user is viewing his/her own profile. show edit links, etc.
             showEditLink = true;
         }
         return (
-            <main className="contributor-profile">
+            <main className="contributor-profile" id="main">
                 <section className="contributor-info">
                     <dl>
                         <dt>{m.nickname}</dt>
@@ -2096,6 +2129,13 @@ var ContributorProfile = React.createClass({
                         <dd>{c.last_name}</dd>
                     </dl>
                 </section>
+                <section className="pick-activity-type">
+                    <dl>
+                        <dt><a href={viewDefinitionsUrl} onClick={this.handleToLink.bind(this, viewDefinitionsUrl)}>{m.definitionsTab}</a></dt>
+                        <dt><a href={viewVotesUrl} onClick={this.handleToLink.bind(this, viewVotesUrl)}>{m.votesTab}</a></dt>
+                        <dt><a href={viewPhrasesUrl} onClick={this.handleToLink.bind(this, viewPhrasesUrl)}>{m.phrasesTab}</a></dt>
+                    </dl>
+                </section>
                 <section className="contributor-activity">
                     <ContributorActivity topState={this.props.topState}/>
                 </section>
@@ -2107,9 +2147,7 @@ var ContributorProfile = React.createClass({
 var ContributorActivity = React.createClass({
     mixins: [LifecycleDebug({displayName: 'ContributorActivity'})],
     hasMore: function (state) {
-        return state.contributorActivity.phrases.length >= PHRASES_PAGE_SIZE ||
-            state.contributorActivity.definitions.length >= PHRASES_PAGE_SIZE ||
-            state.contributorActivity.votes.length >= PHRASES_PAGE_SIZE;
+        return state.contributorActivity.length >= PHRASES_PAGE_SIZE;
     },
     getInitialState: function () {
         return _.merge(this.props.topState, {
@@ -2138,11 +2176,7 @@ var ContributorActivity = React.createClass({
         console.log('load');
         getContributorActivityReactState({lang: lang, shortLangCode: shortLangCode, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: page})
             .then(function (reactState) {
-                var newContributorActivity = {
-                    phrases: _.union(this.state.contributorActivity.phrases, reactState.contributorActivity.phrases),
-                    definitions: _.union(this.state.contributorActivity.definitions, reactState.contributorActivity.definitions),
-                    votes: _.union(this.state.contributorActivity.votes, reactState.contributorActivity.votes)
-                };
+                var newContributorActivity = _.union(this.state.contributorActivity, reactState.contributorActivity);
                 this.setState({
                     contributorActivity: newContributorActivity,
                     hasMore: this.hasMore(reactState),
@@ -2153,18 +2187,14 @@ var ContributorActivity = React.createClass({
     render: function () {
         console.log("rendering ContributorActivity, the state is: " + JSON.stringify(this.state));
         var activityEntries = [];
-        _.forEach(['phrases', 'definitions', 'votes'], function (activityType) {
-            _.forEach(this.state.contributorActivity[activityType], (function (activityObject) {
-                var key = "activity_type:" + activityType +
-                    "phrase_id:" + activityObject.phrase_id +
-                    "definition_id:" + activityObject.definition_id +
-                    "vote_id:" + activityObject.vote_id;
-                activityObject.activityType = activityType;
+            _.forEach(this.state.contributorActivity, (function (ai) {
+                var key = "activity_type:" + ai.type +
+                    "phrase_id:" + ai.phrase_id +
+                    "id:" + ai.id;
                 activityEntries.push(
-                    <ContributorActivityItem topState={this.props.topState} activityObject={activityObject} key={key}/>
+                    <ContributorActivityItem topState={this.props.topState} activityObject={ai} key={key}/>
                 );
             }).bind(this));
-        }.bind(this));
         var infiniteScroll = <InfiniteScroll
                 loader={<div className="loader">loading...</div>}
                 loadMore={this.loadMore}
@@ -2186,23 +2216,24 @@ var ContributorActivity = React.createClass({
 var ContributorActivityItem = React.createClass({
     mixins: [I18nMixin, LinksMixin],
     render: function () {
-        var phraseId = this.props.activityObject.phrase_id,
-            phrase = this.props.activityObject.phrase,
-            phraseUrl = aUrl(util.format("/phrases/%s", phrase), this.props.topState.shortLangCode),
-            activityType = this.props.activityObject.activityType,
-            vote = this.props.activityObject.vote,
-            goToPhraseLinkMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.goToPhraseLink)),
+        var ao = this.props.activityObject,
+            phraseId = ao.phrase_id,
+            phrase = ao.phrase,
+            phraseUrl = aUrl(util.format("/phrases/%s#main", phrase), this.props.topState.shortLangCode),
+            activityType = ao.type,
+            val = ao.val,
+            goToPhraseLinkMessage = this.messages.ContributorActivityItem.goToPhraseLink,
             activityMessage;
-        if ('phrases' === activityType) {
+        if ('phrase' === activityType) {
             activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.phraseActivityEntry), {phrase: phrase});
-        } else if ('definitions' === activityType) {
+        } else if ('definition' === activityType) {
             activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.definitionActivityEntry), {phrase: phrase});
-        } else if ('votes' === activityType) {
-            activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.voteActivityEntry), {phrase: phrase, vote: vote});
+        } else if ('vote' === activityType) {
+            activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.voteActivityEntry), {phrase: phrase, vote: val});
         }
         return (
             <div className="activity-item {activityType}">
-                <div>{activityMessage}</div><a href={phraseUrl} onClick={this.handleToLink.bind(this.phraseUrl)}>{goToPhraseLinkMessage}</a>
+                <div>{activityMessage}</div><a href={phraseUrl} onClick={this.handleToLink.bind(this, phraseUrl)}>{goToPhraseLinkMessage}</a>
             </div>
         );
     }
@@ -2296,7 +2327,7 @@ var AddPhraseForm = React.createClass({
             placeholder = this.fmt(this.msg(this.messages.AddPhraseForm.newPhrasePlaceHolder)),
             submit = this.fmt(this.msg(this.messages.AddPhraseForm.submitPhrase));
         return (
-            <main className="add-phrase">
+            <main className="add-phrase" id="main">
                 <form onSubmit={this.handleSubmit}>
                     <fieldset>
                         <legend>{addPhrase}</legend>
