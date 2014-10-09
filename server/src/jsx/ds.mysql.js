@@ -294,7 +294,7 @@ Data.prototype.getContributorScore = function (params) {
     if (!cid) {
         throw Error("error. tried to get a contributor's score without specifying the 'contributor_id'");
     }
-    scoreQuery = "select count(1) from definition d left join vote v on d.id = v.definition_id where v.contributor_id is not null and d.contributor_id=?;";
+    scoreQuery = "select count(1) as score from definition d left join vote v on d.id = v.definition_id where v.contributor_id is not null and d.contributor_id=?;";
     return pQuery(scoreQuery, [cid]);
 };
 
@@ -307,8 +307,8 @@ Data.prototype.getContributorLeaderboard = function (params) {
         leaderboardQuery,
         start = parseInt(actualLimits && actualLimits.start, 10) || 0,
         limit = parseInt(actualLimits && actualLimits.limit, 10) || 2;
-    leaderboardQuery = "select d.contributor_id, count(1) from definition d left join vote v on d.id = v.definition_id where v.contributor_id is not null group by d.contributor_id; LIMIT ?, ?";
-    return pQuery(scoreQuery, [cid, start, limit]);
+    leaderboardQuery = "select d.contributor_id, count(1) as score from definition d left join vote v on d.id = v.definition_id where v.contributor_id is not null group by d.contributor_id LIMIT ?, ?;";
+    return pQuery(leaderboardQuery, [start, limit]);
 };
 
 /*Data.prototype.searchDefinition

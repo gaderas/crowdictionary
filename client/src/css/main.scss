@@ -94,6 +94,10 @@ $main-heading-margin: 0.4em 0 0 0;
     box-shadow: 0px 1px 0px rgba($more-contrast-2, 0.07);
     border-bottom: $width solid $less-contrast-1;
 }
+@mixin vr-with-shadow($width) {
+    box-shadow: 0px 1px 0px rgba($more-contrast-2, 0.07);
+    border-right: $width solid $less-contrast-1;
+}
 @mixin main-heading-base() {
     margin: $main-heading-margin;
     border: solid $less-contrast-2;
@@ -578,6 +582,52 @@ main.contributor-profile {
     }
     section.contributor-activity {
         @include span(1 at 2 of $two-col-fields-layout);
+        font-size: 50%;
+        padding-bottom: gutter();
+        margin-bottom: gutter();
+        line-height: 1.2em;
+        > div {
+            @include span(1 of 1);
+            div.activity-item {
+                @include hr-with-shadow(1px);
+                position: relative;
+                a::before {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    top: 0;
+                    left: 0;
+                    content: "";
+                }
+            }
+        }
+    }
+}
+main.leaderboard {
+    @include container;
+    > h2 {
+        @include span(18 at 1 of 20 last);
+        @include prefix(1 of 20); //pad
+        @include suffix(1 of 20); //pad
+        @include main-heading-base;
+        margin-bottom: 1em;
+    }
+    > table {
+        @include span(10 at 6 of 20);
+        @include pre(5 of 20);
+        @include post(5 of 20);
+        thead tr {
+            @include hr-with-shadow(2px);
+            text-align: center;
+        }
+        tbody tr {
+            @include hr-with-shadow(1px);
+            text-align: center;
+            td:nth-of-type(2n + 1) {
+                @include vr-with-shadow(1px);
+                border-style: dotted;
+            }
+        }
     }
 }
 .base-submit-input {

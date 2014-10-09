@@ -262,6 +262,12 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
             .then(function (l) {
                 return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
             });
+    } else if ('/leaderboard' === nRouteInfo.route) {
+        // "leaderboard" page
+        return pL10nForLang
+            .then(function (l) {
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+            });
     }
 };
 
@@ -358,6 +364,51 @@ var getContributorActivityReactState = function (params) {
                     });
             });
 };
+
+var getLeaderboardReactState = function (params) {
+    var lang = params.lang,
+        shortLangCode = params.shortLangCode,
+        l10nData = params.l10nData,
+        start = params.start,
+        limit = PHRASES_PAGE_SIZE,
+        leaderboardUrl = baseRoot + util.format("/v1/contributors/leaderboard?start=%d&limit=%d", start, limit),
+        reactState = {
+            globalLang: lang,
+            shortLangCode: shortLangCode,
+            l10nData: l10nData
+        };
+    return pRequest({url: leaderboardUrl, json: true})
+        .then(function (leaderboardRes) {
+            var leaderboard,
+                shownContributorsIds,
+                contributorsQs,
+                contributorsUrl;
+            if (200 !== leaderboardRes[0].statusCode) {
+                throw Error("couldn't fetch leaderboard");
+            }
+            leaderboard = leaderboardRes[1];
+            shownContributorsIds = _.map(leaderboard, function (leader) {
+                return leader.contributor_id;
+            });
+            contributorsQs = _.map(shownContributorsIds, function (id) {
+                return 'id=' + id;
+            }).join('&');
+            contributorsUrl = baseRoot + util.format("/v1/contributors?%s&start=%d&limit=%d", contributorsQs, start, limit);
+            return pRequest({url: contributorsUrl, json: true})
+                .then(function (contributorsRes) {
+                    var contributors;
+                    if (200 !== contributorsRes[0].statusCode) {
+                        throw Error("couldn't fetch data for contributors in leaderboard");
+                    }
+                    contributors = contributorsRes[1];
+                    _.forEach(leaderboard, function (leader) {
+                        leader = _.merge(leader, _.filter(contributors, {id: leader.contributor_id})[0]);
+                    });
+                    reactState.showLeaderboard = leaderboard;
+                    return reactState;
+                });
+        });
+}
 
 var getReactStatePhraseSearchResults = function (rawSearchResults) {
     return _.map(rawSearchResults, function (phraseObj) {
@@ -721,6 +772,33 @@ var routesInfo = [
                             }
                             return reactState;
                         });
+                    return reactState;
+                });
+            // if above promise fails, return here
+            return reactState;
+        }
+    },
+    {
+        serverRoute: '/leaderboard',
+        serverParamNames: [],
+        clientRoute: 'leaderboard',
+        clientRouterFunc: clientRouterFunc,
+        clientRouterFuncName: '/leaderboard',
+        calculateStateFunc: function (overrides, nRouteInfo) {
+            var lang = (overrides && overrides.globalLang) || 'es-MX',
+                l10nData = (overrides && overrides.l10nData) || {},
+                shortLangCode = nRouteInfo.shortLangCode,
+                loginStateUrl = baseRoot + "/v1/login",
+                start = nRouteInfo.query.start || 0,
+                limit = nRouteInfo.query.limit || PHRASES_PAGE_SIZE,
+                leaderboardUrl = baseRoot + util.format("/v1/contributors/leaderboard?start=%d&limit=%d", start, limit);
+            
+            return Q.all([getLeaderboardReactState({lang: lang, shortLangCode: shortLangCode, l10nData: l10nData, start: start}), pRequest({url: loginStateUrl, json: true})])
+                .spread(function (reactState, loginStateRes) {
+                    if (200 === loginStateRes[0].statusCode) {
+                        // add login information if we got it
+                        reactState.loginInfo = loginStateRes[1];
+                    }
                     return reactState;
                 });
             // if above promise fails, return here
@@ -1201,6 +1279,9 @@ var CrowDictionary = React.createClass({
         } else if (this.state.showAddDefinition) {
             // showAddDefinition itself is a phrase object. alreadyAddedDefinition is a definition object. confirmOverwrite is a boolean (or undefined)
             mainContent = <AddDefinitionForm phraseData={this.state.showAddDefinition} topState={this.state} onSubmitAddDefinition={this.handleSubmitAddDefinition} onSetInfo={this.handleSetInfo} setYesno={this.handleSetYesno} key="AddDefinitionForm"/>;
+        } else if (this.state.showLeaderboard) {
+            // showLeaderboard itself is an object containing leaderboard data.
+            mainContent = <Leaderboard topState={this.state} key="Leaderboard"/>;
         } else {
             mainContent = <PhraseSearchResults topState={this.state} onSelectPhrase={this.handleSelectPhrase} onSetInfo={this.handleSetInfo} key="PhraseSearchResults"/>;
         }
@@ -2100,6 +2181,90 @@ var PhraseSearchResults = React.createClass({
     }
 });
 
+var Leaderboard = React.createClass({
+    mixins: [I18nMixin],
+    hasMore: function (state) {
+        return state.showLeaderboard.length >= PHRASES_PAGE_SIZE;
+    },
+    getInitialState: function () {
+        return _.merge(this.props.topState, {
+            hasMore: this.hasMore(this.props.topState),
+            resetPageStart: false
+        });
+    },
+    componentWillReceiveProps: function (nextProps) {
+        // we're rendering page 0 when this component receives props
+        this.setState(_.merge(nextProps.topState, {
+            hasMore: this.hasMore(nextProps.topState),
+            resetPageStart: true
+        }));
+    },
+    componentDidUpdate: function () {
+        /*this.setState({
+            resetPageStart: false
+        });*/
+    },
+    loadMore: function (page) {
+        // page is 0-index based
+        var start = (page * PHRASES_PAGE_SIZE),
+            lang = this.props.topState.globalLang,
+            shortLangCode = this.props.topState.shortLangCode,
+            l10nData = this.props.topState.l10nData;
+            //getContributorActivityReactState({lang: lang, shortLangCode: shortLangCode, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: page})
+        getLeaderboardReactState({lang: lang, shortLangCode: shortLangCode, l10nData: l10nData, start: start})
+            .then(function (reactState) {
+                var newShowLeaderboard = _.union(this.state.showLeaderboard, reactState.showLeaderboard);
+                this.setState({
+                    showLeaderboard: newShowLeaderboard,
+                    hasMore: this.hasMore(reactState),
+                    resetPageStart: false
+                });
+            }.bind(this));
+    },
+    render: function () {
+        console.log("rendering Leaderboard, the state is: " + JSON.stringify(this.state));
+        var leaderboardEntries = [];
+            _.forEach(this.state.showLeaderboard, (function (li) {
+                var key = "contributor_id:" + li.contributor_id;
+                leaderboardEntries.push(
+                    <LeaderboardItem topState={this.props.topState} leaderboardObject={li} key={key}/>
+                );
+            }).bind(this)),
+            infiniteScroll = <InfiniteScroll
+                loader={<div className="loader">loading...</div>}
+                loadMore={this.loadMore}
+                hasMore={this.state.hasMore}
+                resetPageStart={this.state.resetPageStart}
+            >
+                {leaderboardEntries}
+            </InfiniteScroll>,
+            m = this.messages.Leaderboard;
+        return (
+            <main className="leaderboard" id="main">
+                <h2>{m.leaderboard}</h2>
+                <table>
+                    <thead><tr><th>{m.user}</th><th title={m.pointCalculationRulesTitle}>{m.points}</th></tr></thead>
+                    <tbody>{infiniteScroll}</tbody>
+                </table>
+            </main>
+        );
+    }
+});
+
+var LeaderboardItem = React.createClass({
+    mixins: [I18nMixin, LinksMixin],
+    render: function () {
+        var lo = this.props.leaderboardObject,
+            contributorUrl = aUrl(util.format("/contributors/%d/activity#main", lo.contributor_id), this.props.topState.shortLangCode);
+        return (
+            <tr>
+                <td><a href={contributorUrl} onClick={this.handleToLink.bind(this, contributorUrl)}>{lo.nickname}</a></td>
+                <td title={this.messages.Leaderboard.pointCalculationRulesTitle}>{lo.score}</td>
+            </tr>
+        );
+    }
+});
+
 var ContributorProfile = React.createClass({
     mixins: [I18nMixin, LinksMixin],
     render: function () {
@@ -2127,13 +2292,6 @@ var ContributorProfile = React.createClass({
                     <dl>
                         <dt>{m.lastName}</dt>
                         <dd>{c.last_name}</dd>
-                    </dl>
-                </section>
-                <section className="pick-activity-type">
-                    <dl>
-                        <dt><a href={viewDefinitionsUrl} onClick={this.handleToLink.bind(this, viewDefinitionsUrl)}>{m.definitionsTab}</a></dt>
-                        <dt><a href={viewVotesUrl} onClick={this.handleToLink.bind(this, viewVotesUrl)}>{m.votesTab}</a></dt>
-                        <dt><a href={viewPhrasesUrl} onClick={this.handleToLink.bind(this, viewPhrasesUrl)}>{m.phrasesTab}</a></dt>
                     </dl>
                 </section>
                 <section className="contributor-activity">
@@ -2170,11 +2328,12 @@ var ContributorActivity = React.createClass({
     loadMore: function (page) {
         // page is 0-index based
         var start = (page * PHRASES_PAGE_SIZE),
+            l10nData = this.props.topState.l10nData,
             lang = this.props.topState.globalLang,
             shortLangCode = this.props.topState.shortLangCode,
             contributor_id = this.props.topState.contributor_id;
         console.log('load');
-        getContributorActivityReactState({lang: lang, shortLangCode: shortLangCode, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: page})
+        getContributorActivityReactState({l10nData: l10nData, lang: lang, shortLangCode: shortLangCode, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: page})
             .then(function (reactState) {
                 var newContributorActivity = _.union(this.state.contributorActivity, reactState.contributorActivity);
                 this.setState({
@@ -2194,20 +2353,18 @@ var ContributorActivity = React.createClass({
                 activityEntries.push(
                     <ContributorActivityItem topState={this.props.topState} activityObject={ai} key={key}/>
                 );
-            }).bind(this));
-        var infiniteScroll = <InfiniteScroll
+            }).bind(this)),
+            infiniteScroll = <InfiniteScroll
                 loader={<div className="loader">loading...</div>}
                 loadMore={this.loadMore}
                 hasMore={this.state.hasMore}
                 resetPageStart={this.state.resetPageStart}
             >
                 {activityEntries}
-            </InfiniteScroll>
+            </InfiniteScroll>;
         return (
             <div>
-                <div className="contributorActivity">
-                    {infiniteScroll}
-                </div>
+                {infiniteScroll}
             </div>
         );
     }
@@ -2223,7 +2380,9 @@ var ContributorActivityItem = React.createClass({
             activityType = ao.type,
             val = ao.val,
             goToPhraseLinkMessage = this.messages.ContributorActivityItem.goToPhraseLink,
-            activityMessage;
+            activityMessage,
+            cx = React.addons.classSet,
+            containerClasses;
         if ('phrase' === activityType) {
             activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.phraseActivityEntry), {phrase: phrase});
         } else if ('definition' === activityType) {
@@ -2231,9 +2390,10 @@ var ContributorActivityItem = React.createClass({
         } else if ('vote' === activityType) {
             activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.voteActivityEntry), {phrase: phrase, vote: val});
         }
+        containerClasses = cx({'activity-item': true, activityType: true});
         return (
-            <div className="activity-item {activityType}">
-                <div>{activityMessage}</div><a href={phraseUrl} onClick={this.handleToLink.bind(this, phraseUrl)}>{goToPhraseLinkMessage}</a>
+            <div className={containerClasses}>
+                <p>{activityMessage} (<a href={phraseUrl} onClick={this.handleToLink.bind(this, phraseUrl)}>{goToPhraseLinkMessage})</a></p>
             </div>
         );
     }

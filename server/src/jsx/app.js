@@ -183,9 +183,27 @@ appWs.get('/contributors/:contributor_id/activity', function *(next) {
 });
 
 appWs.get('/contributors/:contributor_id/score', function *(next) {
+    this.body = yield Q.fcall(mockData.getContributorScore.bind(mockData, {contributor_id: this.params.contributor_id}))
+        .then(function (res) {
+            return res;
+        })
+        .fail(function (err) {
+            console.log("on fail with err: " + err);
+            this.status = 500;
+            return {message: "couldn't get contributor's score. error: " + err};
+        }.bind(this));
 });
 
 appWs.get('/contributors/leaderboard', function *(next) {
+    this.body = yield Q.fcall(mockData.getContributorLeaderboard.bind(mockData, this.query))
+        .then(function (res) {
+            return res;
+        })
+        .fail(function (err) {
+            console.log("on fail with err: " + err);
+            this.status = 500;
+            return {message: "couldn't get contributors leaderboard. error: " + err};
+        }.bind(this));
 });
 
 appWs.put('/contributors', function *(next) {
