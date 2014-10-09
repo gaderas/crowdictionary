@@ -11,13 +11,23 @@ var Data = function (dbConfig) {
     this.pool = mysql.createPool(dbConfig);
     this.query = (function () {
         console.log('args passed to query: ' + JSON.stringify(_.toArray(arguments)));
-        this.pool.query.apply(this.pool, _.toArray(arguments));
+        try {
+            this.pool.query.apply(this.pool, _.toArray(arguments));
+        } catch (ex) {
+            console.error("caught: " + ex);
+            return Q.reject("caught mysql query exception: " + ex);
+        }
     }).bind(this),
     this.pQuery = (function (query) {
-        return Q.nbind(this.query, this.pool).apply(this.pool, _.toArray(arguments))
-            .then(function (res) {
-                return res[0];
-            });
+        try {
+            return Q.nbind(this.query, this.pool).apply(this.pool, _.toArray(arguments))
+                .then(function (res) {
+                    return res[0];
+                });
+        } catch (ex) {
+            console.error("caught: " + ex);
+            return Q.reject("caught mysql query exception: " + ex);
+        }
     }).bind(this);
 };
 
@@ -269,6 +279,36 @@ Data.prototype.getContributorActivity = function (params) {
     activityQuery += "UNION SELECT 'phrase' AS type, id, IF(updated>created,updated,created) AS last_change, phrase AS val, id AS phrase_id FROM phrase WHERE contributor_id = ? AND lang = ? ";
     activityQuery += "ORDER BY last_change DESC LIMIT ?, ?;";
     return pQuery(activityQuery, [cid, lang, cid, lang, cid, lang, start, limit]);
+};
+
+Data.prototype.getContributorScore = function (params) {
+    var pQuery = this.pQuery,
+        existingParams = _.filterObject(params, _.isNotUndefined),
+        splitParams = appUtil.splitObject(existingParams, ['start', 'limit']),
+        actualParams = splitParams[0],
+        actualLimits = splitParams[1],
+        cid = actualParams.contributor_id,
+        scoreQuery,
+        start = parseInt(actualLimits && actualLimits.start, 10) || 0,
+        limit = parseInt(actualLimits && actualLimits.limit, 10) || 2;
+    if (!cid) {
+        throw Error("error. tried to get a contributor's score without specifying the 'contributor_id'");
+    }
+    scoreQuery = "select count(1) from definition d left join vote v on d.id = v.definition_id where v.contributor_id is not null and d.contributor_id=?;";
+    return pQuery(scoreQuery, [cid]);
+};
+
+Data.prototype.getContributorLeaderboard = function (params) {
+    var pQuery = this.pQuery,
+        existingParams = _.filterObject(params, _.isNotUndefined),
+        splitParams = appUtil.splitObject(existingParams, ['start', 'limit']),
+        actualParams = splitParams[0],
+        actualLimits = splitParams[1],
+        leaderboardQuery,
+        start = parseInt(actualLimits && actualLimits.start, 10) || 0,
+        limit = parseInt(actualLimits && actualLimits.limit, 10) || 2;
+    leaderboardQuery = "select d.contributor_id, count(1) from definition d left join vote v on d.id = v.definition_id where v.contributor_id is not null group by d.contributor_id; LIMIT ?, ?";
+    return pQuery(scoreQuery, [cid, start, limit]);
 };
 
 /*Data.prototype.searchDefinition

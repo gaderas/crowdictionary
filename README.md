@@ -44,6 +44,7 @@ TODO Features
 BUGS
 ----
 
+*   When the mysql library throws an exception (like "/Users/germoad/crowdictionary/node_modules/mysql/lib/protocol/Parser.js:82") hit kills the server
 *   Sometimes (when infinite scroll pages are hit), the browser history is polluted with lots of wrong and unnecessary entries
 *   After hitting "/login?contributorAccountCreated=1" by hand, OK is not getting rid of the Info component
 

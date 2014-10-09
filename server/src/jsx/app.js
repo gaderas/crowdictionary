@@ -157,12 +157,17 @@ appWs.get('/logout', function *(next) {
 appWs.get('/contributors', function *(next) {
     //yield next;
     console.log('query string: ' + JSON.stringify(this.query));
-    this.body = yield mockData.getContributors(this.query)
+    this.body = yield Q.fcall(mockData.getContributors.bind(mockData, this.query))
         .then(function (contributors) {
             return _.map(contributors, function (contributor) {
                 return appUtil.getObjectWithoutProps(contributor, ['email', 'status', 'passhash', 'verification_code', 'verified', 'verification_retries']);
             });
-        });
+        })
+        .fail(function (err) {
+            console.log("on fail with err: " + err);
+            this.status = 500;
+            return {message: "couldn't get contributors. error: " + err};
+        }.bind(this));
 });
 
 appWs.get('/contributors/:contributor_id/activity', function *(next) {
@@ -175,6 +180,12 @@ appWs.get('/contributors/:contributor_id/activity', function *(next) {
             this.status = 500;
             return {message: "couldn't get contributor's activity. error: " + err};
         }.bind(this));
+});
+
+appWs.get('/contributors/:contributor_id/score', function *(next) {
+});
+
+appWs.get('/contributors/leaderboard', function *(next) {
 });
 
 appWs.put('/contributors', function *(next) {
