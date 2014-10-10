@@ -22,10 +22,11 @@ TODO Performance Improvements
 TODO Features
 ----
 
+*   Edit profile. Change password. Recover password.
 *   Use # anchors to fix scroll position upon clicking on links
-*   Put pagination links on phrases list (home, search) for SEO purposes.
-*   User page (come up with queries, rollup tables)
-*   Users leaderboard (come up with queries, rollup tables)
+*   ~~Put pagination links on phrases list (home, search) for SEO purposes.~~
+*   ~~User page (come up with queries, rollup tables)~~
+*   ~~Users leaderboard (come up with queries, rollup tables)~~
 *   Make definitions linkable
 *   Create (editable) user profile page
 *   Implement redirect when hitting URLs with no shortLangCode, and cross links to other languages

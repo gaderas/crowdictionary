@@ -269,6 +269,12 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
             .then(function (l) {
                 return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
             });
+    } else if ('/ep/:alias1' === nRouteInfo.route) {
+        // "editProfile" page
+        return pL10nForLang
+            .then(function (l) {
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
+            });
     }
 };
 
@@ -836,7 +842,40 @@ var routesInfo = [
             // if above promise fails, return here
             return reactState;
         }
-    }
+    },
+    {
+        // editProfile
+        serverRoute: '/ep/:alias1',
+        serverParamNames: ['alias1'],
+        clientRoute: 'ep/:alias1',
+        clientRouterFunc: clientRouterFunc,
+        clientRouterFuncName: '/ep/:alias1',
+        calculateStateFunc: function (overrides, nRouteInfo) {
+            var lang = (overrides && overrides.globalLang) || 'es-MX',
+                l10nData = (overrides && overrides.l10nData) || {},
+                localeEndpointsMap = (overrides && overrides.localeEndpointsMap) || {},
+                loginStateUrl = baseRoot + "/v1/login",
+                shortLangCode = nRouteInfo.shortLangCode,
+                reactState = {
+                    globalLang: lang,
+                    shortLangCode: shortLangCode,
+                    l10nData: l10nData,
+                    localeEndpointsMap: localeEndpointsMap,
+                    saveSuccess: !!nRouteInfo.query.saveSuccess
+                };
+
+            return pRequest({method: "GET", url: loginStateUrl, json: true})
+                .then(function (loginStateRes) {
+                    // fail if no login information (we *need* it)
+                    if (200 !== loginStateRes[0].statusCode) {
+                        throw Error("failed fetching login information in order to show edit profile page");
+                    }
+                    reactState.loginInfo = loginStateRes[1];
+                    reactState.editProfile = true;
+                    return reactState;
+                });
+        }
+    },
 ];
 
 var normalizeRouteInfo = function (clientOrServer, routeInfo, routeParams, query) {
@@ -987,23 +1026,30 @@ var CodedMessagesMixin = {
 
 var EndpointsMixin = {
     getEndpoint: function (name, params) {
-        console.log("topState: " + JSON.stringify(this.props.topState));
-        console.log("localeEndpointsMap: " + JSON.stringify(this.props.topState.localeEndpointsMap));
-        return this.fmt(this.msg(this.props.topState.localeEndpointsMap[name].relUrl), params);
+        var state = this.state || this.props.topState;
+        if (!state) {
+            throw Error("no state or props.topState to get Endpoints data from");
+        }
+        console.log("localeEndpointsMap: " + JSON.stringify(state.localeEndpointsMap));
+        return this.fmt(this.msg(state.localeEndpointsMap[name].relUrl), params);
     }
 };
 
 var LinksMixin = {
     handleToLink: function (url, e) {
         var m;
-        e.preventDefault();
+        if (undefined !== e && e) {
+            // since we call this without passing a DOM event in a couple of cases, we don't assume we'll always have it.
+            e.preventDefault();
+        }
+        console.log("gonna navigate to url: " + url);
         Router.navigate(aPath(url), {trigger: true, replace: false});
     }
 };
 
 
 var CrowDictionary = React.createClass({
-    mixins: [I18nMixin, LoggedInMixin, RouterMixin, CodedMessagesMixin],
+    mixins: [I18nMixin, LoggedInMixin, RouterMixin, CodedMessagesMixin, EndpointsMixin, LinksMixin],
     componentDidMount: function () {
         mainReactComponentMounted = true;
     },
@@ -1096,8 +1142,9 @@ var CrowDictionary = React.createClass({
                     console.log("gonna throw");
                     throw Error("failed to add a new phrase...");
                 }
-                var fragment = "/phrases/"+phrase+"?updated="+Date.now();
-                Router.navigate(fragment, {trigger: true, replace: false});
+                var fragment = aUrl(this.getEndpoint("phrase", {phrase: phrase}) + "?updated=" + Date.now(), this.state.shortLangCode);//"/phrases/"+phrase+"?updated="+Date.now();
+                this.handleToLink(fragment);
+                //Router.navigate(fragment, {trigger: true, replace: false});
             }).bind(this))
             .fail((function (err) {
                 console.error("got an error: " + err);
@@ -1126,8 +1173,46 @@ var CrowDictionary = React.createClass({
                 }
                 console.log("res: " + JSON.stringify(res));
                 var definitionId = res[1].last_id,
-                    fragment = "/phrases/"+phrase+"?updated="+Date.now();
-                Router.navigate(fragment, {trigger: true, replace: true});
+                    fragment = aUrl(this.getEndpoint("phrase", {phrase: phrase}) + "?updated=" + Date.now(), this.state.shortLangCode);//"/phrases/"+phrase+"?updated="+Date.now();
+                this.handleToLink(fragment);
+                //Router.navigate(fragment, {trigger: true, replace: true});
+            }).bind(this))
+            .fail((function (err) {
+                console.error("got an error: " + JSON.stringify(err, ' ', 4));
+                this.setState({
+                    error: "generic"
+                });
+            }).bind(this));
+    },
+    handleSubmitEditProfile: function (enteredValues) {
+        // nickname, first_name, last_name
+        try {
+            this.getLoggedInInfo(true);
+        } catch (err) {
+            console.error("got an error: " + err);
+            this.setState({
+                error: "generic"
+            });
+            return;
+        }
+        var lang = this.state.globalLang,
+            crumb = this.state.crumb,
+            editProfileUrl = baseRoot + "/v1/contributors?email=" + this.state.loginInfo.email;
+        return pRequest({method: "PUT", url: editProfileUrl, body: {email: this.state.loginInfo.email, nickname: enteredValues.nickname, first_name: enteredValues.first_name, last_name: enteredValues.last_name, crumb: crumb}, json: true})
+            .then((function (res) {
+                if (200 !== res[0].statusCode) {
+                    throw Error("failed to save edited profile info");
+                }
+                var refreshLoginUrl = baseRoot + "/v1/login?refresh=true";
+                    fragment = aUrl(this.getEndpoint('contributorProfile', {contributor_id: this.state.loginInfo.id}), this.state.shortLangCode);//"/phrases/"+phrase+"?updated="+Date.now();
+                return pRequest({method: "GET", url: refreshLoginUrl, json: true})
+                    .then(function (refreshLoginRes) {
+                        if (200 !== refreshLoginRes[0].statusCode) {
+                            throw Error("failed to refresh login cookies after the profile change save");
+                        }
+                        this.handleToLink(fragment);
+                    }.bind(this));
+                //Router.navigate(fragment, {trigger: true, replace: true});
             }).bind(this))
             .fail((function (err) {
                 console.error("got an error: " + JSON.stringify(err, ' ', 4));
@@ -1223,13 +1308,6 @@ var CrowDictionary = React.createClass({
             });
             return;
         }
-        /*if (voteInfo.error) {
-            this.setState(voteInfo);
-            return;
-        } else if (voteInfo.info) {
-            this.setState(voteInfo);
-            return;
-        }*/
         console.log("got a vote: " + JSON.stringify(voteInfo));
         var crumb = this.state.crumb,
             addVoteUrl = util.format(baseRoot + "/v1/definitions/%d/vote", voteInfo.definitionId);
@@ -1238,8 +1316,9 @@ var CrowDictionary = React.createClass({
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to record vote...");
                 }
-                var fragment = "/phrases/"+voteInfo.phrase+"?update="+Date.now();
-                Router.navigate(fragment, {trigger: true, replace: true});
+                var fragment = aUrl(this.getEndpoint('phrase', {phrase: voteInfo.phrase}) + "?update=" + Date.now(), this.state.shortLangCode);//"/phrases/"+voteInfo.phrase+"?update="+Date.now();
+                this.handleToLink(fragment);
+                //Router.navigate(fragment, {trigger: true, replace: true});
             }).bind(this));
     },
     handleToMyActivity: function () {
@@ -1323,6 +1402,10 @@ var CrowDictionary = React.createClass({
         } else if (this.state.showAddDefinition) {
             // showAddDefinition itself is a phrase object. alreadyAddedDefinition is a definition object. confirmOverwrite is a boolean (or undefined)
             mainContent = <AddDefinitionForm phraseData={this.state.showAddDefinition} topState={this.state} onSubmitAddDefinition={this.handleSubmitAddDefinition} onSetInfo={this.handleSetInfo} setYesno={this.handleSetYesno} key="AddDefinitionForm"/>;
+        } else if (this.state.editProfile) {
+            // editProfile is just a boolean, get contributor data from state.loginInfo
+// args: formDescription, submitCallback, onSuccessCallback, successIndicatorPropertyName, successMessage, renderedFields, prepopulatedValues
+            mainContent = <EditProfileForm topState={this.state} formDescription="yihee" submitCallback={this.handleSubmitEditProfile} onSuccessCallback={function () {alert("yay!");}} successIndicatorPropertyName="saveSuccess" successMessage="great success" renderedFields={["nickname"]} onSetInfo={this.handleSetInfo} key="EditProfileForm"/>;
         } else if (this.state.showLeaderboard) {
             // showLeaderboard itself is an object containing leaderboard data.
             titleContent = this.messages.Titles.leaderboard;
@@ -1505,7 +1588,7 @@ var YesnoMessage = React.createClass({
 });
 
 var PhraseDetails = React.createClass({
-    mixins: [I18nMixin, HashMixin, EndpointsMixin],
+    mixins: [I18nMixin, HashMixin, EndpointsMixin, LinksMixin],
     handleBack: function (e) {
         e.preventDefault();
         this.props.onClosePhraseDetails();
@@ -1522,7 +1605,7 @@ var PhraseDetails = React.createClass({
                 <PhraseInDetails topState={this.props.topState} />
                 <DefinitionsInDetails onVote={this.props.onVote} topState={this.props.topState} onSetInfo={this.props.onSetInfo}/>
                 <div>
-                    <a href={backToSearchResultsUrl} onClick={this.handleBack} className="back oi" data-glyph="arrow-thick-left">{backToSearchResultsCaption}</a>
+                    <a href={backToSearchResultsUrl} onClick={this.handleToLink.bind(this, backToSearchResultsUrl)} className="back oi" data-glyph="arrow-thick-left">{backToSearchResultsCaption}</a>
                 </div>
             </main>
         );
@@ -1530,20 +1613,17 @@ var PhraseDetails = React.createClass({
 });
 
 var AddDefinitionForm = React.createClass({
-    mixins: [I18nMixin],
+    mixins: [I18nMixin, EndpointsMixin, LinksMixin],
     componentDidMount: function () {
-        var phrase = this.props.phraseData.phrase;
+        var phrase = this.props.phraseData.phrase,
+            shortLangCode = this.props.topState.shortLangCode;
         if (this.props.topState.alreadyAddedDefinition && !this.props.topState.confirmOverwrite) {
-            // show confirmation prompt
-            //mainContent = <InfoMessage onClearInfo={this.handleClearInfo} topState={this.state} key="InfoMessage"/>;
+            var confirmUrl = aUrl(this.getEndpoint('addDefinition') + "?phrase=" + phrase + "&confirmOverwrite=true", shortLangCode),
+                cancelUrl = aUrl(this.getEndpoint('phrase', {phrase: phrase}), shortLangCode);
             this.props.setYesno(
                 this.messages.AddDefinitionForm.confirmOverwrite,
-                function () {
-                    Router.navigate("addDefinition?phrase=" + phrase + "&confirmOverwrite=true", {trigger: true, replace: false});
-                },
-                function () {
-                    Router.navigate("phrases/"+phrase, {trigger: true, replace: false});
-                }
+                this.handleToLink.bind(this, confirmUrl),
+                this.handleToLink.bind(this, cancelUrl)
             );
         }
     },
@@ -1891,7 +1971,9 @@ var UserLinks = React.createClass({
             var addMessage,
                 addUrl,
                 myActivityMessage = this.messages.UserLinks.myActivity,
-                myActivityUrl = aUrl(this.getEndpoint('contributorProfile', {contributor_id: loginInfo.id}), shortLangCode);
+                myActivityUrl = aUrl(this.getEndpoint('contributorProfile', {contributor_id: loginInfo.id}), shortLangCode),
+                leaderboardMessage = this.messages.UserLinks.leaderboard,
+                leaderboardUrl = aUrl(this.getEndpoint('leaderboard'), shortLangCode);
             if (!this.props.phraseData) {
                 // viewing list of phrases. show option to add a phrase.
                 addMessage = this.messages.UserLinks.addPhrase;
@@ -1903,7 +1985,8 @@ var UserLinks = React.createClass({
             }
             return (
                 <h2 className="user-links">
-                    <a className="oi" data-glyph="person" title={myActivityMessage} href={myActivityUrl} onClick={this.handleToMyActivity}></a>
+                    <a className="oi" data-glyph="person" title={myActivityMessage} href={myActivityUrl} onClick={this.handleToLink.bind(this, myActivityUrl)}></a>
+                    <a className="oi" data-glyph="people" title={leaderboardMessage} href={leaderboardUrl} onClick={this.handleToLink.bind(this, leaderboardUrl)}></a>
                     <a className="oi" data-glyph="plus" title={addMessage} href={addUrl} onClick={this.handleToLink.bind(this, addUrl)}></a>
                 </h2>
             );
@@ -1912,7 +1995,7 @@ var UserLinks = React.createClass({
 });
 
 var LoginStatus = React.createClass({
-    mixins: [I18nMixin, EndpointsMixin],
+    mixins: [I18nMixin, LinksMixin, EndpointsMixin],
     handleClick: function () {
         this.props.onToggleLoginPrompt();
     },
@@ -1932,7 +2015,7 @@ var LoginStatus = React.createClass({
             var greeting = this.messages.LoginStatus.notLoggedInGreeting,
                 loginUrl = aUrl(this.getEndpoint('login'), shortLangCode);
             return (
-                <h2 className="login-info"><a className="oi" data-glyph="account-login" title={greeting} href={loginUrl} onClick={this.handleClick}></a></h2>
+                <h2 className="login-info"><a className="oi" data-glyph="account-login" title={greeting} href={loginUrl} onClick={this.handleToLink.bind(this, loginUrl)}></a></h2>
             );
         } else {
             var //greeting = this.fmt(this.msg(this.messages.LoginStatus.loggedInGreeting), {username: loginInfo.email}),
@@ -1942,7 +2025,7 @@ var LoginStatus = React.createClass({
                 addUrl;
             return (
                 <h2 className="login-info">
-                    <a className="oi" data-glyph="account-logout" title={logOutMessage} href={logOutUrl} onClick={this.handleLogOut}></a>
+                    <a className="oi" data-glyph="account-logout" title={logOutMessage} href={logOutUrl} onClick={this.handleToLink.bind(this, logOutUrl)}></a>
                 </h2>
             );
         }
@@ -2001,14 +2084,15 @@ var LogOutOutcome = React.createClass({
 });
 
 var SignupForm = React.createClass({
-    mixins: [I18nMixin, LifecycleDebug({displayName: 'SignupForm'})],
+    mixins: [I18nMixin, EndpointsMixin, LinksMixin, LifecycleDebug({displayName: 'SignupForm'})],
     componentDidMount: function () {
         console.log("SignupForm componentDidMount");
         if (this.props.topState.contributorAccountCreated) {
-            console.log("yes?");
-            this.props.onSetInfo(<span>{this.messages.SignupForm.signupSuccess}</span>, function () {
-                Router.navigate('login?update='+Date.now(), {trigger: true, replace: false});
-            });
+            var loginUrl = aUrl(this.getEndpoint("login") + "?update=" + Date.now(), this.props.topState.shortLangCode);
+            this.props.onSetInfo(
+                <span>{this.messages.SignupForm.signupSuccess}</span>,
+                this.handleToLink.bind(this, loginUrl)
+            );
         }
     },
     componentWillUpdate: function (nextProps) {
@@ -2053,7 +2137,6 @@ var SignupForm = React.createClass({
         };
     },
     componentWillMount: function () {
-        var messages = this.messages;
         this.setState(this.getDefaultState());
     },
     handleSignup: function (e) {
@@ -2157,6 +2240,172 @@ var SignupForm = React.createClass({
             </form>
         );
     },
+});
+
+// args: formDescription, submitCallback, onSuccessCallback, successIndicatorPropertyName, successMessage, renderedFields, prepopulatedValues
+var ProfileFormMixin = {
+    mixins: [I18nMixin, EndpointsMixin, LinksMixin],
+    componentWillMount: function () {
+        this.setState(this.getDefaultState());
+    },
+    componentDidMount: function () {
+        console.log("componentDidMount");
+        var onSuccessCallback = this.props.onSuccessCallback,
+            successIndicatorPropertyName = this.props.successIndicatorPropertyName,
+            successMessage = this.props.successMessage;
+        if (this.props.topState[successIndicatorPropertyName]) {
+            //var profileUrl = aUrl(this.getEndpoint("contributorProfile", {contributor_id: this.props.topState.loginInfo.id}) + "?update=" + Date.now(), this.props.topState.shortLangCode);
+            this.props.onSetInfo(
+                <span>{successMessage}</span>,
+                onSuccessCallback
+                //<span>{this.messages.SignupForm.editSuccess}</span>,
+                //this.handleToLink.bind(this, profileUrl)
+            );
+        }
+    },
+    componentWillUpdate: function (nextProps) {
+        var successIndicatorPropertyName = this.props.successIndicatorPropertyName;
+        if (!nextProps.topState[successIndicatorPropertyName] && this.props.topState[successIndicatorPropertyName]) {
+            this.props.onClearInfo();
+        }
+    },
+    getDefaultState: function () {
+        // not to be confused with getInitialState() :-)
+        var messages = this.messages;
+        return {
+            errors: {
+                globalError: false,
+                email: false,
+                passhash: false,
+                nickname: false,
+                first_name: false,
+                last_name: false
+            },
+            titles: {
+                globalError: "",
+                email: "",
+                passhash: "",
+                nickname: "",
+                first_name: "",
+                last_name: ""
+            },
+            placeholders: {
+                email: messages.SignupForm.usernameFieldPlaceholder,
+                passhash: messages.SignupForm.passwordFieldPlaceholder,
+                nickname: messages.SignupForm.nicknameFieldPlaceholder,
+                first_name: messages.SignupForm.firstNameFieldPlaceholder,
+                last_name: messages.SignupForm.lastNameFieldPlaceholder
+            },
+            labels: {
+                email: messages.SignupForm.usernameFieldLabel,
+                passhash: messages.SignupForm.passwordFieldLabel,
+                nickname: messages.SignupForm.nicknameFieldLabel,
+                first_name: messages.SignupForm.firstNameFieldLabel,
+                last_name: messages.SignupForm.lastNameFieldLabel
+            }
+        };
+    },
+    handleSignup: function (e) {
+        e.preventDefault();
+        var renderedFields = this.props.renderedFields,
+            submitCallback = this.props.submitCallback,
+            enteredValues = _.zipObject(_.map(renderedFields, function (fieldName) {
+                return [fieldName, this.refs[fieldName].getDOMNode().value];
+            }.bind(this)));
+        console.log("renderedFields: " + JSON.stringify(renderedFields) + ", enteredValues: " + JSON.stringify(enteredValues));
+            /*email = this.refs.email.getDOMNode().value,
+            passhash = this.refs.passhash.getDOMNode().value,
+            nickname = this.refs.nickname.getDOMNode().value,
+            first_name = this.refs.first_name.getDOMNode().value,
+            last_name = this.refs.last_name.getDOMNode().value;*/
+        Q(submitCallback(enteredValues))
+            .fail(function (err) {
+                var newState = this.getDefaultState(),
+                    errors = newState.errors;
+                errors.globalError = this.messages.Errors.validationError;
+                _.forEach(err.fields, function (condition, fieldName) {
+                    if ('duplicate' === condition) {
+                        errors[fieldName] = this.messages.Errors.duplicateField;
+                    } else if ('missing' === condition) {
+                        errors[fieldName] = this.messages.Errors.missingField;
+                    } else if ('invalid' === condition) {
+                        errors[fieldName] = this.messages.Errors.invalidField;
+                    } else {
+                        errors[fieldName] = condition;
+                    }
+                }.bind(this));
+                this.setState(newState);
+            }.bind(this));
+    },
+    render: function () {
+        var renderedFields = this.props.renderedFields,
+            submitCallback = this.props.submitCallback,
+            formDescription = this.props.formDescription,
+            messages = this.messages.SignupForm,
+            cx = React.addons.classSet,
+            classNames = {
+                globalError: cx({global: true, error: true, hidden: !this.state.errors.globalError}),
+                email: cx({error: this.state.errors.email}),
+                passhash: cx({error: this.state.errors.passhash}),
+                nickname: cx({error: this.state.errors.nickname}),
+                first_name: cx({error: this.state.errors.first_name}),
+                last_name: cx({error: this.state.errors.last_name})
+            },
+            titles = {
+                email: this.state.errors.email || "",
+                passhash: this.state.errors.passhash || "",
+                nickname: this.state.errors.nickname || "",
+                first_name: this.state.errors.first_name || "",
+                last_name: this.state.errors.last_name || ""
+            },
+            placeholders = {
+                email: (!this.state.errors.email && this.state.placeholders.email) || this.state.errors.email,
+                passhash: (!this.state.errors.passhash && this.state.placeholders.passhash) || this.state.errors.passhash,
+                nickname: (!this.state.errors.nickname && this.state.placeholders.nickname) || this.state.errors.nickname,
+                first_name: (!this.state.errors.first_name && this.state.placeholders.first_name) || this.state.errors.first_name,
+                last_name: (!this.state.errors.last_name && this.state.placeholders.last_name) || this.state.errors.last_name
+            },
+            labels = {
+                email: (!this.state.errors.email && this.state.labels.email) || "* " + this.state.labels.email,
+                passhash: (!this.state.errors.passhash && this.state.labels.passhash) || "* " + this.state.labels.passhash,
+                nickname: (!this.state.errors.nickname && this.state.labels.nickname) || "* " + this.state.labels.nickname,
+                first_name: (!this.state.errors.first_name && this.state.labels.first_name) || "* " + this.state.labels.first_name,
+                last_name: (!this.state.errors.last_name && this.state.labels.last_name) || "* " + this.state.labels.last_name
+            },
+            types = {
+                email: 'email',
+                passhash: 'password',
+                nickname: 'text',
+                first_name: 'text',
+                last_name: 'text'
+            },
+            elements = _.map(renderedFields, function (fieldName) {
+                return <label className={fieldName}>
+                    {labels[fieldName]}
+                    <input className={classNames[fieldName]} title={titles[fieldName]} ref={fieldName} type={types[fieldName]} placeholder={placeholders[fieldName]} key={fieldName} />
+                </label>;
+            });
+        console.log("errors: " + JSON.stringify(this.state.errors));
+        console.log("classNames: " + JSON.stringify(classNames));
+        console.log("labels: " + JSON.stringify(labels));
+        return (
+            <form className="signup" onSubmit={this.handleSignup}>
+                <fieldset>
+                    <legend>{messages.formTitle}</legend>
+                    <p className={classNames.globalError} ref="globalError">{this.state.errors.globalError}</p>
+                    <p>{formDescription}</p>
+                    {elements}
+                    <label className="submit">
+                        {messages.submitButtonLabel}
+                        <input type="submit" value={messages.submitButtonValue}/>
+                    </label>
+                </fieldset>
+            </form>
+        );
+    },
+};
+var EditProfileForm = React.createClass({
+    mixins: [ProfileFormMixin]
 });
 
 

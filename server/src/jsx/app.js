@@ -5,6 +5,7 @@ var request = require('request');
 var React = require('react');
 var serve = require('koa-static');
 var koa = require('koa');
+var compress = require('koa-compress');
 var mount = require('koa-mount');
 var router = require('koa-router');
 var bodyParser = require('koa-body-parser');
@@ -71,6 +72,7 @@ setPRequest(pRequest);
 
 _.mixin(require('../../../shared/build/js/lodash_mixin.js'));
 
+app.use(compress());
 appReact.use(router(appReact));
 app.keys = nconf.get("cookies:user:secrets").split(',');
 appWs.use(function *(next) {
@@ -142,6 +144,19 @@ appWs.post('/login', function *(next) {
 });
 
 appWs.get('/login', function *(next) {
+    if (this.query.refresh) {
+        this.body = yield mockData.getContributors({email: appWs.contributor.email})
+            .then(function (contributorsRes) {
+                if (!contributorsRes.length) {
+                    throw Error("contributor not found while trying to refresh login cookie");
+                }
+                var contributor = contributorsRes[0],
+                    safeContributorInfo = appUtil.getObjectWithoutProps(contributor, ['passhash', 'verification_code']);
+                this.cookies.set('contributor', JSON.stringify(safeContributorInfo), {signed: true});
+                return _.merge(safeContributorInfo, {crumb: app.crumb});
+            }.bind(this));
+        return;
+    }
     yield next;
     this.status = appWs.contributor ? 200 : 401;
     this.body = appWs.contributor ? _.merge(appWs.contributor, {crumb: app.crumb}) : {message: "not logged in"};

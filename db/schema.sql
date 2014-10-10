@@ -54,10 +54,12 @@ CREATE TABLE `contributor` (
     `email` varchar(64) NOT NULL,
     `verified` enum('yes', 'no') NOT NULL DEFAULT 'no',
     `verification_code` varchar(16) NOT NULL,
+    `password_reset_code` varchar(16) NOT NULL DEFAULT '',
     `verification_retries` int NOT NULL DEFAULT 0,
     `passhash` varchar(128) NOT NULL,
     `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated` TIMESTAMP DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    UNIQUE INDEX (`email`)
+    UNIQUE INDEX (`email`),
+    UNIQUE INDEX (`nickname`)
 );

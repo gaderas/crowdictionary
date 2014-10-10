@@ -19,7 +19,8 @@
             "errno6": "correo electrónico ausente",
             "errno7": "contraseña ausente",
             "errno8": "contraseña incorrecta",
-            "errno9": "algo ha salido mal y falló tu entrada al sistema"
+            "errno9": "algo ha salido mal y falló tu entrada al sistema",
+            "errno10": "algo ha salido mal al tratar de mostrarte la página de editar perfil. por favor verifica que hayas entrado al sistema con tu cuenta antes de intentar de nuevo."
         },
         "Infos": {
             "infono1": "la verificación ha sido exitosa",
@@ -35,7 +36,8 @@
         "UserLinks": {
             "addPhrase": "agrega una nueva frase o palabra",
             "addDefinition": "agrega tu propia definición de la frase/palabra \"{phrase}\"",
-            "myActivity": "ver mi historial"
+            "myActivity": "ver mi historial",
+            "leaderboard": "ver tabla de puntuación"
         },
         "LoginStatus": {
             "loggedInGreeting": "¡Hola {username}!",
@@ -70,7 +72,8 @@
             "firstNameFieldLabel": "Nombre",
             "lastNameFieldLabel": "Apellidos",
             "submitButtonLabel": "",
-            "signupSuccess": "Tu cuenta ha sido creada. A continuación te enviaremos un correo de verificación con una liga que deberás seguir para finalizar tu proceso de registro."
+            "signupSuccess": "Tu cuenta ha sido creada. A continuación te enviaremos un correo de verificación con una liga que deberás seguir para finalizar tu proceso de registro.",
+            "editSuccess": "Tu perfil se ha editado con éxito.."
         },
         "AddPhraseForm": {
             "addPhrase": "Nueva frase o palabra",
