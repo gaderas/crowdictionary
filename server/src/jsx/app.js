@@ -545,6 +545,24 @@ appWs.get('/langDetect', function *(next) {
         }.bind(this));
 });
 
+appWs.get('/localeEndpointsMap', function *(next) {
+    var lang = this.query.lang,
+        localeRootMap = nconf.get("localeEndpointsMap");
+    yield next;
+    if (!lang) {
+        this.status = 400;
+        this.body = {message: "'lang' not specified"};
+        return;
+    } else if (!localeRootMap || _.isEmpty(localeRootMap) || !localeRootMap[lang]) {
+        this.status = 500;
+        this.body = {message: "the configuration was not found, or the section about your specified 'lang' was not found in the configuration."};
+        return;
+    } else {
+        this.body = localeRootMap[lang];
+        return;
+    }
+});
+
 
 _.forEach(nconf.get("localeRootMap"), function (root, confLang) {
     var parsedRoot = url.parse(root),

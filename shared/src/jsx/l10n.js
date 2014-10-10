@@ -25,7 +25,6 @@ var langDetect = function (referrer) {
 };
 
 var getL10nForLang = function (lang) {
-    console.log(":)");
     if (!lang) {
         throw Error("no lang passed to getL10nForLang");
     }
@@ -35,7 +34,23 @@ var getL10nForLang = function (lang) {
             if (200 !== res[0].statusCode) {
                 throw Error("error, got status code: '" + res[0].statusCode + "' while trying to fetch l10n data from: " + url);
             }
-            console.log(":-*");
+            return res[1];
+        })
+        .fail(function (err) {
+            return "error: " + err.message;
+        });
+};
+
+var getLocaleEndpointsMap = function (lang) {
+    if (!lang) {
+        throw Error("no lang passed to getLocaleEndpointsMap");
+    }
+    var url = util.format(baseRoot + "/v1/localeEndpointsMap?lang=%s", lang);
+    return pRequest({method: "GET", url: url, json: true})
+        .then(function (res) {
+            if (200 !== res[0].statusCode) {
+                throw Error("error, got status code: '" + res[0].statusCode + "' while trying to fetch localeEndpointsMap data from: " + url);
+            }
             return res[1];
         })
         .fail(function (err) {
@@ -46,4 +61,5 @@ var getL10nForLang = function (lang) {
 module.exports.setPRequest = setPRequest;
 module.exports.setBaseRoot = setBaseRoot;
 module.exports.getL10nForLang = getL10nForLang;
+module.exports.getLocaleEndpointsMap = getLocaleEndpointsMap;
 module.exports.langDetect = langDetect;

@@ -121,9 +121,12 @@
         },
         "ContributorActivityItem": {
             "goToPhraseLink": "Ver",
-            "phraseActivityEntry": "Contribuíste la frase o palabra \"{phrase}\"",
-            "definitionActivityEntry": "Contribuíste una definición para la frase o palabra \"{phrase}\"",
-            "voteActivityEntry": "{vote, select, up {Votaste a favor de una definición para la frase o palabra \"{phrase}\"} down {Votaste en contra de una definición para la frase o palabra \"{phrase}\"} other {Votaste y luego anulaste tu voto por una definición para la frase o palabra \"{phrase}\"}}"
+            "ownPhraseActivityEntry": "Contribuíste la frase o palabra \"{phrase}\"",
+            "othersPhraseActivityEntry": "Contribuyó la frase o palabra \"{phrase}\"",
+            "ownDefinitionActivityEntry": "Contribuíste una definición para la frase o palabra \"{phrase}\"",
+            "othersDefinitionActivityEntry": "Contribuyó una definición para la frase o palabra \"{phrase}\"",
+            "ownVoteActivityEntry": "{vote, select, up {Votaste a favor de una definición para la frase o palabra \"{phrase}\"} down {Votaste en contra de una definición para la frase o palabra \"{phrase}\"} other {Votaste y luego anulaste tu voto por una definición para la frase o palabra \"{phrase}\"}}",
+            "othersVoteActivityEntry": "{vote, select, up {Votó a favor de una definición para la frase o palabra \"{phrase}\"} down {Votó en contra de una definición para la frase o palabra \"{phrase}\"} other {Votó y luego anuló un voto por una definición para la frase o palabra \"{phrase}\"}}"
         },
         "PhraseDetails": {
             "backToSearchResults": "regresar a los resultados de búsqueda"
@@ -165,7 +168,7 @@
             "search": "{phrase}, resultados de búsqueda - MexiOnario",
             "phrase": "{phrase}, significados - MexiOnario",
             "leaderboard": "Tabla de puntuación. Palabras, significados, definiciones - MexiOnario",
-            "profile": "{nickname} (perfil) , votos, significados, frases y palabras - MexiOnario"
+            "profile": "{nickname} (perfil), votos, significados, frases y palabras - MexiOnario"
         }
     }
 }

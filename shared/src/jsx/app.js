@@ -193,11 +193,12 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
     setBaseRoot(baseRoot);
 
     pL10nForLang = l10n.langDetect(effectiveRoot)
-        .then(function (langInfo) {
-            return l10n.getL10nForLang(langInfo.langByReferrer) // we also have langByIp which we can use to tease the user to visit another lang
-                .then(function (l10nData) {
+        .then(function (langInfo) { // we also have langByIp in langInfo, which we can use to tease the user to visit another lang
+            return Q.all([l10n.getL10nForLang(langInfo.langByReferrer), l10n.getLocaleEndpointsMap(langInfo.langByReferrer)])
+                .spread(function (l10nData, localeEndpointsMap) {
                     return {
                         l10nData: l10nData,
+                        localeEndpointsMap: localeEndpointsMap,
                         globalLang: langInfo.langByReferrer,
                         langByIp: langInfo.langByIp
                     };
@@ -210,63 +211,63 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
             // "home page"
             return pL10nForLang
                 .then(function (l) {
-                    return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+                    return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
                 });
         } else if (nRouteInfo.query && nRouteInfo.query.q) {
             return pL10nForLang
                 .then(function (l) {
-                    return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, searchTerm: nRouteInfo.query.q}, nRouteInfo));
+                    return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap, searchTerm: nRouteInfo.query.q}, nRouteInfo));
                 });
         }
-    } else if ('/phrases/:phrase' === nRouteInfo.route) {
+    } else if ('/:phrase' === nRouteInfo.route) {
         // "phrase page"
         console.log("nRouteInfo: " + JSON.stringify(nRouteInfo));
         return pL10nForLang
             .then(function (l) {
-                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
             });
-    } else if ('/contributors/:contributor_id/activity' === nRouteInfo.route) {
+    } else if ('/cp/:alias1/:contributor_id' === nRouteInfo.route) {
         // "contributor activity page"
         console.log("nRouteInfo: " + JSON.stringify(nRouteInfo));
         return pL10nForLang
             .then(function (l) {
-                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
             });
-    } else if ('/logout' === nRouteInfo.route) {
+    } else if ('/o/:alias1' === nRouteInfo.route) {
         // "logout" page
         return pL10nForLang
             .then(function (l) {
-                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
             });
-    } else if ('/login' === nRouteInfo.route) {
+    } else if ('/i/:alias1' === nRouteInfo.route) {
         // "login" page
         return pL10nForLang
             .then(function (l) {
-                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
             });
-    } else if ('/verify' === nRouteInfo.route) {
+    } else if ('/v/:alias1' === nRouteInfo.route) {
         // "login" page
         return pL10nForLang
             .then(function (l) {
-                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
             });
-    } else if ('/addPhrase' === nRouteInfo.route) {
+    } else if ('/y/:alias1' === nRouteInfo.route) {
         // "add phrase" page
         return pL10nForLang
             .then(function (l) {
-                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
             });
-    } else if ('/addDefinition' === nRouteInfo.route) {
+    } else if ('/x/:alias1' === nRouteInfo.route) {
         // "add definition" page
         return pL10nForLang
             .then(function (l) {
-                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
             });
-    } else if ('/leaderboard' === nRouteInfo.route) {
+    } else if ('/l/:alias1' === nRouteInfo.route) {
         // "leaderboard" page
         return pL10nForLang
             .then(function (l) {
-                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData}, nRouteInfo));
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
             });
     }
 };
@@ -278,6 +279,7 @@ var getPhraseSearchReactState = function (params) {
         page = params.page,
         start = (page * pageSize),
         l10nData = params.l10nData,
+        localeEndpointsMap = params.localeEndpointsMap,
         shortLangCode = params.shortLangCode;
     if (!term) {
         phrasesUrl = baseRoot + "/v1/lang/"+lang+"/phrases?start="+start+"&limit="+pageSize;
@@ -295,6 +297,7 @@ var getPhraseSearchReactState = function (params) {
                     globalLang: lang,
                     shortLangCode: shortLangCode,
                     l10nData: l10nData,
+                    localeEndpointsMap: localeEndpointsMap,
                     page: page,
                     searchTerm: term,
                     searchResults: getReactStatePhraseSearchResults(rawSearchResults)
@@ -326,6 +329,7 @@ var getContributorActivityReactState = function (params) {
         page = params.page,
         start = (page * pageSize),
         l10nData = params.l10nData,
+        localeEndpointsMap = params.localeEndpointsMap,
         activityUrl = baseRoot + util.format("/v1/contributors/%d/activity?lang=%s&start=%d&limit=%d", contributor_id, lang, start, pageSize),
         shortLangCode = params.shortLangCode;
 
@@ -359,6 +363,7 @@ var getContributorActivityReactState = function (params) {
                             globalLang: lang,
                             shortLangCode: shortLangCode,
                             l10nData: l10nData,
+                            localeEndpointsMap: localeEndpointsMap,
                             contributor_id: contributor_id,
                             contributorActivity: activity
                         };
@@ -370,13 +375,15 @@ var getLeaderboardReactState = function (params) {
     var lang = params.lang,
         shortLangCode = params.shortLangCode,
         l10nData = params.l10nData,
+        localeEndpointsMap = params.localeEndpointsMap,
         start = params.start,
         limit = PHRASES_PAGE_SIZE,
         leaderboardUrl = baseRoot + util.format("/v1/contributors/leaderboard?start=%d&limit=%d", start, limit),
         reactState = {
             globalLang: lang,
             shortLangCode: shortLangCode,
-            l10nData: l10nData
+            l10nData: l10nData,
+            localeEndpointsMap: localeEndpointsMap
         };
     return pRequest({url: leaderboardUrl, json: true})
         .then(function (leaderboardRes) {
@@ -443,12 +450,13 @@ var routesInfo = [
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 term = (overrides && overrides.searchTerm) || '',
                 l10nData = (overrides && overrides.l10nData) || {},
+                localeEndpointsMap = (overrides && overrides.localeEndpointsMap) || {},
                 page = nRouteInfo.query.page || 0,
                 loginStateUrl = baseRoot + "/v1/login",
                 definitionsUrl,
                 phrasesUrl;
             return Q.all([
-                getPhraseSearchReactState({l10nData: l10nData, lang: lang, shortLangCode: nRouteInfo.shortLangCode, term: term, pageSize: PHRASES_PAGE_SIZE, page: page}),
+                getPhraseSearchReactState({l10nData: l10nData, localeEndpointsMap: localeEndpointsMap, lang: lang, shortLangCode: nRouteInfo.shortLangCode, term: term, pageSize: PHRASES_PAGE_SIZE, page: page}),
                 pRequest({method: "GET", url: loginStateUrl, json: true})
             ])
                 .spread(function (reactState, loginStateRes) {
@@ -461,15 +469,17 @@ var routesInfo = [
         }
     },
     {
-        serverRoute: '/phrases/:phrase',
+        // phrase, was: /phrases/:phrase
+        serverRoute: '/:phrase',
         serverParamNames: ['phrase'],
-        clientRoute: 'phrases/:phrase',
+        clientRoute: ':phrase',
         clientRouterFunc: clientRouterFunc,
-        clientRouterFuncName: '/phrases/:phrase',
+        clientRouterFuncName: '/:phrase',
         calculateStateFunc: function (overrides, nRouteInfo) {
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 phrase = (nRouteInfo && nRouteInfo.params && nRouteInfo.params.phrase),
                 l10nData = (overrides && overrides.l10nData) || {},
+                localeEndpointsMap = (overrides && overrides.localeEndpointsMap) || {},
                 phraseUrl = baseRoot + util.format("/v1/lang/%s/phrases/%s", lang, phrase),
                 loginStateUrl = baseRoot + "/v1/login",
                 shortLangCode = nRouteInfo.shortLangCode;
@@ -487,6 +497,7 @@ var routesInfo = [
                             globalLang: lang,
                             shortLangCode: shortLangCode,
                             l10nData: l10nData,
+                            localeEndpointsMap: localeEndpointsMap,
                             shownPhraseData: shownPhraseData
                         };
                     // add login information if we got it
@@ -550,15 +561,17 @@ var routesInfo = [
         }
     },
     {
-        serverRoute: '/contributors/:contributor_id/activity',
-        serverParamNames: ['contributor_id'],
-        clientRoute: 'contributors/:contributor_id/activity',
+        // contributorProfile, was: contributors/:contributor_id/activity
+        serverRoute: '/cp/:alias1/:contributor_id',
+        serverParamNames: ['alias1', 'contributor_id'],
+        clientRoute: 'cp/:alias1/:contributor_id',
         clientRouterFunc: clientRouterFunc,
-        clientRouterFuncName: '/contributors/:contributor_id/activity',
+        clientRouterFuncName: '/cp/:alias1/:contributor_id',
         calculateStateFunc: function (overrides, nRouteInfo) {
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 contributor_id = parseInt(nRouteInfo && nRouteInfo.params && nRouteInfo.params.contributor_id, 10),
                 l10nData = (overrides && overrides.l10nData) || {},
+                localeEndpointsMap = (overrides && overrides.localeEndpointsMap) || {},
                 loginStateUrl = baseRoot + "/v1/login",
                 shortLangCode = nRouteInfo.shortLangCode;
             if (!contributor_id) {
@@ -566,7 +579,7 @@ var routesInfo = [
             }
 
             return Q.all([
-                getContributorActivityReactState({l10nData: l10nData, shortLangCode: shortLangCode, lang: lang, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: 0}),
+                getContributorActivityReactState({l10nData: l10nData, localeEndpointsMap: localeEndpointsMap, shortLangCode: shortLangCode, lang: lang, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: 0}),
                 pRequest({method: "GET", url: loginStateUrl, json: true})
             ])
                 .spread(function (reactState, loginStateRes) {
@@ -599,19 +612,22 @@ var routesInfo = [
         }
     },
     {
-        serverRoute: '/logout',
-        serverParamNames: [],
-        clientRoute: 'logout',
+        // logout
+        serverRoute: '/o/:alias1',
+        serverParamNames: ['alias1'],
+        clientRoute: 'o/:alias1',
         clientRouterFunc: clientRouterFunc,
-        clientRouterFuncName: '/logout',
+        clientRouterFuncName: '/o/:alias1',
         calculateStateFunc: function (overrides, nRouteInfo) {
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 l10nData = (overrides && overrides.l10nData) || {},
+                localeEndpointsMap = (overrides && overrides.localeEndpointsMap) || {},
                 shortLangCode = nRouteInfo.shortLangCode,
                 reactState = {
                     globalLang: lang,
                     shortLangCode: shortLangCode,
                     l10nData: l10nData,
+                    localeEndpointsMap: localeEndpointsMap,
                     doLogOut: true
                 },
                 loginStateUrl = baseRoot + "/v1/login";
@@ -628,19 +644,22 @@ var routesInfo = [
         }
     },
     {
-        serverRoute: '/login',
-        serverParamNames: [],
-        clientRoute: 'login',
+        // login
+        serverRoute: '/i/:alias1',
+        serverParamNames: ['alias1'],
+        clientRoute: 'i/:alias1',
         clientRouterFunc: clientRouterFunc,
-        clientRouterFuncName: '/login',
+        clientRouterFuncName: '/i/:alias1',
         calculateStateFunc: function (overrides, nRouteInfo) {
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 l10nData = (overrides && overrides.l10nData) || {},
+                localeEndpointsMap = (overrides && overrides.localeEndpointsMap) || {},
                 shortLangCode = nRouteInfo.shortLangCode,
                 reactState = {
                     globalLang: lang,
                     shortLangCode: shortLangCode,
                     l10nData: l10nData,
+                    localeEndpointsMap: localeEndpointsMap,
                     showLoginPrompt: true,
                     contributorAccountCreated: !!nRouteInfo.query.contributorAccountCreated
                 },
@@ -658,19 +677,22 @@ var routesInfo = [
         }
     },
     {
-        serverRoute: '/verify',
-        serverParamNames: [],
-        clientRoute: 'verify',
+        // verify
+        serverRoute: '/v/:alias1',
+        serverParamNames: ['alias1'],
+        clientRoute: 'v/:alias1',
         clientRouterFunc: clientRouterFunc,
-        clientRouterFuncName: '/verify',
+        clientRouterFuncName: '/v/:alias1',
         calculateStateFunc: function (overrides, nRouteInfo) {
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 l10nData = (overrides && overrides.l10nData) || {},
+                localeEndpointsMap = (overrides && overrides.localeEndpointsMap) || {},
                 shortLangCode = nRouteInfo.shortLangCode,
                 reactState = {
                     globalLang: lang,
                     shortLangCode: shortLangCode,
                     l10nData: l10nData,
+                    localeEndpointsMap: localeEndpointsMap,
                     showVerificationPrompt: !nRouteInfo.query.validateVerification,
                     validateVerification: nRouteInfo.query.validateVerification,
                     email: nRouteInfo.query.email
@@ -689,19 +711,22 @@ var routesInfo = [
         }
     },
     {
-        serverRoute: '/addPhrase',
-        serverParamNames: [],
-        clientRoute: 'addPhrase',
+        // addPhrase
+        serverRoute: '/y/:alias1',
+        serverParamNames: ['alias1'],
+        clientRoute: 'y/:alias1',
         clientRouterFunc: clientRouterFunc,
-        clientRouterFuncName: '/addPhrase',
+        clientRouterFuncName: '/y/:alias1',
         calculateStateFunc: function (overrides, nRouteInfo) {
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 l10nData = (overrides && overrides.l10nData) || {},
+                localeEndpointsMap = (overrides && overrides.localeEndpointsMap) || {},
                 shortLangCode = nRouteInfo.shortLangCode,
                 reactState = {
                     globalLang: lang,
                     shortLangCode: shortLangCode,
                     l10nData: l10nData,
+                    localeEndpointsMap: localeEndpointsMap,
                     showAddPhrase: nRouteInfo.query.phrase || true
                 },
                 loginStateUrl = baseRoot + "/v1/login";
@@ -718,19 +743,22 @@ var routesInfo = [
         }
     },
     {
-        serverRoute: '/addDefinition',
-        serverParamNames: ['phrase'],
-        clientRoute: 'addDefinition',
+        // addDefinition
+        serverRoute: '/x/:alias1',
+        serverParamNames: ['alias1'],
+        clientRoute: 'x/:alias1',
         clientRouterFunc: clientRouterFunc,
-        clientRouterFuncName: '/addDefinition',
+        clientRouterFuncName: '/x/:alias1',
         calculateStateFunc: function (overrides, nRouteInfo) {
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 l10nData = (overrides && overrides.l10nData) || {},
+                localeEndpointsMap = (overrides && overrides.localeEndpointsMap) || {},
                 shortLangCode = nRouteInfo.shortLangCode,
                 reactState = {
                     globalLang: lang,
                     shortLangCode: shortLangCode,
                     l10nData: l10nData,
+                    localeEndpointsMap: localeEndpointsMap,
                     showAddDefinition: false,
                     alreadyAddedDefinition: false
                 },
@@ -781,21 +809,23 @@ var routesInfo = [
         }
     },
     {
-        serverRoute: '/leaderboard',
-        serverParamNames: [],
-        clientRoute: 'leaderboard',
+        // leaderboard
+        serverRoute: '/l/:alias1',
+        serverParamNames: ['alias1'],
+        clientRoute: 'l/:alias1',
         clientRouterFunc: clientRouterFunc,
-        clientRouterFuncName: '/leaderboard',
+        clientRouterFuncName: '/l/:alias1',
         calculateStateFunc: function (overrides, nRouteInfo) {
             var lang = (overrides && overrides.globalLang) || 'es-MX',
                 l10nData = (overrides && overrides.l10nData) || {},
+                localeEndpointsMap = (overrides && overrides.localeEndpointsMap) || {},
                 shortLangCode = nRouteInfo.shortLangCode,
                 loginStateUrl = baseRoot + "/v1/login",
                 start = nRouteInfo.query.start || 0,
                 limit = PHRASES_PAGE_SIZE,
                 leaderboardUrl = baseRoot + util.format("/v1/contributors/leaderboard?start=%d&limit=%d", start, limit);
             
-            return Q.all([getLeaderboardReactState({lang: lang, shortLangCode: shortLangCode, l10nData: l10nData, start: start}), pRequest({url: loginStateUrl, json: true})])
+            return Q.all([getLeaderboardReactState({lang: lang, shortLangCode: shortLangCode, l10nData: l10nData, localeEndpointsMap: localeEndpointsMap, start: start}), pRequest({url: loginStateUrl, json: true})])
                 .spread(function (reactState, loginStateRes) {
                     if (200 === loginStateRes[0].statusCode) {
                         // add login information if we got it
@@ -951,6 +981,15 @@ var CodedMessagesMixin = {
             }
         }
         return ret;
+    }
+};
+
+
+var EndpointsMixin = {
+    getEndpoint: function (name, params) {
+        console.log("topState: " + JSON.stringify(this.props.topState));
+        console.log("localeEndpointsMap: " + JSON.stringify(this.props.topState.localeEndpointsMap));
+        return this.fmt(this.msg(this.props.topState.localeEndpointsMap[name].relUrl), params);
     }
 };
 
@@ -1466,7 +1505,7 @@ var YesnoMessage = React.createClass({
 });
 
 var PhraseDetails = React.createClass({
-    mixins: [I18nMixin, HashMixin],
+    mixins: [I18nMixin, HashMixin, EndpointsMixin],
     handleBack: function (e) {
         e.preventDefault();
         this.props.onClosePhraseDetails();
@@ -1475,7 +1514,8 @@ var PhraseDetails = React.createClass({
         var backToSearchResultsCaption = this.fmt(this.msg(this.messages.PhraseDetails.backToSearchResults)),
             shortLangCode = this.props.topState.shortLangCode,
             searchTerm = this.props.getSearchTermFromDOM(),
-            backToSearchResultsRelativeUrl = searchTerm ? '?q=' + searchTerm : '',
+            searchRelUrl = this.getEndpoint('search'),
+            backToSearchResultsRelativeUrl = searchTerm ? searchRelUrl + '?q=' + searchTerm : searchRelUrl,
             backToSearchResultsUrl = aUrl(backToSearchResultsRelativeUrl, shortLangCode);
         return (
             <main className="phrase-details" id="main">
@@ -1563,12 +1603,12 @@ console.log("myPreviousDefinition: " + JSON.stringify(myPreviousDefinition));
 });
 
 var PhraseInDetails = React.createClass({
-    mixins: [I18nMixin, LinksMixin],
+    mixins: [I18nMixin, LinksMixin, EndpointsMixin],
     render: function () {
         var phrase = this.props.topState.shownPhraseData.phrase,
             loginInfo = this.props.topState.loginInfo,
             addDefinitionCaption = this.messages.PhraseInDetails.addDefinitionCaption,
-            addUrl = aUrl(util.format("/addDefinition?phrase=%s", phrase), this.props.topState.shortLangCode),
+            addUrl = aUrl(this.getEndpoint('addDefinition') + "?phrase=" + phrase, this.props.topState.shortLangCode),
             addDefinitionElem = (loginInfo && <p>{addDefinitionCaption}: <a className="oi" data-glyph="plus" title={addDefinitionCaption} href={addUrl} onClick={this.handleToLink.bind(this, addUrl)}></a></p>) || "";
         return (
             <section className="phrase-top">
@@ -1597,7 +1637,7 @@ var DefinitionsInDetails = React.createClass({
  * so all svg transformations (e.g.: rotation) have to take this into account.
  */
 var DefinitionInDetails = React.createClass({
-    mixins: [I18nMixin, LinksMixin],
+    mixins: [I18nMixin, LinksMixin, EndpointsMixin],
     handleVote: function (e) {
         e.preventDefault();
         console.log("annnd they voted...");
@@ -1700,7 +1740,7 @@ var DefinitionInDetails = React.createClass({
             tagsCaption = this.messages.DefinitionInDetails.tags,
             byCaption = this.messages.DefinitionInDetails.by,
             authorNick = this.props.topState.shownPhraseData.contributorsInfo[definitionObj.contributor_id].nickname || "??",
-            authorProfileUrl = aUrl(util.format("/contributors/%s/activity", definitionObj.contributor_id), this.props.topState.shortLangCode),
+            authorProfileUrl = aUrl(this.getEndpoint('contributorProfile', {contributor_id: definitionObj.contributor_id}), this.props.topState.shortLangCode),
             cx = React.addons.classSet,
             upClasses = ('up' === userVote && cx({up: true, voted: true})) || cx({up: true}),
             downClasses = ('down' === userVote && cx({down: true, voted: true})) || cx({down: true});
@@ -1739,11 +1779,11 @@ var DefinitionInDetails = React.createClass({
 });
 
 var DefinitionTag = React.createClass({
-    mixins: [I18nMixin, LinksMixin],
+    mixins: [I18nMixin, LinksMixin, EndpointsMixin],
     render: function () {
         var tag = this.props.tag,
             existingPhraseTag = this.props.topState.shownPhraseData.existingPhraseTags[tag],
-            phraseUrl = existingPhraseTag && aUrl("/phrases/"+tag, this.props.topState.shortLangCode),
+            phraseUrl = existingPhraseTag && aUrl(this.getEndpoint('phrase', {phrase: tag}), this.props.topState.shortLangCode),
             loginInfo = this.props.topState.loginInfo;
             
         if (phraseUrl) {
@@ -1835,7 +1875,7 @@ var NavBar = React.createClass({
 });
 
 var UserLinks = React.createClass({
-    mixins: [I18nMixin, LinksMixin],
+    mixins: [I18nMixin, LinksMixin, EndpointsMixin],
     handleToMyActivity: function (e) {
         e.preventDefault();
         this.props.onToMyActivity();
@@ -1851,15 +1891,15 @@ var UserLinks = React.createClass({
             var addMessage,
                 addUrl,
                 myActivityMessage = this.messages.UserLinks.myActivity,
-                myActivityUrl = aUrl(util.format("/contributors/%s/activity", loginInfo.id), shortLangCode);
+                myActivityUrl = aUrl(this.getEndpoint('contributorProfile', {contributor_id: loginInfo.id}), shortLangCode);
             if (!this.props.phraseData) {
                 // viewing list of phrases. show option to add a phrase.
                 addMessage = this.messages.UserLinks.addPhrase;
-                addUrl = aUrl("/addPhrase");
+                addUrl = aUrl(this.getEndpoint('addPhrase'));
             } else {
                 var phrase = this.props.phraseData.phrase;
                 addMessage = this.fmt(this.msg(this.messages.UserLinks.addDefinition), {phrase: phrase});
-                addUrl = aUrl("/addDefinition?phrase="+phrase);
+                addUrl = aUrl(this.getEndpoint('addDefinition') + "?phrase="+phrase);
             }
             return (
                 <h2 className="user-links">
@@ -1872,7 +1912,7 @@ var UserLinks = React.createClass({
 });
 
 var LoginStatus = React.createClass({
-    mixins: [I18nMixin],
+    mixins: [I18nMixin, EndpointsMixin],
     handleClick: function () {
         this.props.onToggleLoginPrompt();
     },
@@ -1890,14 +1930,14 @@ var LoginStatus = React.createClass({
         console.log("loginInfo...: " + JSON.stringify(loginInfo, ' ', 4));
         if (undefined === loginInfo) {
             var greeting = this.messages.LoginStatus.notLoggedInGreeting,
-                loginUrl = aUrl("/login", shortLangCode);
+                loginUrl = aUrl(this.getEndpoint('login'), shortLangCode);
             return (
-                <h2 className="login-info"><a className="oi" data-glyph="account-login" title={greeting} href={aUrl("/login", shortLangCode)} onClick={this.handleClick}></a></h2>
+                <h2 className="login-info"><a className="oi" data-glyph="account-login" title={greeting} href={loginUrl} onClick={this.handleClick}></a></h2>
             );
         } else {
             var //greeting = this.fmt(this.msg(this.messages.LoginStatus.loggedInGreeting), {username: loginInfo.email}),
                 logOutMessage = this.fmt(this.msg(this.messages.LoginStatus.logOutMessage)),
-                logOutUrl = aUrl("/logout", shortLangCode),
+                logOutUrl = aUrl(this.getEndpoint('logout'), shortLangCode),
                 addMessage,
                 addUrl;
             return (
@@ -2147,9 +2187,10 @@ var PhraseSearchResults = React.createClass({
         // page is 0-index based
         var term = this.state.searchTerm,
             start = (page * PHRASES_PAGE_SIZE),
-            lang = this.state.globalLang;
+            lang = this.state.globalLang,
+            localeEndpointsMap = this.state.localeEndpointsMap;
         console.log('load');
-        getPhraseSearchReactState({lang: lang, shortLangCode: this.state.shortLangCode, term: term, pageSize: PHRASES_PAGE_SIZE, page: page})
+        getPhraseSearchReactState({lang: lang, localeEndpointsMap: localeEndpointsMap, shortLangCode: this.state.shortLangCode, term: term, pageSize: PHRASES_PAGE_SIZE, page: page})
             .then(function (reactState) {
                 // the only part of the newly computed reactState that we'll use is the searchResults array to append it to our current one...
                 this.setState({
@@ -2290,10 +2331,10 @@ var Leaderboard = React.createClass({
 });
 
 var LeaderboardItem = React.createClass({
-    mixins: [I18nMixin, LinksMixin],
+    mixins: [I18nMixin, LinksMixin, EndpointsMixin],
     render: function () {
         var lo = this.props.leaderboardObject,
-            contributorUrl = aUrl(util.format("/contributors/%d/activity#main", lo.contributor_id), this.props.topState.shortLangCode);
+            contributorUrl = aUrl(this.getEndpoint('contributorProfile', {contributor_id: lo.contributor_id}), this.props.topState.shortLangCode);
         return (
             <tr>
                 <td><a href={contributorUrl} onClick={this.handleToLink.bind(this, contributorUrl)}>{lo.nickname}</a></td>
@@ -2367,11 +2408,12 @@ var ContributorActivity = React.createClass({
         // page is 0-index based
         var start = (page * PHRASES_PAGE_SIZE),
             l10nData = this.props.topState.l10nData,
+            localeEndpointsMap = this.props.topState.localeEndpointsMap,
             lang = this.props.topState.globalLang,
             shortLangCode = this.props.topState.shortLangCode,
             contributor_id = this.props.topState.contributor_id;
         console.log('load');
-        getContributorActivityReactState({l10nData: l10nData, lang: lang, shortLangCode: shortLangCode, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: page})
+        getContributorActivityReactState({l10nData: l10nData, localeEndpointsMap: localeEndpointsMap, lang: lang, shortLangCode: shortLangCode, contributor_id: contributor_id, pageSize: PHRASES_PAGE_SIZE, page: page})
             .then(function (reactState) {
                 var newContributorActivity = _.union(this.state.contributorActivity, reactState.contributorActivity);
                 this.setState({
@@ -2409,24 +2451,37 @@ var ContributorActivity = React.createClass({
 });
 
 var ContributorActivityItem = React.createClass({
-    mixins: [I18nMixin, LinksMixin],
+    mixins: [I18nMixin, LinksMixin, EndpointsMixin],
     render: function () {
         var ao = this.props.activityObject,
             phraseId = ao.phrase_id,
             phrase = ao.phrase,
-            phraseUrl = aUrl(util.format("/phrases/%s#main", phrase), this.props.topState.shortLangCode),
+            phraseUrl = aUrl(this.getEndpoint('phrase', {phrase: phrase}) + "#main", this.props.topState.shortLangCode),
             activityType = ao.type,
             val = ao.val,
             goToPhraseLinkMessage = this.messages.ContributorActivityItem.goToPhraseLink,
             activityMessage,
             cx = React.addons.classSet,
-            containerClasses;
+            containerClasses,
+            whose = (this.props.topState.loginInfo && this.props.topState.loginInfo.id && this.props.topState.loginInfo.id === this.props.topState.contributor_id && 'own') || 'others';
         if ('phrase' === activityType) {
-            activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.phraseActivityEntry), {phrase: phrase});
+            if ('own' === whose) {
+                activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.ownPhraseActivityEntry), {phrase: phrase});
+            } else {
+                activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.othersPhraseActivityEntry), {phrase: phrase});
+            }
         } else if ('definition' === activityType) {
-            activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.definitionActivityEntry), {phrase: phrase});
+            if ('own' === whose) {
+                activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.ownDefinitionActivityEntry), {phrase: phrase});
+            } else {
+                activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.othersDefinitionActivityEntry), {phrase: phrase});
+            }
         } else if ('vote' === activityType) {
-            activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.voteActivityEntry), {phrase: phrase, vote: val});
+            if ('own' === whose) {
+                activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.ownVoteActivityEntry), {phrase: phrase, vote: val});
+            } else {
+                activityMessage = this.fmt(this.msg(this.messages.ContributorActivityItem.othersVoteActivityEntry), {phrase: phrase, vote: val});
+            }
         }
         containerClasses = cx({'activity-item': true, activityType: true});
         return (
@@ -2473,6 +2528,7 @@ var PhraseSearchResult = React.createClass({
 });
 
 var PhraseInList = React.createClass({
+    mixins: [I18nMixin, LinksMixin, EndpointsMixin],
     handleClick: function (e) {
         e.preventDefault();
         console.log("clicked on phrase: " + this.props.searchResult.phrase);
@@ -2480,10 +2536,10 @@ var PhraseInList = React.createClass({
         this.props.onSelectPhrase(phraseData);
     },
     render: function () {
-        var phraseUrl = aUrl(util.format("/phrases/%s", this.props.searchResult.phrase), this.props.topState.shortLangCode);
+        var phraseUrl = aUrl(this.getEndpoint('phrase', {phrase: this.props.searchResult.phrase}), this.props.topState.shortLangCode);
         return (
-            <dt onClick={this.handleClick}>
-                <a href={phraseUrl}>{this.props.searchResult.phrase}</a>
+            <dt>
+                <a href={phraseUrl} onClick={this.handleToLink.bind(this, phraseUrl)}>{this.props.searchResult.phrase}</a>
             </dt>
         );
     }

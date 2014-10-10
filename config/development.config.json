@@ -1,12 +1,5 @@
 {
     "sources": {
-        "fifa": {
-            "useCacheMatchesPage": true,
-            "useCacheMatchPages": true,
-            "useCachePdfs": false,
-            "domain": "www.fifa.com",
-            "all_matches_path": "/worldcup/matches/index.html"
-        }
     },
     "data": {
         "source": "mysql",
@@ -41,11 +34,44 @@
     },
     "localeRootMap": {
         "es-MX": "http://www.mexico.com/",
-        "es-MX": "http://172.18.71.210/",
+        "es-MX": "http://172.18.69.56/",
         "es-CL": "http://www.espanol.com/cl",
         "es-PE": "http://www.espanol.com/pe",
         "en-US": "http://www.english.com/us",
         "id-ID": "http://www.bahasa.com/id",
         "pt-BR": "http://www.portugues.com/br"
+    },
+    "localeEndpointsMap": {
+        "es-MX": {
+            "leaderboard": {
+                "relUrl": "/l/tabla_de_puntuacion"
+            },
+            "addDefinition": {
+                "relUrl": "/x/nueva_definicion"
+            },
+            "addPhrase": {
+                "relUrl": "/y/nueva_frase_o_palabra"
+            },
+            "verify": {
+                "relUrl": "/v/verificacion_de_cuenta"
+            },
+            "login": {
+                "relUrl": "/i/entrar"
+            },
+            "logout": {
+                "relUrl": "/o/salir"
+            },
+            "contributorProfile": {
+                "relUrl": "/cp/perfil_de_usuario/{contributor_id}",
+                "params": ["contributor_id"] 
+            },
+            "phrase": {
+                "relUrl": "/{phrase}",
+                "params": ["phrase"]
+            },
+            "search": {
+                "relUrl": "/"
+            }
+        }
     }
 }
