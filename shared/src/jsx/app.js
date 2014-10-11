@@ -506,15 +506,20 @@ var routesInfo = [
                             localeEndpointsMap: localeEndpointsMap,
                             shownPhraseData: shownPhraseData
                         };
+
                     // add login information if we got it
                     if (200 === loginStateRes[0].statusCode) {
                         reactState.loginInfo = loginStateRes[1];
                     }
 
+                    // if we don't have a phrase, redirect to addPhrase (when rendering server side)
                     if (!shownPhraseData) {
                         // return here if no phrase data, no point in fetching any definitions
+                        var addPhraseUrl = aUrl(localeEndpointsMap.addPhrase.relUrl + "?phrase=" + phrase);
+                        reactState.serverRedirect = {code: 302, location: addPhraseUrl};
                         return reactState;
                     }
+
                     var phraseIds = [shownPhraseData.id];
 
                     return pRequest({url: baseRoot + "/v1/definitions?phraseIds=" + phraseIds.join(','), json: true})
@@ -1871,7 +1876,7 @@ var DefinitionTag = React.createClass({
                 <li className="exists"><a className="tag" href={phraseUrl} onClick={this.handleToLink.bind(this, phraseUrl)}>{tag}</a></li>
             );
         } else if (loginInfo) {
-            phraseUrl = aUrl("/addPhrase?phrase="+tag);
+            phraseUrl = aUrl(this.getEndpoint("addPhrase") + "?phrase=" + tag);
             return (
                 <li className="not-exists"><a className="tag" href={phraseUrl} onClick={this.handleToLink.bind(this, phraseUrl)}>{tag}</a></li>
             );

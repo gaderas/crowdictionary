@@ -693,6 +693,10 @@ _.forEach(routesInfo, function (routeInfo) {
             .then((function (state) {
                 console.log("state: " + JSON.stringify(state));
                 console.log("lang is: " + state.globalLang + ", and l10nData: " + JSON.stringify(state.l10nData));
+                if (state.serverRedirect) {
+                    this.redirect(state.serverRedirect.location);
+                    return;
+                }
                 setInitialState(state);
                 var markup = "<!DOCTYPE html>\n" + React.renderComponentToString(
                     <CrowDictionary nRouteInfo={nRouteInfo} />
