@@ -262,7 +262,57 @@ appWs.put('/contributors', function *(next) {
                 return {message: "couldn't fetch contributor data to validate verification code", errno: 5};
             }.bind(this));
         return;
+    } else if (requestBody.password_reset_code) {
+        // "password reset"
+        var contributorEmail,
+            password_reset_code = requestBody.password_reset_code,
+            new_password = requestBody.new_password,
+            new_password_confirm = requestBody.new_password_confirm;
+        if (!requestBody.email) {
+            this.status = 403;
+            this.body = "missing email";
+            return;
+        }
+        contributorEmail = requestBody.email;
+        this.body = yield mockData.getContributors({email: contributorEmail})
+            .then(function (res) {
+                var contributor;
+                if (!res.length) {
+                    this.status = 500;
+                    return {message: "contributor to be updated was not found in database"};
+                }
+                contributor = res[0];
+                if (!contributor.password_reset_code) {
+                    // important check to avoid resetting passwords with empty string verification code
+                    this.status = 403;
+                    return {message: "the specified contributor hadn't requested a password reset code"};
+                }
+                if(contributor.password_reset_code !== password_reset_code) {
+                    this.status = 403;
+                    return {message: "wrong password reset code was provided"};
+                }
+                if (new_password !== new_password_confirm) {
+                    this.status = 403;
+                    return {message: "provided password and confirmation do not match"};
+                }
+                return mockData.updateContributor({email: contributorEmail}, {email: contributorEmail, passhash: new_password, password_reset_code: ''})
+                    .then(function (updateContributorRes) {
+                        return {message: "contributor's password was reset"};
+                    })
+                    .fail(function (err) {
+                        console.error(err);
+                        this.status = 500;
+                        return {message: "something went wrong while trying to reset the contributor's password"};
+                    }.bind(this));
+            }.bind(this))
+            .fail(function (err) {
+                console.error(err);
+                this.status = 500;
+                return {message: "something went wrong while trying to fetch the contributor's record to check the password reset code"};
+            });
+        return;
     } else if (appWs.contributor) {
+        // update
         if (app.crumb !== requestBody.crumb) {
             this.status = 403;
             this.body = "invalid crumb";
@@ -271,6 +321,11 @@ appWs.put('/contributors', function *(next) {
         if (appWs.contributor.email !== this.query.email) {
             this.status = 403;
             this.body = "trying to modify a contributor record for a user other than the signed in user";
+            return;
+        }
+        if (this.query.email !== requestBody.email) {
+            this.status = 403;
+            this.body = "trying to modify the contributor's email, which is not allowed";
             return;
         }
         this.body = yield mockData.updateContributor(this.query, appUtil.getObjectWithoutProps(requestBody, ['crumb']))

@@ -22,6 +22,7 @@ TODO Performance Improvements
 TODO Features
 ----
 
+*   PUT /contributors option to trigger start password reset
 *   Edit profile. Change password. Recover password.
 *   Use # anchors to fix scroll position upon clicking on links
 *   ~~Put pagination links on phrases list (home, search) for SEO purposes.~~
