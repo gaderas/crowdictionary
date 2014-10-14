@@ -22,6 +22,7 @@ TODO Performance Improvements
 TODO Features
 ----
 
+*   catch top level 404s (would be phrases), redirect to addPhrase
 *   PUT /contributors option to trigger start password reset
 *   Edit profile. Change password. Recover password.
 *   Use # anchors to fix scroll position upon clicking on links
@@ -47,8 +48,9 @@ BUGS
 ----
 
 *   When the mysql library throws an exception (like "/Users/germoad/crowdictionary/node_modules/mysql/lib/protocol/Parser.js:82") hit kills the server
-*   Sometimes (when infinite scroll pages are hit), the browser history is polluted with lots of wrong and unnecessary entries
+*   ~~Sometimes (when infinite scroll pages are hit), the browser history is polluted with lots of wrong and unnecessary entries~~
 *   After hitting "/login?contributorAccountCreated=1" by hand, OK is not getting rid of the Info component
+*   On visiting "edit profile" page when logged out, we should redirect to "login" or show some message, instead of plain 404.
 
 Sample requests
 ----
@@ -62,6 +64,8 @@ Sample requests
 *   PUT contributors - create (sign/up) or update a contributor's record
     `curl -X PUT -d '{"email": "germoad@yahoo.com", "passhash": "poiuyt", "crumb": "xxxxx"}' -H "Content-Type: application/json" 'http://localhost:3000/v1/contributors?email=germoad@yahoo.com' --cookie-jar /tmp/cookiez -v`
     `curl -X PUT -d '{"email": "germoad@yahoo.com", "submitVerification": "xxxxx"}' -H "Content-Type: application/json" 'http://localhost:3000/v1/contributors?email=germoad@yahoo.com' --cookie-jar /tmp/cookiez -v`
+    `curl -X PUT -H "content-type: application/json"  "http://localhost:3000/v1/contributors" -d '{"email": "bono@yahoo.com", "initiate_password_recovery": true}' -v`
+    `curl -X PUT -H "content-type: application/json"  "http://localhost:3000/v1/contributors" -d '{"email": "bono@yahoo.com", "password_reset_code": "lalas", "new_password": "tttsssss", "new_password_confirm": "tttsssss"}' -v`
 *   GET phrases - get phrases in a specific language
     `curl -H "Accept: application/json" "http://localhost:3000/v1/lang/es-MX/phrases"`
     Search is supported e.g. by performing the following request:

@@ -34,7 +34,7 @@
     },
     "localeRootMap": {
         "es-MX": "http://www.mexico.com/",
-        "es-MX": "http://192.168.0.16/",
+        "es-MX": "http://127.0.0.1/",
         "es-CL": "http://www.espanol.com/cl",
         "es-PE": "http://www.espanol.com/pe",
         "en-US": "http://www.english.com/us",
@@ -52,6 +52,12 @@
             "addPhrase": {
                 "relUrl": "/y/nueva_frase_o_palabra"
             },
+            "initiatePasswordRecovery": {
+                "relUrl": "/ipr/recuperar_contrasena"
+            },
+            "passwordRecovery": {
+                "relUrl": "/pr/codigo_recuperar_contrasena"
+            },
             "verify": {
                 "relUrl": "/v/verificacion_de_cuenta"
             },
@@ -64,6 +70,9 @@
             "contributorProfile": {
                 "relUrl": "/cp/perfil_de_usuario/{contributor_id}",
                 "params": ["contributor_id"] 
+            },
+            "editContributorProfile": {
+                "relUrl": "/ep/editar_perfil_de_usuario"
             },
             "phrase": {
                 "relUrl": "/{phrase}",

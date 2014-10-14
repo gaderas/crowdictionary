@@ -275,6 +275,18 @@ var pCalculateStateBasedOnNormalizedRouteInfo = function (nRouteInfo) {
             .then(function (l) {
                 return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
             });
+    } else if ('/ipr/:alias1' === nRouteInfo.route) {
+        // "initiatePasswordRecovery" page
+        return pL10nForLang
+            .then(function (l) {
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
+            });
+    } else if ('/pr/:alias1' === nRouteInfo.route) {
+        // "passwordRecovery" page
+        return pL10nForLang
+            .then(function (l) {
+                return Q(nRouteInfo.calculateStateFunc({globalLang: l.globalLang, langByIp: l.langByIp, l10nData: l.l10nData, localeEndpointsMap: l.localeEndpointsMap}, nRouteInfo));
+            });
     }
 };
 
@@ -515,7 +527,7 @@ var routesInfo = [
                     // if we don't have a phrase, redirect to addPhrase (when rendering server side)
                     if (!shownPhraseData) {
                         // return here if no phrase data, no point in fetching any definitions
-                        var addPhraseUrl = aUrl(localeEndpointsMap.addPhrase.relUrl + "?phrase=" + phrase);
+                        var addPhraseUrl = aUrl(localeEndpointsMap.addPhrase.relUrl + "?phrase=" + phrase, shortLangCode);
                         reactState.serverRedirect = {code: 302, location: addPhraseUrl};
                         return reactState;
                     }
@@ -881,6 +893,75 @@ var routesInfo = [
                 });
         }
     },
+    {
+        // initiatePasswordRecovery
+        serverRoute: '/ipr/:alias1',
+        serverParamNames: ['alias1'],
+        clientRoute: 'ipr/:alias1',
+        clientRouterFunc: clientRouterFunc,
+        clientRouterFuncName: '/ipr/:alias1',
+        calculateStateFunc: function (overrides, nRouteInfo) {
+            var lang = (overrides && overrides.globalLang) || 'es-MX',
+                l10nData = (overrides && overrides.l10nData) || {},
+                localeEndpointsMap = (overrides && overrides.localeEndpointsMap) || {},
+                shortLangCode = nRouteInfo.shortLangCode,
+                reactState = {
+                    globalLang: lang,
+                    shortLangCode: shortLangCode,
+                    l10nData: l10nData,
+                    localeEndpointsMap: localeEndpointsMap,
+                    initiatePasswordRecovery: true,
+                    saveSuccess: !!nRouteInfo.query.saveSuccess,
+                    qsEmail: nRouteInfo.query.email
+                },
+                loginStateUrl = baseRoot + "/v1/login";
+            return pRequest({method: "GET", url: loginStateUrl, json: true})
+                .then(function (loginStateRes) {
+                    // add login information if we got it
+                    if (200 === loginStateRes[0].statusCode) {
+                        reactState.loginInfo = loginStateRes[1];
+                    }
+                    return reactState;
+                });
+            // if above promise fails, return here
+            return reactState;
+        }
+    },
+    {
+        // passwordRecovery
+        serverRoute: '/pr/:alias1',
+        serverParamNames: ['alias1'],
+        clientRoute: 'pr/:alias1',
+        clientRouterFunc: clientRouterFunc,
+        clientRouterFuncName: '/pr/:alias1',
+        calculateStateFunc: function (overrides, nRouteInfo) {
+            var lang = (overrides && overrides.globalLang) || 'es-MX',
+                l10nData = (overrides && overrides.l10nData) || {},
+                localeEndpointsMap = (overrides && overrides.localeEndpointsMap) || {},
+                shortLangCode = nRouteInfo.shortLangCode,
+                reactState = {
+                    globalLang: lang,
+                    shortLangCode: shortLangCode,
+                    l10nData: l10nData,
+                    localeEndpointsMap: localeEndpointsMap,
+                    passwordRecovery: true,
+                    saveSuccess: !!nRouteInfo.query.saveSuccess,
+                    qsEmail: nRouteInfo.query.email,
+                    qsPasswordResetCode: nRouteInfo.query.password_reset_code
+                },
+                loginStateUrl = baseRoot + "/v1/login";
+            return pRequest({method: "GET", url: loginStateUrl, json: true})
+                .then(function (loginStateRes) {
+                    // add login information if we got it
+                    if (200 === loginStateRes[0].statusCode) {
+                        reactState.loginInfo = loginStateRes[1];
+                    }
+                    return reactState;
+                });
+            // if above promise fails, return here
+            return reactState;
+        }
+    },
 ];
 
 var normalizeRouteInfo = function (clientOrServer, routeInfo, routeParams, query) {
@@ -960,6 +1041,7 @@ var I18nMixin = {
 
 var LoggedInMixin = {
     getLoggedInInfo: function (loginRequired) {
+        var state = this.getEffectiveState(); // depends on I18nMixin
         if (!this.state.loginInfo) {
             if (loginRequired) {
                 throw Error(this.fmt(this.msg(this.messages.LoggedInMixin.requiredLoginMissing)));
@@ -1189,9 +1271,9 @@ var CrowDictionary = React.createClass({
                 });
             }).bind(this));
     },
-    handleSubmitEditProfile: function (enteredValues) {
+    handleSubmitEditProfile: function (onConfirmSuccessCallback, enteredValues) {
         // nickname, first_name, last_name
-        try {
+        /*try {
             this.getLoggedInInfo(true);
         } catch (err) {
             console.error("got an error: " + err);
@@ -1199,23 +1281,34 @@ var CrowDictionary = React.createClass({
                 error: "generic"
             });
             return;
-        }
+        }*/
         var lang = this.state.globalLang,
             crumb = this.state.crumb,
-            editProfileUrl = baseRoot + "/v1/contributors?email=" + this.state.loginInfo.email;
-        return pRequest({method: "PUT", url: editProfileUrl, body: {email: this.state.loginInfo.email, nickname: enteredValues.nickname, first_name: enteredValues.first_name, last_name: enteredValues.last_name, crumb: crumb}, json: true})
+            email = enteredValues.email || (this.state.loginInfo && this.state.loginInfo.email) || "",
+            editProfileUrl = baseRoot + "/v1/contributors?email=" + email;
+        if (!email) {
+            throw Error("no email could be derived from either the form values or the logged in user info");
+        }
+        return pRequest({method: "PUT", url: editProfileUrl, body: {email: email, nickname: enteredValues.nickname, first_name: enteredValues.first_name, last_name: enteredValues.last_name, initiate_password_recovery: enteredValues.initiate_password_recovery, password_reset_code: enteredValues.password_reset_code, new_password: enteredValues.new_password, new_password_confirm: enteredValues.new_password_confirm, crumb: crumb}, json: true})
             .then((function (res) {
                 if (200 !== res[0].statusCode) {
                     throw Error("failed to save edited profile info");
                 }
                 var refreshLoginUrl = baseRoot + "/v1/login?refresh=true";
-                    fragment = aUrl(this.getEndpoint('contributorProfile', {contributor_id: this.state.loginInfo.id}), this.state.shortLangCode);//"/phrases/"+phrase+"?updated="+Date.now();
+                if (!this.state.loginInfo) {
+                    // if not logged in (e.g. password recovery flow), we don't have to "refresh" login info
+                    onConfirmSuccessCallback();
+                    return;
+                }
                 return pRequest({method: "GET", url: refreshLoginUrl, json: true})
                     .then(function (refreshLoginRes) {
                         if (200 !== refreshLoginRes[0].statusCode) {
                             throw Error("failed to refresh login cookies after the profile change save");
                         }
-                        this.handleToLink(fragment);
+                        onConfirmSuccessCallback();
+                        /*this.setState({
+                            saveSuccess: 1 // need to set the state property here because the router ignores it
+                        });*/
                     }.bind(this));
                 //Router.navigate(fragment, {trigger: true, replace: true});
             }).bind(this))
@@ -1409,8 +1502,25 @@ var CrowDictionary = React.createClass({
             mainContent = <AddDefinitionForm phraseData={this.state.showAddDefinition} topState={this.state} onSubmitAddDefinition={this.handleSubmitAddDefinition} onSetInfo={this.handleSetInfo} setYesno={this.handleSetYesno} key="AddDefinitionForm"/>;
         } else if (this.state.editProfile) {
             // editProfile is just a boolean, get contributor data from state.loginInfo
-// args: formDescription, submitCallback, onSuccessCallback, successIndicatorPropertyName, successMessage, renderedFields, prepopulatedValues
-            mainContent = <EditProfileForm topState={this.state} formDescription="yihee" submitCallback={this.handleSubmitEditProfile} onSuccessCallback={function () {alert("yay!");}} successIndicatorPropertyName="saveSuccess" successMessage="great success" renderedFields={["nickname"]} onSetInfo={this.handleSetInfo} key="EditProfileForm"/>;
+            var formDescription = this.messages.EditProfileForm.formDescription,
+                onSuccessMessage = this.messages.EditProfileForm.saveSuccess,
+                onInitialSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("editContributorProfile", {contributor_id: this.state.loginInfo.id}) + "?saveSuccess=1", this.state.shortLangCode));
+                onConfirmSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("contributorProfile", {contributor_id: this.state.loginInfo.id}), this.state.shortLangCode));
+            mainContent = <EditProfileForm topState={this.state} formDescription={formDescription} submitCallback={this.handleSubmitEditProfile.bind(this, onInitialSuccessCallback)} onConfirmSuccessCallback={onConfirmSuccessCallback} successIndicatorPropertyName="saveSuccess" successMessage={onSuccessMessage} renderedFields={["nickname", "first_name", "last_name"]} prepopulatedValues={this.state.loginInfo} onSetInfo={this.handleSetInfo} key="EditProfileForm"/>;
+        } else if (this.state.initiatePasswordRecovery) {
+            // initiatePasswordRecovery is just a boolean, get contributor data from state.loginInfo
+            var formDescription = this.messages.InitiatePasswordRecoveryForm.formDescription,
+                onSuccessMessage = this.messages.InitiatePasswordRecoveryForm.saveSuccess,
+                onInitialSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("initiatePasswordRecovery") + "?saveSuccess=1", this.state.shortLangCode));
+                onConfirmSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("search"), this.state.shortLangCode));
+            mainContent = <InitiatePasswordRecoveryForm topState={this.state} formDescription={formDescription} submitCallback={this.handleSubmitEditProfile.bind(this, onInitialSuccessCallback)} onConfirmSuccessCallback={onConfirmSuccessCallback} successIndicatorPropertyName="saveSuccess" successMessage={onSuccessMessage} renderedFields={["email", "initiate_password_recovery"]} prepopulatedValues={{email: this.state.qsEmail, initiate_password_recovery: true}} onSetInfo={this.handleSetInfo} key="InitiatePasswordRecoveryForm"/>;
+        } else if (this.state.passwordRecovery) {
+            // passwordRecovery is just a boolean, get contributor data from state.loginInfo
+            var formDescription = this.messages.PasswordRecoveryForm.formDescription,
+                onSuccessMessage = this.messages.PasswordRecoveryForm.saveSuccess,
+                onInitialSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("passwordRecovery") + "?saveSuccess=1", this.state.shortLangCode));
+                onConfirmSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("login"), this.state.shortLangCode));
+            mainContent = <PasswordRecoveryForm topState={this.state} formDescription={formDescription} submitCallback={this.handleSubmitEditProfile.bind(this, onInitialSuccessCallback)} onConfirmSuccessCallback={onConfirmSuccessCallback} successIndicatorPropertyName="saveSuccess" successMessage={onSuccessMessage} renderedFields={["email", "password_reset_code", "new_password", "new_password_confirm"]} prepopulatedValues={{email: this.state.qsEmail, password_reset_code: this.state.qsPasswordResetCode}} onSetInfo={this.handleSetInfo} key="PasswordRecoveryForm"/>;
         } else if (this.state.showLeaderboard) {
             // showLeaderboard itself is an object containing leaderboard data.
             titleContent = this.messages.Titles.leaderboard;
@@ -2247,32 +2357,114 @@ var SignupForm = React.createClass({
     },
 });
 
-// args: formDescription, submitCallback, onSuccessCallback, successIndicatorPropertyName, successMessage, renderedFields, prepopulatedValues
+var PromptsMixin = {
+    getInitialState: function() {
+        return this.props.topState;
+    },
+    handleClearError: function () {
+        this.setState({
+            error: undefined
+        });
+    },
+    handleClearInfo: function () {
+        console.log("clearing info...");
+        if (this.state.clearInfoCallback) {
+            this.state.clearInfoCallback();
+            // invoke the callback (most likely Router.navigate), and we're done!
+            return;
+        }
+        this.setState({
+            info: undefined
+        });
+    },
+    handleSetInfo: function (info, cb) {
+        this.setState({
+            showPrompt: true,
+            info: info,
+            clearInfoCallback: cb
+        });
+    },
+    handleYesnoYes: function () {
+        console.log("user said 'Yes'...");
+        if (this.state.yesCallback) {
+            this.state.yesCallback();
+            // invoke the callback (most likely Router.navigate), and we're done!
+            return;
+        }
+        this.setState({
+            yesno: undefined
+        });
+    },
+    handleYesnoNo: function () {
+        console.log("user said 'No'...");
+        if (this.state.noCallback) {
+            this.state.noCallback();
+            // invoke the callback (most likely Router.navigate), and we're done!
+            return;
+        }
+        this.setState({
+            yesno: undefined
+        });
+    },
+    handleSetYesno: function (yesno, yesCb, noCb) {
+        this.setState({
+            yesno: yesno,
+            yesCallback: yesCb,
+            noCallback: noCb
+        });
+    },
+    getPromptElements: function () {
+        var mainContent,
+            state = this.state;
+        if (this.state.error) {
+            mainContent = <ErrorMessage onClearError={this.handleClearError} topState={state} key="ErrorMessage"/>;
+        } else if (this.state.info) {
+            mainContent = <InfoMessage onClearInfo={this.handleClearInfo} topState={state} key="InfoMessage"/>;
+        } else if (this.state.yesno) {
+            mainContent = <YesnoMessage onYes={this.handleYesnoYes} onNo={this.handleYesnoNo} topState={state} key="YesnoMessage"/>;
+        }
+        return mainContent;
+    }
+};
+
+// args: formDescription, submitCallback, onConfirmSuccessCallback, successIndicatorPropertyName, successMessage, renderedFields, prepopulatedValues
 var ProfileFormMixin = {
-    mixins: [I18nMixin, EndpointsMixin, LinksMixin],
+    mixins: [I18nMixin, EndpointsMixin, LinksMixin, PromptsMixin, LifecycleDebug({displayName: 'ProfileFormMixin'})],
     componentWillMount: function () {
         this.setState(this.getDefaultState());
     },
     componentDidMount: function () {
         console.log("componentDidMount");
-        var onSuccessCallback = this.props.onSuccessCallback,
+        var onConfirmSuccessCallback = this.props.onConfirmSuccessCallback,
             successIndicatorPropertyName = this.props.successIndicatorPropertyName,
             successMessage = this.props.successMessage;
         if (this.props.topState[successIndicatorPropertyName]) {
             //var profileUrl = aUrl(this.getEndpoint("contributorProfile", {contributor_id: this.props.topState.loginInfo.id}) + "?update=" + Date.now(), this.props.topState.shortLangCode);
             this.props.onSetInfo(
                 <span>{successMessage}</span>,
-                onSuccessCallback
+                onConfirmSuccessCallback
                 //<span>{this.messages.SignupForm.editSuccess}</span>,
                 //this.handleToLink.bind(this, profileUrl)
             );
         }
     },
-    componentWillUpdate: function (nextProps) {
-        var successIndicatorPropertyName = this.props.successIndicatorPropertyName;
-        if (!nextProps.topState[successIndicatorPropertyName] && this.props.topState[successIndicatorPropertyName]) {
-            this.props.onClearInfo();
+    componentWillReceiveProps: function (nextProps) {
+        var onConfirmSuccessCallback = this.props.onConfirmSuccessCallback,
+            successIndicatorPropertyName = this.props.successIndicatorPropertyName,
+            successMessage = this.props.successMessage;
+        console.log("old success indicator: " + this.props.topState[successIndicatorPropertyName]);
+        console.log("next success indicator: " + nextProps.topState[successIndicatorPropertyName]);
+        if (nextProps.topState[successIndicatorPropertyName]) {
+            this.handleSetInfo(
+                <span>{successMessage}</span>,
+                onConfirmSuccessCallback
+                //<span>{this.messages.SignupForm.editSuccess}</span>,
+                //this.handleToLink.bind(this, profileUrl)
+            );
         }
+        /*if (!nextProps.topState[successIndicatorPropertyName] && this.props.topState[successIndicatorPropertyName]) {
+            this.props.onClearInfo();
+        }*/
     },
     getDefaultState: function () {
         // not to be confused with getInitialState() :-)
@@ -2284,7 +2476,11 @@ var ProfileFormMixin = {
                 passhash: false,
                 nickname: false,
                 first_name: false,
-                last_name: false
+                last_name: false,
+                initiate_password_recovery: false,
+                password_reset_code: false,
+                new_password: false,
+                new_password_confirm: false
             },
             titles: {
                 globalError: "",
@@ -2292,25 +2488,37 @@ var ProfileFormMixin = {
                 passhash: "",
                 nickname: "",
                 first_name: "",
-                last_name: ""
+                last_name: "",
+                initiate_password_recovery: "",
+                password_reset_code: "",
+                new_password: "",
+                new_password_confirm: ""
             },
             placeholders: {
                 email: messages.SignupForm.usernameFieldPlaceholder,
                 passhash: messages.SignupForm.passwordFieldPlaceholder,
                 nickname: messages.SignupForm.nicknameFieldPlaceholder,
                 first_name: messages.SignupForm.firstNameFieldPlaceholder,
-                last_name: messages.SignupForm.lastNameFieldPlaceholder
+                last_name: messages.SignupForm.lastNameFieldPlaceholder,
+                initiate_password_recovery: "",
+                password_reset_code: messages.SignupForm.passwordResetCodeFieldPlaceholder,
+                new_password: messages.SignupForm.newPasswordFieldPlaceholder,
+                new_password_confirm: messages.SignupForm.newPasswordConfirmFieldPlaceholder
             },
             labels: {
                 email: messages.SignupForm.usernameFieldLabel,
                 passhash: messages.SignupForm.passwordFieldLabel,
                 nickname: messages.SignupForm.nicknameFieldLabel,
                 first_name: messages.SignupForm.firstNameFieldLabel,
-                last_name: messages.SignupForm.lastNameFieldLabel
+                last_name: messages.SignupForm.lastNameFieldLabel,
+                initiate_password_recovery: "",
+                password_reset_code: messages.SignupForm.passwordResetCodeFieldLabel,
+                new_password: messages.SignupForm.newPasswordFieldLabel,
+                new_password_confirm: messages.SignupForm.newPasswordConfirmFieldLabel
             }
         };
     },
-    handleSignup: function (e) {
+    handleSubmit: function (e) {
         e.preventDefault();
         var renderedFields = this.props.renderedFields,
             submitCallback = this.props.submitCallback,
@@ -2318,11 +2526,6 @@ var ProfileFormMixin = {
                 return [fieldName, this.refs[fieldName].getDOMNode().value];
             }.bind(this)));
         console.log("renderedFields: " + JSON.stringify(renderedFields) + ", enteredValues: " + JSON.stringify(enteredValues));
-            /*email = this.refs.email.getDOMNode().value,
-            passhash = this.refs.passhash.getDOMNode().value,
-            nickname = this.refs.nickname.getDOMNode().value,
-            first_name = this.refs.first_name.getDOMNode().value,
-            last_name = this.refs.last_name.getDOMNode().value;*/
         Q(submitCallback(enteredValues))
             .fail(function (err) {
                 var newState = this.getDefaultState(),
@@ -2354,47 +2557,71 @@ var ProfileFormMixin = {
                 passhash: cx({error: this.state.errors.passhash}),
                 nickname: cx({error: this.state.errors.nickname}),
                 first_name: cx({error: this.state.errors.first_name}),
-                last_name: cx({error: this.state.errors.last_name})
+                last_name: cx({error: this.state.errors.last_name}),
+                initiate_password_recovery: "",
+                password_reset_code: cx({error: this.state.errors.password_reset_code}),
+                new_password: cx({error: this.state.errors.new_password}),
+                new_password_confirm: cx({error: this.state.errors.new_password_confirm})
             },
             titles = {
                 email: this.state.errors.email || "",
                 passhash: this.state.errors.passhash || "",
                 nickname: this.state.errors.nickname || "",
                 first_name: this.state.errors.first_name || "",
-                last_name: this.state.errors.last_name || ""
+                last_name: this.state.errors.last_name || "",
+                initiate_password_recovery: "",
+                password_reset_code: this.state.errors.password_reset_code || "",
+                new_password: this.state.errors.new_password || "",
+                new_password_confirm: this.state.errors.new_password_confirm || ""
             },
             placeholders = {
                 email: (!this.state.errors.email && this.state.placeholders.email) || this.state.errors.email,
                 passhash: (!this.state.errors.passhash && this.state.placeholders.passhash) || this.state.errors.passhash,
                 nickname: (!this.state.errors.nickname && this.state.placeholders.nickname) || this.state.errors.nickname,
                 first_name: (!this.state.errors.first_name && this.state.placeholders.first_name) || this.state.errors.first_name,
-                last_name: (!this.state.errors.last_name && this.state.placeholders.last_name) || this.state.errors.last_name
+                last_name: (!this.state.errors.last_name && this.state.placeholders.last_name) || this.state.errors.last_name,
+                initiate_password_recovery: "",
+                password_reset_code: (!this.state.errors.password_reset_code && this.state.placeholders.password_reset_code) || this.state.errors.password_reset_code,
+                new_password: (!this.state.errors.new_password && this.state.placeholders.new_password) || this.state.errors.new_password,
+                new_password_confirm: (!this.state.errors.new_password_confirm && this.state.placeholders.new_password_confirm) || this.state.errors.new_password_confirm
             },
             labels = {
                 email: (!this.state.errors.email && this.state.labels.email) || "* " + this.state.labels.email,
                 passhash: (!this.state.errors.passhash && this.state.labels.passhash) || "* " + this.state.labels.passhash,
                 nickname: (!this.state.errors.nickname && this.state.labels.nickname) || "* " + this.state.labels.nickname,
                 first_name: (!this.state.errors.first_name && this.state.labels.first_name) || "* " + this.state.labels.first_name,
-                last_name: (!this.state.errors.last_name && this.state.labels.last_name) || "* " + this.state.labels.last_name
+                last_name: (!this.state.errors.last_name && this.state.labels.last_name) || "* " + this.state.labels.last_name,
+                initiate_password_recovery: "",
+                password_reset_code: (!this.state.errors.password_reset_code && this.state.labels.password_reset_code) || "* " + this.state.labels.password_reset_code,
+                new_password: (!this.state.errors.new_password && this.state.labels.new_password) || "* " + this.state.labels.new_password,
+                new_password_confirm: (!this.state.errors.new_password_confirm && this.state.labels.new_password_confirm) || "* " + this.state.labels.new_password_confirm
             },
             types = {
                 email: 'email',
                 passhash: 'password',
                 nickname: 'text',
                 first_name: 'text',
-                last_name: 'text'
+                last_name: 'text',
+                initiate_password_recovery: 'hidden',
+                password_reset_code: 'text',
+                new_password: 'password',
+                new_password_confirm: 'password'
             },
             elements = _.map(renderedFields, function (fieldName) {
-                return <label className={fieldName}>
+                var defaultValue = (this.props.prepopulatedValues && this.props.prepopulatedValues[fieldName]) || "";
+                return <label className={fieldName} key={fieldName}>
                     {labels[fieldName]}
-                    <input className={classNames[fieldName]} title={titles[fieldName]} ref={fieldName} type={types[fieldName]} placeholder={placeholders[fieldName]} key={fieldName} />
+                    <input className={classNames[fieldName]} title={titles[fieldName]} ref={fieldName} type={types[fieldName]} placeholder={placeholders[fieldName]} defaultValue={defaultValue}/>
                 </label>;
-            });
+            }.bind(this));
         console.log("errors: " + JSON.stringify(this.state.errors));
         console.log("classNames: " + JSON.stringify(classNames));
         console.log("labels: " + JSON.stringify(labels));
+        if (this.state.showPrompt) {
+            return this.getPromptElements();
+        }
         return (
-            <form className="signup" onSubmit={this.handleSignup}>
+            <form className="signup" onSubmit={this.handleSubmit}>
                 <fieldset>
                     <legend>{messages.formTitle}</legend>
                     <p className={classNames.globalError} ref="globalError">{this.state.errors.globalError}</p>
@@ -2410,6 +2637,23 @@ var ProfileFormMixin = {
     },
 };
 var EditProfileForm = React.createClass({
+    mixins: [ProfileFormMixin, LoggedInMixin],
+    componentWillMount: function () {
+        try {
+            this.getLoggedInInfo(true);
+        } catch (err) {
+            console.error("got an error: " + err);
+            this.setState({
+                error: "generic"
+            });
+            return;
+        }
+    }
+});
+var InitiatePasswordRecoveryForm = React.createClass({
+    mixins: [ProfileFormMixin]
+});
+var PasswordRecoveryForm = React.createClass({
     mixins: [ProfileFormMixin]
 });
 

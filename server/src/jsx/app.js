@@ -72,6 +72,13 @@ setPRequest(pRequest);
 
 _.mixin(require('../../../shared/build/js/lodash_mixin.js'));
 
+var generate_random_code = function () {
+    var random_buffer = new Buffer((Math.random()*1000000).toString()),
+        verification_code = random_buffer.toString('base64').substring(0, 15);
+    return verification_code;
+};
+
+
 app.use(compress());
 appReact.use(router(appReact));
 app.keys = nconf.get("cookies:user:secrets").split(',');
@@ -223,8 +230,7 @@ appWs.get('/contributors/leaderboard', function *(next) {
 
 appWs.put('/contributors', function *(next) {
     var requestBody = appUtil.getObjectWithoutProps(this.request.body, ['status', 'verified', 'verification_code', 'verification_retries']),
-        random_buffer = new Buffer((Math.random()*1000000).toString()),
-        verification_code = random_buffer.toString('base64').substring(0, 15);
+        verification_code = generate_random_code();
     console.log('put /contributors incoming body: ' + JSON.stringify(this.request.body));
     if (requestBody.validateVerification) {
         if (!requestBody.email) {
@@ -262,6 +268,33 @@ appWs.put('/contributors', function *(next) {
                 return {message: "couldn't fetch contributor data to validate verification code", errno: 5};
             }.bind(this));
         return;
+    } else if (requestBody.initiate_password_recovery) {
+        var contributorEmail,
+            new_password_reset_code = generate_random_code();
+        if (!requestBody.email) {
+            this.status = 403;
+            this.body = "missing email";
+            return;
+        }
+        if (!new_password_reset_code) {
+            this.status = 500;
+            this.body = {message: "there was a problem generating password reset code"};
+            throw Error("there was a problem generating password reset code");
+        }
+        contributorEmail = requestBody.email;
+        this.body = yield mockData.updateContributor({email: contributorEmail}, {email: contributorEmail, password_reset_status: 'requested', password_reset_code: new_password_reset_code})
+            .then(function (res) {
+                var contributor;
+                contributor = res[0];
+                return {message: "a password reset code was created"};
+            }.bind(this))
+            .fail(function (err) {
+                //if (err.message.match(/ER_DUP_ENTRY/) && err.message.match(/for key 'email'/))
+                this.status = 500;
+                return {message: "contributor to be updated was not found in database, or update failed for some other reason."};
+                throw Error("sql error while updating contributor to initiate password request: message: " + err.message + ", stack: " + err.stack);
+            }.bind(this));
+        return;
     } else if (requestBody.password_reset_code) {
         // "password reset"
         var contributorEmail,
@@ -282,7 +315,7 @@ appWs.put('/contributors', function *(next) {
                     return {message: "contributor to be updated was not found in database"};
                 }
                 contributor = res[0];
-                if (!contributor.password_reset_code) {
+                if ('requested' !== contributor.password_reset_status || !contributor.password_reset_code) {
                     // important check to avoid resetting passwords with empty string verification code
                     this.status = 403;
                     return {message: "the specified contributor hadn't requested a password reset code"};
@@ -295,7 +328,7 @@ appWs.put('/contributors', function *(next) {
                     this.status = 403;
                     return {message: "provided password and confirmation do not match"};
                 }
-                return mockData.updateContributor({email: contributorEmail}, {email: contributorEmail, passhash: new_password, password_reset_code: ''})
+                return mockData.updateContributor({email: contributorEmail}, {email: contributorEmail, passhash: new_password, password_reset_code: '', password_reset_status: 'not_requested'})
                     .then(function (updateContributorRes) {
                         return {message: "contributor's password was reset"};
                     })

@@ -65,15 +65,33 @@
             "nicknameFieldPlaceholder": "Alias o apodo",
             "firstNameFieldPlaceholder": "nombre",
             "lastNameFieldPlaceholder": "apellidos",
+            "passwordResetCodeFieldPlaceholder": "código secreto",
+            "newPasswordFieldPlaceholder": "nueva contraseña",
+            "newPasswordConfirmFieldPlaceholder": "confirma nueva contraseña",
             "submitButtonValue": "Crear",
             "usernameFieldLabel": "Correo Electrónico",
             "passwordFieldLabel": "Contraseña",
             "nicknameFieldLabel": "Alias",
             "firstNameFieldLabel": "Nombre",
             "lastNameFieldLabel": "Apellidos",
+            "passwordResetCodeFieldLabel": "Código Secreto",
+            "newPasswordFieldLabel": "Nueva Contraseña",
+            "newPasswordConfirmFieldLabel": "Confirma Nueva Contraseña",
             "submitButtonLabel": "",
             "signupSuccess": "Tu cuenta ha sido creada. A continuación te enviaremos un correo de verificación con una liga que deberás seguir para finalizar tu proceso de registro.",
             "editSuccess": "Tu perfil se ha editado con éxito.."
+        },
+        "EditProfileForm": {
+            "formDescription": "Realiza aquí los cambios a tus datos de perfil.",
+            "saveSuccess": "Se guardaron los cambios con éxito."
+        },
+        "InitiatePasswordRecoveryForm": {
+            "formDescription": "Aquí puedes solicitar que se te envíe un código para reestablecer tu contraseña si es que la has perdido.",
+            "saveSuccess": "En breve enviaremos a tu correo electrónico un código con instrucciones para cambiar tu contraseña."
+        },
+        "PasswordRecoveryForm": {
+            "formDescription": "Por favor, introduce a continuación tu correo electrónico y el código que te enviamos para poder cambiar tu contraseña.",
+            "saveSuccess": "Tu nueva contraseña ha sido activada. Puedes empezar a usarla para entrar al sistema."
         },
         "AddPhraseForm": {
             "addPhrase": "Nueva frase o palabra",
