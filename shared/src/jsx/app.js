@@ -2148,7 +2148,7 @@ var LoginStatus = React.createClass({
 });
 
 var LoginPrompt = React.createClass({
-    mixins: [I18nMixin],
+    mixins: [I18nMixin, EndpointsMixin],
     handleLogIn: function (e) {
         var username = this.refs.username.getDOMNode().value,
             password = this.refs.password.getDOMNode().value;
@@ -2156,7 +2156,8 @@ var LoginPrompt = React.createClass({
         this.props.onLogIn(username, password);
     },
     render: function () {
-        var display = this.props.topState.showLoginPrompt ? "block" : "none",
+        var forgotPasswordUrl = aUrl(this.getEndpoint('initiatePasswordRecovery'), this.props.topState.shortLangCode),
+            display = this.props.topState.showLoginPrompt ? "block" : "none",
             style = {display: display},
             messages = this.messages.LoginPrompt;
         return (
@@ -2177,6 +2178,9 @@ var LoginPrompt = React.createClass({
                             {messages.submitButtonLabel}
                             <input type="submit" value={messages.submitButtonValue}/>
                         </label>
+                        <section className="forgotPassword">
+                            <a href={forgotPasswordUrl}>{messages.forgotPassword}</a>
+                        </section>
                     </fieldset>
                 </form>
                 <SignupForm topState={this.props.topState} onSignup={this.props.onSignup} onSetInfo={this.props.onSetInfo} onClearInfo={this.props.onClearInfo}/>

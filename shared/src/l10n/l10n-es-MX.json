@@ -52,7 +52,8 @@
             "submitButtonValue": "Entrar",
             "usernameFieldLabel": "Correo Electrónico",
             "passwordFieldLabel": "Contraseña",
-            "submitButtonLabel": ""
+            "submitButtonLabel": "",
+            "forgotPassword": "¿Olvidaste tu contraseña?"
         },
         "LogOutOutcome": {
             "willLogYouOutShortly": "saliendo..."
@@ -86,7 +87,7 @@
             "saveSuccess": "Se guardaron los cambios con éxito."
         },
         "InitiatePasswordRecoveryForm": {
-            "formDescription": "Aquí puedes solicitar que se te envíe un código para reestablecer tu contraseña si es que la has perdido.",
+            "formDescription": "Aquí puedes solicitar que se te envíe por correo electrónico un código para reestablecer tu contraseña si es que la has perdido.",
             "saveSuccess": "En breve enviaremos a tu correo electrónico un código con instrucciones para cambiar tu contraseña."
         },
         "PasswordRecoveryForm": {
