@@ -1503,24 +1503,30 @@ var CrowDictionary = React.createClass({
         } else if (this.state.editProfile) {
             // editProfile is just a boolean, get contributor data from state.loginInfo
             var formDescription = this.messages.EditProfileForm.formDescription,
+                formTitle = this.messages.EditProfileForm.formTitle,
+                submitButtonValue = this.messages.EditProfileForm.submitButtonValue,
                 onSuccessMessage = this.messages.EditProfileForm.saveSuccess,
                 onInitialSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("editContributorProfile", {contributor_id: this.state.loginInfo.id}) + "?saveSuccess=1", this.state.shortLangCode));
                 onConfirmSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("contributorProfile", {contributor_id: this.state.loginInfo.id}), this.state.shortLangCode));
-            mainContent = <EditProfileForm topState={this.state} formDescription={formDescription} submitCallback={this.handleSubmitEditProfile.bind(this, onInitialSuccessCallback)} onConfirmSuccessCallback={onConfirmSuccessCallback} successIndicatorPropertyName="saveSuccess" successMessage={onSuccessMessage} renderedFields={["nickname", "first_name", "last_name"]} prepopulatedValues={this.state.loginInfo} onSetInfo={this.handleSetInfo} key="EditProfileForm"/>;
+            mainContent = <EditProfileForm topState={this.state} formTitle={formTitle} formDescription={formDescription} submitButtonValue={submitButtonValue} submitCallback={this.handleSubmitEditProfile.bind(this, onInitialSuccessCallback)} onConfirmSuccessCallback={onConfirmSuccessCallback} successIndicatorPropertyName="saveSuccess" successMessage={onSuccessMessage} renderedFields={["nickname", "first_name", "last_name"]} prepopulatedValues={this.state.loginInfo} onSetInfo={this.handleSetInfo} key="EditProfileForm"/>;
         } else if (this.state.initiatePasswordRecovery) {
             // initiatePasswordRecovery is just a boolean, get contributor data from state.loginInfo
             var formDescription = this.messages.InitiatePasswordRecoveryForm.formDescription,
+                formTitle = this.messages.InitiatePasswordRecoveryForm.formTitle,
+                submitButtonValue = this.messages.InitiatePasswordRecoveryForm.submitButtonValue,
                 onSuccessMessage = this.messages.InitiatePasswordRecoveryForm.saveSuccess,
                 onInitialSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("initiatePasswordRecovery") + "?saveSuccess=1", this.state.shortLangCode));
                 onConfirmSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("search"), this.state.shortLangCode));
-            mainContent = <InitiatePasswordRecoveryForm topState={this.state} formDescription={formDescription} submitCallback={this.handleSubmitEditProfile.bind(this, onInitialSuccessCallback)} onConfirmSuccessCallback={onConfirmSuccessCallback} successIndicatorPropertyName="saveSuccess" successMessage={onSuccessMessage} renderedFields={["email", "initiate_password_recovery"]} prepopulatedValues={{email: this.state.qsEmail, initiate_password_recovery: true}} onSetInfo={this.handleSetInfo} key="InitiatePasswordRecoveryForm"/>;
+            mainContent = <InitiatePasswordRecoveryForm topState={this.state} formTitle={formTitle} formDescription={formDescription} submitButtonValue={submitButtonValue} submitCallback={this.handleSubmitEditProfile.bind(this, onInitialSuccessCallback)} onConfirmSuccessCallback={onConfirmSuccessCallback} successIndicatorPropertyName="saveSuccess" successMessage={onSuccessMessage} renderedFields={["email", "initiate_password_recovery"]} prepopulatedValues={{email: this.state.qsEmail, initiate_password_recovery: true}} onSetInfo={this.handleSetInfo} key="InitiatePasswordRecoveryForm"/>;
         } else if (this.state.passwordRecovery) {
             // passwordRecovery is just a boolean, get contributor data from state.loginInfo
             var formDescription = this.messages.PasswordRecoveryForm.formDescription,
+                formTitle = this.messages.PasswordRecoveryForm.formTitle,
+                submitButtonValue = this.messages.PasswordRecoveryForm.submitButtonValue,
                 onSuccessMessage = this.messages.PasswordRecoveryForm.saveSuccess,
                 onInitialSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("passwordRecovery") + "?saveSuccess=1", this.state.shortLangCode));
                 onConfirmSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("login"), this.state.shortLangCode));
-            mainContent = <PasswordRecoveryForm topState={this.state} formDescription={formDescription} submitCallback={this.handleSubmitEditProfile.bind(this, onInitialSuccessCallback)} onConfirmSuccessCallback={onConfirmSuccessCallback} successIndicatorPropertyName="saveSuccess" successMessage={onSuccessMessage} renderedFields={["email", "password_reset_code", "new_password", "new_password_confirm"]} prepopulatedValues={{email: this.state.qsEmail, password_reset_code: this.state.qsPasswordResetCode}} onSetInfo={this.handleSetInfo} key="PasswordRecoveryForm"/>;
+            mainContent = <PasswordRecoveryForm topState={this.state} formTitle={formTitle} formDescription={formDescription} submitButtonValue={submitButtonValue} submitCallback={this.handleSubmitEditProfile.bind(this, onInitialSuccessCallback)} onConfirmSuccessCallback={onConfirmSuccessCallback} successIndicatorPropertyName="saveSuccess" successMessage={onSuccessMessage} renderedFields={["email", "password_reset_code", "new_password", "new_password_confirm"]} prepopulatedValues={{email: this.state.qsEmail, password_reset_code: this.state.qsPasswordResetCode}} onSetInfo={this.handleSetInfo} key="PasswordRecoveryForm"/>;
         } else if (this.state.showLeaderboard) {
             // showLeaderboard itself is an object containing leaderboard data.
             titleContent = this.messages.Titles.leaderboard;
@@ -2168,7 +2174,7 @@ var LoginPrompt = React.createClass({
                         <p>{messages.loginFormDescription}</p>
                         <label className="username">
                             {messages.usernameFieldLabel}
-                            <input ref="username" type="text" placeholder={messages.usernameFieldPlaceholder}/>
+                            <input ref="username" type="email" placeholder={messages.usernameFieldPlaceholder}/>
                         </label>
                         <label className="password">
                             {messages.passwordFieldLabel}
@@ -2549,10 +2555,12 @@ var ProfileFormMixin = {
                 this.setState(newState);
             }.bind(this));
     },
-    render: function () {
+    getRenderedForm: function () {
         var renderedFields = this.props.renderedFields,
             submitCallback = this.props.submitCallback,
+            formTitle = this.props.formTitle,
             formDescription = this.props.formDescription,
+            submitButtonValue = this.props.submitButtonValue,
             messages = this.messages.SignupForm,
             cx = React.addons.classSet,
             classNames = {
@@ -2625,20 +2633,20 @@ var ProfileFormMixin = {
             return this.getPromptElements();
         }
         return (
-            <form className="signup" onSubmit={this.handleSubmit}>
+            <form className="user-form" onSubmit={this.handleSubmit}>
                 <fieldset>
-                    <legend>{messages.formTitle}</legend>
+                    <legend>{formTitle}</legend>
                     <p className={classNames.globalError} ref="globalError">{this.state.errors.globalError}</p>
                     <p>{formDescription}</p>
                     {elements}
                     <label className="submit">
                         {messages.submitButtonLabel}
-                        <input type="submit" value={messages.submitButtonValue}/>
+                        <input type="submit" value={submitButtonValue}/>
                     </label>
                 </fieldset>
             </form>
         );
-    },
+    }
 };
 var EditProfileForm = React.createClass({
     mixins: [ProfileFormMixin, LoggedInMixin],
@@ -2652,13 +2660,34 @@ var EditProfileForm = React.createClass({
             });
             return;
         }
+    },
+    render: function () {
+        return (
+            <main className="edit-profile" id="main">
+                {this.getRenderedForm()}
+            </main>
+        );
     }
 });
 var InitiatePasswordRecoveryForm = React.createClass({
-    mixins: [ProfileFormMixin]
+    mixins: [ProfileFormMixin],
+    render: function () {
+        return (
+            <main className="initiate-password-recovery" id="main">
+                {this.getRenderedForm()}
+            </main>
+        );
+    }
 });
 var PasswordRecoveryForm = React.createClass({
-    mixins: [ProfileFormMixin]
+    mixins: [ProfileFormMixin],
+    render: function () {
+        return (
+            <main className="password-recovery" id="main">
+                {this.getRenderedForm()}
+            </main>
+        );
+    }
 });
 
 

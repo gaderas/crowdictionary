@@ -83,16 +83,22 @@
             "editSuccess": "Tu perfil se ha editado con éxito.."
         },
         "EditProfileForm": {
+            "formTitle": "Editar perfil",
             "formDescription": "Realiza aquí los cambios a tus datos de perfil.",
-            "saveSuccess": "Se guardaron los cambios con éxito."
+            "saveSuccess": "Se guardaron los cambios con éxito.",
+            "submitButtonValue": "Guardar"
         },
         "InitiatePasswordRecoveryForm": {
+            "formTitle": "Reestablecer contraseña",
             "formDescription": "Aquí puedes solicitar que se te envíe por correo electrónico un código para reestablecer tu contraseña si es que la has perdido.",
-            "saveSuccess": "En breve enviaremos a tu correo electrónico un código con instrucciones para cambiar tu contraseña."
+            "saveSuccess": "En breve enviaremos a tu correo electrónico un código con instrucciones para cambiar tu contraseña.",
+            "submitButtonValue": "Solicitar"
         },
         "PasswordRecoveryForm": {
+            "formTitle": "Reestablecer contraseña",
             "formDescription": "Por favor, introduce a continuación tu correo electrónico y el código que te enviamos para poder cambiar tu contraseña.",
-            "saveSuccess": "Tu nueva contraseña ha sido activada. Puedes empezar a usarla para entrar al sistema."
+            "saveSuccess": "Tu nueva contraseña ha sido activada. Puedes empezar a usarla para entrar al sistema.",
+            "submitButtonValue": "Reestablecer"
         },
         "AddPhraseForm": {
             "addPhrase": "Nueva frase o palabra",

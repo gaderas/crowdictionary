@@ -315,7 +315,7 @@ appWs.put('/contributors', function *(next) {
                     return {message: "contributor to be updated was not found in database"};
                 }
                 contributor = res[0];
-                if ('requested' !== contributor.password_reset_status || !contributor.password_reset_code) {
+                if (('requested' !== contributor.password_reset_status && 'emailed' !== contributor.password_reset_status) || !contributor.password_reset_code) {
                     // important check to avoid resetting passwords with empty string verification code
                     this.status = 403;
                     return {message: "the specified contributor hadn't requested a password reset code"};

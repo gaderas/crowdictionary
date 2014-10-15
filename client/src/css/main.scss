@@ -407,57 +407,85 @@ main.add-phrase {
         }
     }
 }
+@mixin user-form($displayed-labels) {
+        @include span(1 of 1 last);
+        //text-align: center;
+        fieldset {
+            @include span(18 of 20 last);
+            @include post(1 of 20); //margin
+            @extend .base-base-fieldset;
+            padding-top: span(1 of 20);
+            padding-bottom: span(1 of 20);
+            legend {
+                @extend .base-legend;
+                padding-left: 1em;
+            }
+            p {
+                font-size: 70%;
+                margin-bottom: span(1 of 20);
+            }
+            p, #{$displayed-labels} {
+                @include span(18 of 20 last);
+                @include post(1 of 20);
+            }
+            #{$displayed-labels} {
+                margin-bottom: span(1 of 20) / 2;
+                > span {
+                    @include span(1 of 1);
+                }
+                > input {
+                    @include span(1 of 1);
+                }
+            }
+            label.submit {
+                @include span(5 at 2 of 20);
+                @include pre(2 of 20);
+                margin-top: span(1 of 20);
+                input[type="submit"] {
+                    @extend .base-submit-input;
+                }
+            }
+        }
+}
 main.login {
     @include span(1 of 1 last);
-    //@include with-layout(gutters 0);
     @include container;
     form.login {
-        @include span(1 of 1 last);
-        text-align: center;
+        @include user-form("label.username, label.password");
+        margin-bottom: span(1 of 20);
         fieldset {
-            width: 70%;
-            display: inline-block;
+            section.forgotPassword {
+                @include span(10 of 20 last);
+                @include post(3 of 20);
+                margin-top: span(1 of 20);
+                font-size: 40%;
+                color: $less-contrast-1;
+            }
         }
     }
     form.signup {
-        @include span(1 of 1 last);
-        text-align: center;
-        fieldset {
-            width: 70%;
-            display: inline-block;
-        }
+        @include user-form("label.username, label.password, label.nickname, label.firstName, label.lastName");
     }
-    form.login, form.signup {
-        font-size: $base-font-size;
-        fieldset {
-            @extend .base-fieldset;
-            padding: 1em!important;
-            text-align: left;
-            > p {
-                font-size: 70%;
-                margin-bottom: 1em;
-            }
-            legend {
-                @extend .base-legend;
-            }
-            label {
-                line-height: 1.5em;
-                margin-bottom: 1em;
-            }
-            input[type="text"], input[type="password"], input[type="email"] {
-                width: 90%;
-                height: 1.1em;
-                line-height: 1em;
-            }
-            input[type="submit"] {
-                @extend .base-submit-input;
-                margin-top: 1.4em;
-            }
-            input {
-                display: block;
-                font-size: $base-font-size;
-            }
-        }
+}
+main.initiate-password-recovery {
+    @include span(1 of 1 last);
+    @include container;
+    form {
+        @include user-form("label.email");
+    }
+}
+main.password-recovery {
+    @include span(1 of 1 last);
+    @include container;
+    form {
+        @include user-form("label.email, label.password_reset_code, label.new_password, label.new_password_confirm");
+    }
+}
+main.edit-profile {
+    @include span(1 of 1 last);
+    @include container;
+    form {
+        @include user-form("label.nickname, label.first_name, label.last_name");
     }
 }
 main.yesno-message, main.error-message, main.info-message {
@@ -613,14 +641,16 @@ main.leaderboard {
         margin-bottom: 1em;
     }
     > table {
-        @include span(10 at 6 of 20);
-        @include pre(5 of 20);
+        @include span(10 at 6 of 20 first);
+        //@include pre(5 of 20);
         @include post(5 of 20);
         thead tr {
+            @include span(1 of 1);
             @include hr-with-shadow(2px);
             text-align: center;
         }
         tbody tr {
+            @include span(1 of 1);
             @include hr-with-shadow(1px);
             text-align: center;
             td:nth-of-type(2n + 1) {

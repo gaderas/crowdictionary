@@ -55,7 +55,7 @@ CREATE TABLE `contributor` (
     `verified` enum('yes', 'no') NOT NULL DEFAULT 'no',
     `verification_code` varchar(16) NOT NULL,
     `password_reset_code` varchar(16) NOT NULL DEFAULT '',
-    `password_reset_status` enum('requested', 'not_requested') NOT NULL DEFAULT 'not_requested',
+    `password_reset_status` enum('not_requested', 'requested', 'emailed') NOT NULL DEFAULT 'not_requested',
     `verification_retries` int NOT NULL DEFAULT 0,
     `passhash` varchar(128) NOT NULL,
     `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -63,4 +63,17 @@ CREATE TABLE `contributor` (
     PRIMARY KEY (`id`),
     UNIQUE INDEX (`email`),
     UNIQUE INDEX (`nickname`)
+);
+
+CREATE TABLE `notification` (
+    `id` int AUTO_INCREMENT NOT NULL,
+    `type` enum('email') NOT NULL,
+    `recipient` varchar(64) NOT NULL,
+    `contributor_id` int NOT NULL,
+    `scheduled` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `sent` TIMESTAMP,
+    `send_status_received` TIMESTAMP,
+    `send_status` varchar(2048),
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX (`contributor_id`)
 );

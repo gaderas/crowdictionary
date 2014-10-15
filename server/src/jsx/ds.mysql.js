@@ -307,7 +307,7 @@ Data.prototype.getContributorLeaderboard = function (params) {
         leaderboardQuery,
         start = parseInt(actualLimits && actualLimits.start, 10) || 0,
         limit = parseInt(actualLimits && actualLimits.limit, 10) || 2;
-    leaderboardQuery = "select d.contributor_id, count(1) as score from definition d left join vote v on d.id = v.definition_id where v.contributor_id is not null group by d.contributor_id LIMIT ?, ?;";
+    leaderboardQuery = "select d.contributor_id, count(1) as score from definition d left join vote v on d.id = v.definition_id where v.contributor_id is not null group by d.contributor_id ORDER BY score DESC LIMIT ?, ?;";
     return pQuery(leaderboardQuery, [start, limit]);
 };
 
