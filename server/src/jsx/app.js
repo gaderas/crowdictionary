@@ -186,7 +186,7 @@ appWs.get('/contributors', function *(next) {
             });
         })
         .fail(function (err) {
-            console.log("on fail with err: " + err);
+            console.log("on fail with err: " + err + ",stack: " + err.stack);
             this.status = 500;
             return {message: "couldn't get contributors. error: " + err};
         }.bind(this));

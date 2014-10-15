@@ -9,26 +9,14 @@ _.mixin(require('../../../shared/build/js/lodash_mixin.js'));
 var Data = function (dbConfig) {
     console.log('using mysql ds with config: ' + JSON.stringify(dbConfig, ' ', 4));
     this.pool = mysql.createPool(dbConfig);
-    this.query = (function () {
-        console.log('args passed to query: ' + JSON.stringify(_.toArray(arguments)));
-        try {
-            this.pool.query.apply(this.pool, _.toArray(arguments));
-        } catch (ex) {
-            console.error("caught: " + ex);
-            return Q.reject("caught mysql query exception: " + ex);
-        }
-    }).bind(this),
-    this.pQuery = (function (query) {
-        try {
-            return Q.nbind(this.query, this.pool).apply(this.pool, _.toArray(arguments))
-                .then(function (res) {
-                    return res[0];
-                });
-        } catch (ex) {
-            console.error("caught: " + ex);
-            return Q.reject("caught mysql query exception: " + ex);
-        }
-    }).bind(this);
+    this.pQuery = function (qs, qparams) {
+        console.log('args passed to pQuery: ' + JSON.stringify(_.toArray(arguments)));
+        var denodifiedQuery = Q.nbind(this.pool.query, this.pool);
+        qparams = _.map(qparams, function (param) {
+            return (undefined !== param) ? param : "";
+        });
+        return Q.fcall(denodifiedQuery, qs, qparams);
+    }.bind(this);
 };
 
 
