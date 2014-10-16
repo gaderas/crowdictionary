@@ -2276,7 +2276,8 @@ var SignupForm = React.createClass({
             last_name: last_name,
             email: email,
             passhash: passhash,
-            nickname: nickname
+            nickname: nickname,
+            preferred_langs: this.props.topState.globalLang
         }))
             .fail(function (err) {
                 var newState = this.getDefaultState(),

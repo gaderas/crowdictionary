@@ -193,10 +193,10 @@
         },
         "Titles": {
             "home": "Significados de palabras, frases, diccionario - MexiOnario",
-            "search": "{phrase}, resultados de búsqueda - MexiOnario",
-            "phrase": "{phrase}, significados - MexiOnario",
+            "search": "({phrase}), resultados de búsqueda - MexiOnario",
+            "phrase": "({phrase}), significados - MexiOnario",
             "leaderboard": "Tabla de puntuación. Palabras, significados, definiciones - MexiOnario",
-            "profile": "{nickname} (perfil), votos, significados, frases y palabras - MexiOnario"
+            "profile": "({nickname}) - perfil - Votos, significados, frases y palabras - MexiOnario"
         }
     }
 }

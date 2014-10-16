@@ -43,8 +43,15 @@ module.exports = function(grunt) {
             },
             l10n: {
                 cwd: 'shared/src/l10n/',
-                src: '**',
+                src: '*',
                 dest: 'client/build/l10n/',
+                filter: 'isFile',
+                expand: true
+            },
+            backofficeL10n: {
+                cwd: 'shared/src/l10n/backoffice/',
+                src: '*',
+                dest: 'backoffice/build/l10n/',
                 filter: 'isFile',
                 expand: true
             },

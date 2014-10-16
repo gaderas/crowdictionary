@@ -17,6 +17,10 @@
             }
         }
     },
+    "mailer": {
+        "transport": "ses",
+        "rateLimit": 10
+    },
     "cookies": {
         "user": {
             "name": "U",

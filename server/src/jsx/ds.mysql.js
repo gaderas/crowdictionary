@@ -12,10 +12,14 @@ var Data = function (dbConfig) {
     this.pQuery = function (qs, qparams) {
         console.log('args passed to pQuery: ' + JSON.stringify(_.toArray(arguments)));
         var denodifiedQuery = Q.nbind(this.pool.query, this.pool);
-        qparams = _.map(qparams, function (param) {
-            return (undefined !== param) ? param : "";
+        _.forEach(qparams, function (param, key) {
+            param = (undefined !== param) ? param : "";
         });
-        return Q.fcall(denodifiedQuery, qs, qparams);
+        console.log("qparams (query params) are now: " + JSON.stringify(qparams));
+        return Q.fcall(denodifiedQuery, qs, qparams)
+            .then(function (res) {
+                return res[0];
+            });
     }.bind(this);
 };
 
@@ -36,23 +40,22 @@ Data.prototype.getContributors = function (params) {
         searchedKey;
     if (actualParams.id) {
         searchedKey = 'id';
-        if (_.isString(actualParams.id)) {
-            actualParams.id = [actualParams.id];
-        }
-    }
-    if (actualParams.email) {
+    } else if (actualParams.email) {
         searchedKey = 'email';
-        if (_.isString(actualParams.email)) {
-            actualParams.email = [actualParams.email];
-        }
+    } else if (actualParams.status) {
+        searchedKey = 'status';
+    } else if (actualParams.password_reset_status) {
+        searchedKey = 'password_reset_status';
+    } else {
+        throw Error("there's missing information in the request that prevents this service from knowing what data you want");
+    }
+    if (_.isString(actualParams[searchedKey])) {
+        actualParams[searchedKey] = [actualParams[searchedKey]];
     }
     if ('id' === searchedKey) {
         actualParams.id = _.map(actualParams.id, function (id) {
             return parseInt(id, 10);
         });
-    }
-    if (undefined !== actualParams.id && undefined !== actualParams.email) {
-        throw Error("can't specify both email and id parameters (just one or the other)");
     }
     return pQuery("SELECT * FROM `contributor` WHERE ?? IN (?)", [searchedKey, actualParams[searchedKey]]);
 };
