@@ -68,12 +68,15 @@ CREATE TABLE `contributor` (
 CREATE TABLE `notification` (
     `id` int AUTO_INCREMENT NOT NULL,
     `type` enum('email') NOT NULL,
+    `kind` enum('account_verification', 'password_reset') NOT NULL,
+    `code` varchar(16) NOT NULL,
     `recipient` varchar(64) NOT NULL,
     `contributor_id` int NOT NULL,
     `scheduled` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    `sent` TIMESTAMP,
-    `send_status_received` TIMESTAMP,
-    `send_status` varchar(2048),
+    `sent` TIMESTAMP NOT NULL,
+    `send_status_received` TIMESTAMP NOT NULL,
+    `send_status` enum('none', 'success', 'fail') NOT NULL DEFAULT 'none',
+    `send_status_message` varchar(2048) NOT NULL DEFAULT '',
     PRIMARY KEY (`id`),
-    UNIQUE INDEX (`contributor_id`)
+    UNIQUE INDEX (`contributor_id`, `type`, `code`)
 );

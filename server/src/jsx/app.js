@@ -668,16 +668,7 @@ appWs.get('/localeEndpointsMap', function *(next) {
 
 
 _.forEach(nconf.get("localeRootMap"), function (root, confLang) {
-    var parsedRoot = url.parse(root),
-        matches = parsedRoot.pathname.match(/^\/([^\/]+)(\/|$)/),
-        shortLangCode;
-    if (!matches) {
-        // if no matches, this locale is served from "root" path
-        shortLangCode = '';
-        //throw Error("couldn't find shortLangCode for pathname: " + parsedRoot.pathname);
-    } else {
-        shortLangCode = matches[1];
-    }
+    var shortLangCode = appUtil.getShortLangCodeFromRoot(root);
 
 _.forEach(routesInfo, function (routeInfo) {
     var localRouteInfo = _.clone(routeInfo);

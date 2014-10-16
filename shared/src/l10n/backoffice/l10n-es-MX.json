@@ -5,13 +5,13 @@
         "AccountVerificationEmail": {
             "title": "MexiOnario - Verificación de correo",
             "body": {
-                "text": "¡Bienvenido a MexiOnario! \n\n Ahora puedes formar parte de la comunidad que contribuye palabras al diccionario mas mexicano e interactivo de internet. \n\n Haz clic en la siguiente liga para activar tu cuenta: \n [{prefilledUrl}]. \n\n Si la liga anterior no funciona, usa esta otra junto con estos datos: \n [{plainUrl}] \n *correo:* {recipientAddress} \n *código de verificación*: {accountActivationCode} \n\n\n ¡Gracias! \n\n Atte.: \n El equipo de MexiOnario."
+                "text": "¡Bienvenido a MexiOnario! \n\n Ahora puedes formar parte de la comunidad que contribuye palabras al diccionario más mexicano e interactivo de internet. \n\n Haz clic en la siguiente liga para activar tu cuenta: \n [{prefilledUrl}]. \n\n Si la liga anterior no funciona, usa esta otra junto con estos datos: \n [{plainUrl}] \n *correo*: {recipientAddress} \n *código de verificación*: {accountActivationCode} \n\n\n ¡Gracias! \n\n Atte.: \n El equipo de MexiOnario."
             }
         },
         "PasswordRecoveryEmail": {
-            "title": "MexiOnario - Reestablece tu contraseña",
+            "title": "MexiOnario - Reestablecer contraseña",
             "body": {
-                "text": ""
+                "text": "Apreciable usuario(a) de MexiOnario: \n\n Reestablece tu contraseña visitando la siguiente liga: \n [{prefilledUrl}] \n\n Si la liga anterior no funciona, usa esta otra junto con estos datos: \n [{plainUrl}] \n *correo*: {recipientAddress} \n *código para reestablecer contraseña*: {passwordResetCode} \n\n\n ¡Gracias por ser miembro(a) de la comunidad de MexiOnario! \n\n Atte.: \n El equipo de MexiOnario."
             }
         }
     }

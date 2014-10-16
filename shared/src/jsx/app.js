@@ -76,14 +76,7 @@ RouteNotifier.prototype.removeStateChangeListener = function () {
 
 var routeNotifier = new RouteNotifier();
 
-/**
- * transform a path, the kind that we pass to Router.navigate()
- * into a url (no hostname) suitable for anchor tags
- */
-var aUrl = function (path, shortLangCode) {
-    path = (path.match(/^\//) && path) || '/'+path;
-    return (shortLangCode && '/'+shortLangCode+path) || path;
-};
+var aUrl = appUtil.aUrl;
 
 /**
  * transform a url (no hostname), the kind that we display in anchor tags,

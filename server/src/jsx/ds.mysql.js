@@ -96,6 +96,26 @@ Data.prototype.updateContributor = function (params, payload) {
     return pQuery("UPDATE `contributor` SET ? WHERE ?", [payload, insertBy]);
 };
 
+/**
+ * NOT TO BE EXPOSED VIA AN API ENDPOINT
+ * example payload: {
+ *     type: email,
+ *     code: "s3cr3tCODE",
+ *     recipient: somebody@example.com,
+ *     contributor_id: 101,
+ *     //scheduled: (new Date()).toISOString(), // on row creation, `scheduled` is set automatically. on subsequent updates we set `sent`, `send_status_received`
+ *     sent: (new Date()).toISOString(), // one update for `sent`, and another one later on for `send_status_received`
+ *     send_status_received: (new Date()).toISOString(),
+ *     send_status: "success", // "success" || "fail",
+ *     send_status_message: "aws-ses-id: 432 kfjsld 32..."
+ * }
+ */
+Data.prototype.putNotification = function (payload) {
+    var pQuery = this.pQuery;
+    console.log("on putNotification");
+    return pQuery("INSERT INTO `notification` SET ? ON DUPLICATE KEY UPDATE ?", [payload, payload]);
+};
+
 Data.prototype.getPhrases = function (params) {
     var pQuery = this.pQuery,
         existingParams = _.reduce(params, function (result, val, key) {
