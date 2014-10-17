@@ -141,8 +141,31 @@ body > div {
     @include span(1 of 1);
     header.TopBar {
         @include hr-with-shadow(4px);
+        @include span(1 of 1);
         nav.NavBar {
-            @include with-layout((gutters: 0)) {
+            @include span(1 of 1);
+            @include hr-with-shadow(2px);
+            text-align: center;
+            h2.home {
+                @include span(1 of 3 0);
+            }
+            h2.user-links {
+                @include span(1 of 3 0);
+                a:nth-child(1), a:nth-child(2) {
+                    @include span(1 of 3);
+                }
+                a:nth-child(3) {
+                    @include span(1 of 3 last);
+                }
+            }
+            h2.login-info {
+                @include span(1 of 3 0 last);
+            }
+            h2 a::before {
+                line-height: 1.3em;
+                font-size: 1.5em;
+            }
+            /*@include with-layout((gutters: 0)) {
                 @include container;
                 //font-family: "Open Sans",sans-serif;
                 h2.home {
@@ -176,7 +199,7 @@ body > div {
                         font-size: $base-font-size * 1.5;
                     }
                 }
-            }
+            }*/
         }
     }
 }
