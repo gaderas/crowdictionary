@@ -140,6 +140,13 @@ appWs.post('/login', function *(next) {
                 console.error("passhash mismatch!");
                 this.status = 403;
                 return {message: "bad password provided", errno: 8};
+            } else if ('yes' !== contributor.verified) {
+                this.status = 403;
+                return {message: "account hasn't been verified", errno: 11};
+                //status: 'active', verified: 'yes'
+            } else if ('new' === contributor.status || 'pendingVerification' === contributor.status || 'suspended' === contributor.status) {
+                this.status = 403;
+                return {message: "account hasn't been verified", errno: 12};
             }
             this.cookies.set('contributor', JSON.stringify(safeContributorInfo), {signed: true});
             return {message: "login successful", infono: 2};
@@ -253,7 +260,7 @@ appWs.put('/contributors', function *(next) {
                     this.status = 403;
                     return {message: "the user identified by the provided email is already verified", errno: 1};
                 }
-                return mockData.updateContributor({email: requestBody.email}, {email: requestBody.email, verified: 'yes'})
+                return mockData.updateContributor({email: requestBody.email}, {email: requestBody.email, status: 'active', verified: 'yes'})
                     .then(function (res) {
                         return {message: "verification success", infono: 1}
                     }.bind(this))

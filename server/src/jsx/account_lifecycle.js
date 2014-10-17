@@ -81,7 +81,7 @@ Mailer.prototype.sendAccountVerificationEmail = function (recipientAddress, lang
                 from: this.fromAddress,
                 to: recipientAddress,
                 subject: l10nData.messages.AccountVerificationEmail.title,
-                text: l10nData.messages.AccountVerificationEmail.body.textMsg.format({prefilledUrl: rootUrl.replace(/\/$/, '') + this.localeEndpointsMap[lang]['verify'].relUrl + "?email=" + recipientAddress + "&verification_code=" + code, plainUrl: rootUrl.replace(/\/$/, '') + this.localeEndpointsMap[lang]['verify'].relUrl, recipientAddress: recipientAddress, accountActivationCode: code})
+                text: l10nData.messages.AccountVerificationEmail.body.textMsg.format({prefilledUrl: rootUrl.replace(/\/$/, '') + this.localeEndpointsMap[lang]['verify'].relUrl + "?email=" + recipientAddress + "&validateVerification=" + code, plainUrl: rootUrl.replace(/\/$/, '') + this.localeEndpointsMap[lang]['verify'].relUrl, recipientAddress: recipientAddress, accountActivationCode: code})
             })
         }.bind(this))
         .then(function (res) {

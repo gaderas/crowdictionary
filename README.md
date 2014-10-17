@@ -27,6 +27,8 @@ TODO Features
 *   PUT /contributors option to trigger start password reset
 *   Edit profile. Change password. Recover password.
 *   Use # anchors to fix scroll position upon clicking on links
+*   Have dedicated password *change* form, to change password while logged in
+*   Refactor account verification flow to be more like Contributor Profile edit forms.
 *   ~~Put pagination links on phrases list (home, search) for SEO purposes.~~
 *   ~~User page (come up with queries, rollup tables)~~
 *   ~~Users leaderboard (come up with queries, rollup tables)~~

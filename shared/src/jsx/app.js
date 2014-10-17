@@ -81,6 +81,7 @@ var aUrl = appUtil.aUrl;
 /**
  * transform a url (no hostname), the kind that we display in anchor tags,
  * into a path string suitable for passing to Router.navigate()
+ * (basically, eliminate the 'shortLangCode' path component, if set)
  */
 var aPath = function (url, shortLangCode) {
     var re = new RegExp("^/?"+shortLangCode+"(/.*|$)"),
