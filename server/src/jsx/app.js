@@ -189,7 +189,7 @@ appWs.get('/contributors', function *(next) {
     this.body = yield Q.fcall(mockData.getContributors.bind(mockData, this.query))
         .then(function (contributors) {
             return _.map(contributors, function (contributor) {
-                return appUtil.getObjectWithoutProps(contributor, ['email', 'status', 'passhash', 'verification_code', 'verified', 'verification_retries']);
+                return appUtil.getObjectWithoutProps(contributor, ['email', 'status', 'passhash', 'verification_code', 'verified', 'verification_retries', 'password_reset_status', 'password_reset_code']);
             });
         })
         .fail(function (err) {

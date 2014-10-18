@@ -1500,7 +1500,7 @@ var CrowDictionary = React.createClass({
                 formTitle = this.messages.EditProfileForm.formTitle,
                 submitButtonValue = this.messages.EditProfileForm.submitButtonValue,
                 onSuccessMessage = this.messages.EditProfileForm.saveSuccess,
-                onInitialSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("editContributorProfile", {contributor_id: this.state.loginInfo.id}) + "?saveSuccess=1", this.state.shortLangCode));
+                onInitialSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("editContributorProfile") + "?saveSuccess=1", this.state.shortLangCode));
                 onConfirmSuccessCallback = this.handleToLink.bind(this, aUrl(this.getEndpoint("contributorProfile", {contributor_id: this.state.loginInfo.id}), this.state.shortLangCode));
             mainContent = <EditProfileForm topState={this.state} formTitle={formTitle} formDescription={formDescription} submitButtonValue={submitButtonValue} submitCallback={this.handleSubmitEditProfile.bind(this, onInitialSuccessCallback)} onConfirmSuccessCallback={onConfirmSuccessCallback} successIndicatorPropertyName="saveSuccess" successMessage={onSuccessMessage} renderedFields={["nickname", "first_name", "last_name"]} prepopulatedValues={this.state.loginInfo} onSetInfo={this.handleSetInfo} key="EditProfileForm"/>;
         } else if (this.state.initiatePasswordRecovery) {
@@ -2871,20 +2871,23 @@ var LeaderboardItem = React.createClass({
 });
 
 var ContributorProfile = React.createClass({
-    mixins: [I18nMixin, LinksMixin],
+    mixins: [I18nMixin, LinksMixin, EndpointsMixin],
     render: function () {
-        var showEditLink = false,
+        var editElement = '',
             m = this.messages.ContributorProfile,
             c = this.props.topState.viewedContributor,
             viewDefinitionsUrl = aUrl(util.format("/contributors/%d/activity?view=%s", c.id, 'definitions')),
             viewPhrasesUrl = aUrl(util.format("/contributors/%d/activity?view=%s", c.id, 'phrases')),
-            viewVotesUrl = aUrl(util.format("/contributors/%d/activity?view=%s", c.id, 'votes'));
+            viewVotesUrl = aUrl(util.format("/contributors/%d/activity?view=%s", c.id, 'votes')),
+            editProfileUrl;
         if (!_.isEmpty(this.props.topState.loginInfo) && this.props.topState.contributor_id === this.props.topState.loginInfo.id) {
             // the user is viewing his/her own profile. show edit links, etc.
-            showEditLink = true;
+            editProfileUrl = aUrl(this.getEndpoint('editContributorProfile'), this.props.topState.shortLangCode);
+            editElement = <a className="oi" data-glyph="pencil" href={editProfileUrl} onClick={this.handleToLink.bind(this, editProfileUrl)}>{m.editLink}</a>;
         }
         return (
             <main className="contributor-profile" id="main">
+                <h2>{m.title}</h2>
                 <section className="contributor-info">
                     <dl>
                         <dt>{m.nickname}</dt>
@@ -2898,6 +2901,7 @@ var ContributorProfile = React.createClass({
                         <dt>{m.lastName}</dt>
                         <dd>{c.last_name}</dd>
                     </dl>
+                    {editElement}
                 </section>
                 <section className="contributor-activity">
                     <ContributorActivity topState={this.props.topState}/>

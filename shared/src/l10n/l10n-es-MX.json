@@ -38,7 +38,7 @@
         "UserLinks": {
             "addPhrase": "agrega una nueva frase o palabra",
             "addDefinition": "agrega tu propia definición de la frase/palabra \"{phrase}\"",
-            "myActivity": "ver mi historial",
+            "myActivity": "ver mi perfil",
             "leaderboard": "ver tabla de puntuación"
         },
         "LoginStatus": {
@@ -147,7 +147,9 @@
             "memberSince": "miembro desde",
             "phrasesTab": "Frases",
             "definitionsTab": "Definiciones",
-            "votesTab": "Votos"
+            "votesTab": "Votos",
+            "title": "Perfil de usuario",
+            "editLink": "Editar"
         },
         "ContributorActivityItem": {
             "goToPhraseLink": "Ver",

@@ -29,6 +29,7 @@ TODO Features
 *   Use # anchors to fix scroll position upon clicking on links
 *   Have dedicated password *change* form, to change password while logged in
 *   Refactor account verification flow to be more like Contributor Profile edit forms.
+*   GET /contributors fields returned should be filtered based on a whitelist, not a blacklist like it is now
 *   ~~Put pagination links on phrases list (home, search) for SEO purposes.~~
 *   ~~User page (come up with queries, rollup tables)~~
 *   ~~Users leaderboard (come up with queries, rollup tables)~~

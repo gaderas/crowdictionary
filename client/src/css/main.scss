@@ -165,41 +165,6 @@ body > div {
                 line-height: 1.3em;
                 font-size: 1.5em;
             }
-            /*@include with-layout((gutters: 0)) {
-                @include container;
-                //font-family: "Open Sans",sans-serif;
-                h2.home {
-                    @include span(1 of 3);
-                    * {
-                        padding: 0 .4em;
-                    }
-                }
-                h2.user-links {
-                    //$map: (
-                        //sprea
-                    //);
-                    @include span(1 of 3);
-                    * {
-                        padding: 0 .4em;
-                    }
-                }
-                h2.login-info {
-                    @include span(1 of 3 last);
-                    * {
-                        padding: 0 .4em;
-                    }
-                }
-                h2 {
-                    //@include with-layout(gutters 0);
-                    //margin: 0;
-                    //font-size: 2.5em;
-                    padding: .2em 0;
-                    text-align: center;
-                    ::before {
-                        font-size: $base-font-size * 1.5;
-                    }
-                }
-            }*/
         }
     }
 }
@@ -430,7 +395,7 @@ main.add-phrase {
         }
     }
 }
-@mixin user-form($displayed-labels) {
+@mixin user-form($displayed-labels...) {
         @include span(1 of 1 last);
         //text-align: center;
         fieldset {
@@ -457,7 +422,7 @@ main.add-phrase {
                     @include span(1 of 1);
                 }
                 > input {
-                    @include span(1 of 1);
+                    width: span(1 of 1) - gutter(); // if we don't substract something, the input field bleeds out of the box on iOS
                 }
             }
             label.submit {
@@ -472,14 +437,14 @@ main.add-phrase {
 }
 main.login {
     @include span(1 of 1 last);
-    @include container;
     form.login {
         @include user-form("label.username, label.password");
+        //@include user-form("label.username", "label.password");
         margin-bottom: span(1 of 20);
         fieldset {
             section.forgotPassword {
                 @include span(10 of 20 last);
-                @include post(3 of 20);
+                //@include post(3 of 20);
                 margin-top: span(1 of 20);
                 font-size: 40%;
                 color: $less-contrast-1;
@@ -605,6 +570,13 @@ main.verification-prompt {
 }
 main.contributor-profile {
     @include container;
+    > h2 {
+        @include span(18 at 1 of 20 last);
+        @include prefix(1 of 20); //pad
+        @include suffix(1 of 20); //pad
+        @include main-heading-base;
+        margin-bottom: 1em;
+    }
     section.contributor-info {
         @include span(1 at 1 of $two-col-fields-layout);
         //position: sticky;
@@ -630,10 +602,19 @@ main.contributor-profile {
                 font-weight: bold;
             }
         }
+        > a {
+            @include span(18 of 20);
+            @include pre(1 of 20);
+            @include post(1 of 20);
+            text-align: center;
+            &::before {
+                margin-right: 0.5em;
+            }
+        }
     }
     section.contributor-activity {
         @include span(1 at 2 of $two-col-fields-layout);
-        font-size: 50%;
+        font-size: 60%;
         padding-bottom: gutter();
         margin-bottom: gutter();
         line-height: 1.2em;
@@ -641,6 +622,9 @@ main.contributor-profile {
             @include span(1 of 1);
             div.activity-item {
                 @include hr-with-shadow(1px);
+                //padding: 1em inherit;
+                padding-top: 1em;
+                padding-bottom: 1em;
                 position: relative;
                 a::before {
                     position: absolute;
@@ -655,30 +639,43 @@ main.contributor-profile {
     }
 }
 main.leaderboard {
-    @include container;
+    @include span(1 of 1);
     > h2 {
-        @include span(18 at 1 of 20 last);
+        @include span(18 at 1 of 20 first);
         @include prefix(1 of 20); //pad
         @include suffix(1 of 20); //pad
         @include main-heading-base;
         margin-bottom: 1em;
     }
     > table {
-        @include span(10 at 6 of 20 first);
-        //@include pre(5 of 20);
-        @include post(5 of 20);
+        @include span(1 of 1);
         thead tr {
             @include span(1 of 1);
             @include hr-with-shadow(2px);
             text-align: center;
+            th:nth-of-type(1) {
+                @include span(1 of 2);
+            }
+            th:nth-of-type(2) {
+                @include span(1 of 2 last);
+            }
+        }
+        tbody {
+            font-size: 80%;
+            line-height: 1.5em;
         }
         tbody tr {
             @include span(1 of 1);
             @include hr-with-shadow(1px);
             text-align: center;
-            td:nth-of-type(2n + 1) {
+            td:nth-of-type(1) {
+                @include span(1 of 2);
                 @include vr-with-shadow(1px);
+                width: span(1 of 2) - 1%;
                 border-style: dotted;
+            }
+            td:nth-of-type(2) {
+                @include span(1 of 2 last);
             }
         }
     }
