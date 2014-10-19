@@ -788,3 +788,9 @@ input[type="text"], input[type="password"], textarea, input[type="email"], input
     visibility: hidden;
     opacity: 0;
 }
+
+body {
+    @include breakpoint(980px) {
+        background: green;
+    }
+}

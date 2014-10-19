@@ -1534,6 +1534,7 @@ var CrowDictionary = React.createClass({
             <html lang="en-US" dir="ltr" >
             <head>
               <meta charset="utf-8" />
+              <meta name="viewport" content="width=device-width; initial-scale=1.0" />
               <title>{titleContent}</title>
               <script src="/static/js/dep/jquery.js" />
               <script src="/static/js/dep/underscore.js" />

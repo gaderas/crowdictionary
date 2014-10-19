@@ -38,7 +38,7 @@
     },
     "localeRootMap": {
         "es-MX": "http://www.mexico.com/",
-        "es-MX": "http://172.19.135.5/",
+        "es-MX": "http://192.168.0.16/",
         "es-CL": "http://www.espanol.com/cl",
         "es-PE": "http://www.espanol.com/pe",
         "en-US": "http://www.english.com/us",
