@@ -1529,12 +1529,14 @@ var CrowDictionary = React.createClass({
             titleContent = this.state.searchTerm ? this.fmt(this.msg(this.messages.Titles.search), {phrase: this.state.searchTerm}) : titleContent;
             mainContent = <PhraseSearchResults topState={this.state} onSelectPhrase={this.handleSelectPhrase} onSetInfo={this.handleSetInfo} key="PhraseSearchResults"/>;
         }
+        var faviconUrl = aUrl("/static/assets/img/mexionario-64x64.png", this.state.shortLangCode);
         //manifest="/static/assets/global_cache.manifest"
         return (
             <html lang="en-US" dir="ltr" >
             <head>
               <meta charset="utf-8" />
-              <meta name="viewport" content="width=device-width; initial-scale=1.0" />
+              <meta name="viewport" content="width=device-width" />
+              <link rel="icon" type="image/png" href={faviconUrl} />
               <title>{titleContent}</title>
               <script src="/static/js/dep/jquery.js" />
               <script src="/static/js/dep/underscore.js" />
