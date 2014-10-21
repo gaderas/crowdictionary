@@ -1079,7 +1079,9 @@ var ScrollToTopMixin = {
         window.scroll(0, 0);
     },
     componentDidUpdate: function () {
-        window.scroll(0, 0);
+        if (!window.location.search.contains('update')) {
+            window.scroll(0, 0);
+        }
     }
 };
 

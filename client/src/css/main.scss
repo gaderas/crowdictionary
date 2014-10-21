@@ -272,9 +272,9 @@ main.phrase-details {
     section.phrase-top {
         h2 {
             @include main-heading-base;
-            font-size: 140%;
-            font-style: none;
-            font-weight: bold;
+            //font-style: none;
+            //font-weight: bold;
+            margin-bottom: 1em;
         }
         p {
             font-size: 70%;
@@ -531,6 +531,7 @@ main.add-definition form {
     @include span(1 of 1);
     > h2 {
         @include span(1 of 1);
+        @include main-heading-base;
         margin-bottom: gutter();
     }
     > label {
