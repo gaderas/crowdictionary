@@ -171,21 +171,22 @@ header.TopBar {
 section.SearchBar {
     @include span(1 of 1 last);
     @include hr-with-shadow(2px);
-    height: 126px;
+    height: 63px;
     text-align: center;
     vertical-align: middle;
-    background: url('/static/assets/img/mexionario-200x126.png') no-repeat; // es-MX
+    background-repeat: no-repeat;
+    background-image: url('/static/assets/img/mexionario-100x63.png'); // es-MX
     background-position: right top;
     position: relative;
 }
 form.SearchBar {
     //@include span(1 of 1 last);
     position: relative;
-    width: 70%;
+    width: 65%;
     height: 50%;
     top: 50%;
     left: 50%;
-    margin: -31px 0 0 -50%;
+    margin: -15px 0 0 -50%;
     color: $more-contrast-1;
     //width: 75%;
     box-shadow: 0px 1px 0px rgba($more-contrast-2, 0.1), 0px 1px 7px 0px rgba($less-contrast-1, 0.8) inset;
@@ -834,6 +835,8 @@ header.TopBar {
             background-position: left top;
             box-shadow: none;
             border: none;
+            height: 126px;
+            background-image: url('/static/assets/img/mexionario-200x126.png'); // es-MX
         }
         form.SearchBar {
             @include breakpoint($large-screen) {
