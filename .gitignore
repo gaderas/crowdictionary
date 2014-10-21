@@ -1,10 +1,8 @@
 *~
 *.swp
 node_modules
-client/build
 .sass-cache
 bower_components
 .module-cache
-build
 .DS_Store
 scratch

@@ -1,0 +1,23 @@
+{
+    "locales": ["en-US"],
+    "formats": {"number": {}, "date": {}, "time": {}},
+    "messages": {
+        "top": {
+            "greeting": {
+                "loggedIn": "Hello, {username}!",
+                "notLoggedIn": "login!!!"
+            }
+        },
+        "forms": {
+            "newPhrase": {
+                "placeHolder": "enter a new phrase here"
+            },
+            "newDefinition": {
+                "placeHolder": "enter a new definition for phrase '{phrase}' here"
+            }
+        },
+        "LoggedInMixin": {
+            "requiredLoginMissing": "attempted to perform an operation that requires you to be logged in, without being logged in"
+        }
+    }
+}
