@@ -171,35 +171,57 @@ body > div {
 section.SearchBar {
     @include span(1 of 1 last);
     @include hr-with-shadow(2px);
+    height: 126px;
     text-align: center;
-    vertical-align: center;
-    padding: 1em 0;
-    background: url('/static/assets/img/mexionario-200x126.png')
+    vertical-align: middle;
+    background: url('/static/assets/img/mexionario-200x126.png') no-repeat; // es-MX
+    background-position: right top;
+    position: relative;
 }
 form.SearchBar {
+    //@include span(1 of 1 last);
+    position: relative;
+    width: 70%;
+    height: 50%;
+    top: 50%;
+    left: 50%;
+    margin: -31px 0 0 -50%;
     color: $more-contrast-1;
-    width: 75%;
+    //width: 75%;
     box-shadow: 0px 1px 0px rgba($more-contrast-2, 0.1), 0px 1px 7px 0px rgba($less-contrast-1, 0.8) inset;
     background: none repeat scroll 0% 0% rgba($less-contrast-1, 0.3);
     border-radius: 10px;
     border: 0px none;
     font-size: 0.8em;
     text-align: left;
+    vertical-align: middle;
+    //display: inline-block;
     &::before {
+        position: absolute;
+        top: 50%;
+        margin-top: -20px;
         font-size: $base-font-size;
-        display: inline-block;
+        //display: inline-block;
         vertical-align: middle!important;
     }
     input[type="search"] {
-        display: inline-block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        height: 100%;
+        width: 100%;
+        margin: -50% 0 0 -50%;
+        padding-left: 20px;
+        //@include span(1 of 2 first);
+        //display: inline-block;
         vertical-align: middle;
-        width: 80%;
+        //width: 80%;
         background: none repeat scroll 0% 0% rgba(0, 0, 0, 0);
         border: 0px none;
         font-size: 1.5em;
     }
-    padding: 1em 0.3em;
-    display: inline-block;
+    //padding: 1em 0.3em;
+    //display: inline-block;
 }
 main.phrase-list {
     @include span(1 of 1 last);
