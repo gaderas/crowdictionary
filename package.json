@@ -43,6 +43,8 @@
     "nopt": "^3.0.0",
     "q": "^1.0.1",
     "react": "^0.10.0",
+    "react-infinite-scroll": "https://github.com/sanx/react-infinite-scroll/archive/v0.1.5.tar.gz",
+    "react-lifecycle-debug": "https://github.com/sanx/react-lifecycle-debug/archive/v0.0.1.tar.gz",
     "request": "^2.40.0"
   }
 }
