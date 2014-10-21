@@ -139,32 +139,32 @@ a:link {
 
 body > div {
     @include span(1 of 1);
-    header.TopBar {
-        @include hr-with-shadow(4px);
+}
+header.TopBar {
+    @include hr-with-shadow(4px);
+    @include span(1 of 1);
+    nav.NavBar {
         @include span(1 of 1);
-        nav.NavBar {
-            @include span(1 of 1);
-            @include hr-with-shadow(2px);
-            text-align: center;
-            h2.home {
-                @include span(1 of 3 0);
+        @include hr-with-shadow(2px);
+        text-align: center;
+        h2.home {
+            @include span(1 of 3 0);
+        }
+        h2.user-links {
+            @include span(1 of 3 0);
+            a:nth-child(1), a:nth-child(2) {
+                @include span(1 of 3);
             }
-            h2.user-links {
-                @include span(1 of 3 0);
-                a:nth-child(1), a:nth-child(2) {
-                    @include span(1 of 3);
-                }
-                a:nth-child(3) {
-                    @include span(1 of 3 last);
-                }
+            a:nth-child(3) {
+                @include span(1 of 3 last);
             }
-            h2.login-info {
-                @include span(1 of 3 0 last);
-            }
-            h2 a::before {
-                line-height: 1.3em;
-                font-size: 1.5em;
-            }
+        }
+        h2.login-info {
+            @include span(1 of 3 0 last);
+        }
+        h2 a::before {
+            line-height: 1.3em;
+            font-size: 1.5em;
         }
     }
 }
@@ -198,20 +198,19 @@ form.SearchBar {
     //display: inline-block;
     &::before {
         position: absolute;
-        top: 50%;
+        top: 50% !important; //override oi
         margin-top: -20px;
         font-size: $base-font-size;
         //display: inline-block;
-        vertical-align: middle!important;
+        vertical-align: middle!important; //override oi
     }
     input[type="search"] {
         position: absolute;
         top: 50%;
         left: 50%;
-        height: 100%;
         width: 100%;
-        margin: -50% 0 0 -50%;
-        padding-left: 20px;
+        margin: -0.65em 0 0 -50%;
+        padding-left: 25px;
         //@include span(1 of 2 first);
         //display: inline-block;
         vertical-align: middle;
@@ -219,6 +218,7 @@ form.SearchBar {
         background: none repeat scroll 0% 0% rgba(0, 0, 0, 0);
         border: 0px none;
         font-size: 1.5em;
+        box-shadow: none;
     }
     //padding: 1em 0.3em;
     //display: inline-block;
@@ -786,6 +786,7 @@ input[type="text"], input[type="password"], textarea, input[type="email"], input
     //box-shadow: 0 0 10px 0 lighten($base-background-color, 5%) inset, 0 0 10px 0 darken($base-background-color, 5%);
     box-shadow: 0px 1px 0px rgba($more-contrast-2, 0.1), 0px 1px 7px 0px rgba($base-background-color, 0.8) inset;
     background: none repeat scroll 0% 0% rgba($less-contrast-1, 0.3);
+    -webkit-appearance: textfield;
 
     @include placeholder {
         color: $less-contrast-2;
@@ -793,27 +794,56 @@ input[type="text"], input[type="password"], textarea, input[type="email"], input
 }
 
 .main-enter {
-    visibility: show;
+    //visibility: show;
     opacity: 0.01;
     transition: opacity .5s ease-in;
 }
 .main-enter.main-enter-active {
-    visibility: show;
+    //visibility: show;
     opacity: 1;
 }
 .main-leave {
     // don't want this animation, but need it because disabling it in JS breaks iOS
-    visibility: hidden;
+    //visibility: hidden;
     opacity: 0.0000001;
     transition: opacity 0.000001s ease-in;
 }
 .main-leave.main-leave-active {
-    visibility: hidden;
+    //visibility: hidden;
     opacity: 0;
 }
-
+$large-screen: 980px;
 body {
-    @include breakpoint(980px) {
-        background: green;
+    @include breakpoint($large-screen) {
+        max-width: $large-screen;
+    }
+}
+header.TopBar {
+    @include breakpoint($large-screen) {
+        @include span(1 of 1);
+    }
+    nav.NavBar {
+        @include breakpoint($large-screen) {
+            @include span(1 of 2 0 last);
+        }
+    }
+    section.SearchBar {
+        @include breakpoint($large-screen) {
+            @include span(1 of 2 0);
+            background-position: left top;
+            box-shadow: none;
+            border: none;
+        }
+        form.SearchBar {
+            @include breakpoint($large-screen) {
+                left: 200px; // es-MX
+                margin-left: 0;
+                width: $large-screen/2 - 200px;
+            }
+            input[type="search"] {
+                @include breakpoint($large-screen) {
+                }
+            }
+        }
     }
 }

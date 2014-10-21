@@ -3,7 +3,7 @@
 var Q = require('q');
 var appUtil = require('./util.js');
 var React = require('react/addons');
-var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+//var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 var LifecycleDebug = require('react-lifecycle-debug');
 var InfiniteScroll = require('react-infinite-scroll')(React, [LifecycleDebug({displayName: 'InfiniteScroll'})]);
 var l10n = require('./l10n.js');
@@ -1074,6 +1074,15 @@ var HashMixin = {
     },
 };
 
+var ScrollToTopMixin = {
+    componentDidMount: function () {
+        window.scroll(0, 0);
+    },
+    componentDidUpdate: function () {
+        window.scroll(0, 0);
+    }
+};
+
 /**
  * depends on I18nMixin
  */
@@ -1546,9 +1555,7 @@ var CrowDictionary = React.createClass({
             <body>
             <div>
                 <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} onToMyActivity={this.handleToMyActivity} topState={this.state} ref="topBar" />
-                <ReactCSSTransitionGroup transitionName="main">
                     {mainContent}
-                </ReactCSSTransitionGroup>
             </div>
             <footer>{this.messages.Footer.copyrightNotice}</footer>
             <script src="/static/js/app.js" />
@@ -1706,7 +1713,7 @@ var YesnoMessage = React.createClass({
 });
 
 var PhraseDetails = React.createClass({
-    mixins: [I18nMixin, HashMixin, EndpointsMixin, LinksMixin],
+    mixins: [I18nMixin, ScrollToTopMixin, EndpointsMixin, LinksMixin],
     handleBack: function (e) {
         e.preventDefault();
         this.props.onClosePhraseDetails();
@@ -2707,6 +2714,8 @@ var PhraseSearchResults = React.createClass({
             resetPageStart: true
         }));
     },
+    componentWillMount: function () {
+    },
     componentDidUpdate: function () {
         /*this.setState({
             resetPageStart: false
@@ -2874,7 +2883,7 @@ var LeaderboardItem = React.createClass({
 });
 
 var ContributorProfile = React.createClass({
-    mixins: [I18nMixin, LinksMixin, EndpointsMixin],
+    mixins: [I18nMixin, ScrollToTopMixin, LinksMixin, EndpointsMixin],
     render: function () {
         var editElement = '',
             m = this.messages.ContributorProfile,
@@ -2989,7 +2998,7 @@ var ContributorActivityItem = React.createClass({
         var ao = this.props.activityObject,
             phraseId = ao.phrase_id,
             phrase = ao.phrase,
-            phraseUrl = aUrl(this.getEndpoint('phrase', {phrase: phrase}) + "#main", this.props.topState.shortLangCode),
+            phraseUrl = aUrl(this.getEndpoint('phrase', {phrase: phrase}), this.props.topState.shortLangCode),
             activityType = ao.type,
             val = ao.val,
             goToPhraseLinkMessage = this.messages.ContributorActivityItem.goToPhraseLink,
