@@ -39326,12 +39326,14 @@ module.exports.getLocaleEndpointsMap = getLocaleEndpointsMap;
 module.exports.langDetect = langDetect;
 
 },{"lodash":22,"q":23,"util":12}],179:[function(require,module,exports){
+var isEmptyValue = function (value) {
+    return _.isEmpty(value) || value.toString().replace(/\s+/g, '') === '';
+};
+
 module.exports = {
-    isEmptyValue: function (value) {
-        return _.isEmpty(value) || value.toString().replace(/\s+/g, '') === '';
-    },
+    isEmptyValue: isEmptyValue,
     isNotEmptyValue: function (value) {
-        return !_.isEmptyValue(value);
+        return !isEmptyValue(value);
     },
     isNotEmpty: function (value) {
         return !_.isEmpty(value);

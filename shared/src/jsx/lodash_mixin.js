@@ -1,9 +1,11 @@
+var isEmptyValue = function (value) {
+    return _.isEmpty(value) || value.toString().replace(/\s+/g, '') === '';
+};
+
 module.exports = {
-    isEmptyValue: function (value) {
-        return _.isEmpty(value) || value.toString().replace(/\s+/g, '') === '';
-    },
+    isEmptyValue: isEmptyValue,
     isNotEmptyValue: function (value) {
-        return !_.isEmptyValue(value);
+        return !isEmptyValue(value);
     },
     isNotEmpty: function (value) {
         return !_.isEmpty(value);
