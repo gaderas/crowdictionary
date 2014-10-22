@@ -102,7 +102,7 @@ appWs.use(function *(next) {
     console.log('csrf middleware after yield');
 });
 appWs.use(function *(next) {
-    var contributorCookie = this.cookies.get('contributor', {signed: true}),
+    var contributorCookie = decodeURIComponent(this.cookies.get('contributor', {signed: true})),
         contributor;
     try {
         contributor = JSON.parse(contributorCookie);
@@ -148,7 +148,7 @@ appWs.post('/login', function *(next) {
                 this.status = 403;
                 return {message: "account hasn't been verified", errno: 12};
             }
-            this.cookies.set('contributor', JSON.stringify(safeContributorInfo), {signed: true});
+            this.cookies.set('contributor', encodeURIComponent(JSON.stringify(safeContributorInfo)), {signed: true});
             return {message: "login successful", infono: 2};
         }.bind(this))
         .fail(function (err) {
@@ -166,7 +166,7 @@ appWs.get('/login', function *(next) {
                 }
                 var contributor = contributorsRes[0],
                     safeContributorInfo = appUtil.getObjectWithoutProps(contributor, ['passhash', 'verification_code']);
-                this.cookies.set('contributor', JSON.stringify(safeContributorInfo), {signed: true});
+                this.cookies.set('contributor', encodeURIComponent(JSON.stringify(safeContributorInfo)), {signed: true});
                 return _.merge(safeContributorInfo, {crumb: app.crumb});
             }.bind(this));
         return;
@@ -433,7 +433,7 @@ appWs.put('/lang/:lang/phrases/:phrase', function *(next) {
     console.log("phrase in URI: '" + this.params.phrase + "'");
     console.log('put /phrases incoming body: ' + JSON.stringify(this.request.body));
     var requestBody = appUtil.getObjectWithoutProps(this.request.body, ['contributor_id']),
-        contributorCookie = this.cookies.get('contributor', {signed: true}),
+        contributorCookie = decodeURIComponent(this.cookies.get('contributor', {signed: true})),
         contributor = JSON.parse(contributorCookie) || {};
     requestBody.contributor_id = contributor.id;
     if (!requestBody.contributor_id) {
@@ -507,7 +507,7 @@ appWs.get('/definitions', function *(next) {
  */
 appWs.post('/lang/:lang/phrases/:phrase/definitions', function *(next) {
     var requestBody = appUtil.getObjectWithoutProps(this.request.body, ['contributor_id']),
-        contributorCookie = this.cookies.get('contributor', {signed: true}),
+        contributorCookie = decodeURIComponent(this.cookies.get('contributor', {signed: true})),
         contributor = JSON.parse(contributorCookie) || {};
     requestBody.contributor_id = contributor.id;
     if (!requestBody.contributor_id) {
@@ -564,7 +564,7 @@ appWs.post('/lang/:lang/phrases/:phrase/definitions', function *(next) {
  */
 appWs.put('/definitions/:definition_id/vote', function *(next) {
     var requestBody = appUtil.getObjectWithoutProps(this.request.body, ['contributor_id']),
-        contributorCookie = this.cookies.get('contributor', {signed: true}),
+        contributorCookie = decodeURIComponent(this.cookies.get('contributor', {signed: true})),
         contributor = JSON.parse(contributorCookie) || {};
     requestBody.contributor_id = contributor.id;
     if (!requestBody.contributor_id) {
