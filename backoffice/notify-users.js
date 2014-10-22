@@ -58,7 +58,7 @@ var emailContributor = function (kind, contributor, sentCodeFieldName, mailerFun
 };
 
 var emailPasswordRecoveryRequests = function () {
-    db.getContributors({password_reset_status: 'requested'})
+    return db.getContributors({password_reset_status: 'requested'})
         .then(function (contributors) {
             console.log("contributors that we'll send password reset emails to: " + JSON.stringify(contributors));
             _.forEach(contributors, function (contributor) {
@@ -68,17 +68,21 @@ var emailPasswordRecoveryRequests = function () {
         });
 };
 var emailNewContributors = function () {
-    db.getContributors({status: 'new'})
+    return db.getContributors({status: 'new'})
         .then(function (contributors) {
             console.log("contributors that we'll send activation emails to: " + JSON.stringify(contributors));
             _.forEach(contributors, function (contributor) {
                 var mailerFunc = mailer.sendAccountVerificationEmail.bind(mailer); //.bind(mailer, contributor.email, lang, rootUrl, code);
                 return emailContributor('account_verification', contributor, 'verification_code', mailerFunc, {status: 'pendingVerification'});
             });
-        })
+        });
 };
 
 
-
-emailNewContributors();
-emailPasswordRecoveryRequests();
+Q.fcall(emailNewContributors)
+    .then(function (res) {
+        return Q.fcall(emailPasswordRecoveryRequests)
+    })
+    .then(function () {
+        return db.end();
+    });

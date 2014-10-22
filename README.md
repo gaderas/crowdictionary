@@ -90,3 +90,10 @@ Sample requests
 *   PUT vote - vote or change vote if definition_id/contributor_id already voted
     `curl -X PUT -d '{"crumb": "OF4iZigBP9Eb5pvuXY2bnSnyWR4", "vote": "neutral", "definition_id": 1}' -H "Content-Type: application/json" "http://localhost:3000/v1/definitions/1/vote" --cookie /tmp/cookiez -v`
 
+
+Deployment
+----
+
+    * make sure that the following setting is set on mysql's `my.cnf`: `sql_mode = STRICT_ALL_TABLES`
+    * check that the setting mentioned above is indeed active by running: `show global variables where variable_name = 'sql_mode';`... the expected output is: `sql_mode: STRICT_ALL_TABLES`
+    * copy the `dbip` db (which is not part of the repo), and load it into a database of the same name (`dbip`)

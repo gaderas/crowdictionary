@@ -23,6 +23,10 @@ var Data = function (dbConfig) {
     }.bind(this);
 };
 
+Data.prototype.end = function () {
+    var denodifiedEnd = Q.nbind(this.pool.end, this.pool);
+    return denodifiedEnd();
+};
 
 Data.prototype.getContributors = function (params) {
     var pQuery = this.pQuery,
