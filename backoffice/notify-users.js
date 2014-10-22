@@ -18,13 +18,13 @@ var db = dsFactory(nconf),
 
 
 //resetContributorFields, e.g.: [{password_reset_status: 'emailed'}]
-var emailContributor = function (kind, contributor, sentCodeFieldName, mailerFunc, resetContributorFields) {
+var pEmailContributor = function (kind, contributor, sentCodeFieldName, mailerFunc, resetContributorFields) {
     var code = contributor[sentCodeFieldName],
         nowTs = appUtil.toUTCISOString(new Date()),
         lang = contributor.preferred_langs.split(',')[0],
         rootUrl = localeRootMap[lang];
     console.log("on emailContributor()");
-    Q.allSettled([
+    return Q.allSettled([
         db.putNotification({type: 'email', kind: kind, code: code, recipient: contributor.email, contributor_id: contributor.id, scheduled: nowTs, sent: nowTs}),
         mailerFunc.call(null, contributor.email, lang, rootUrl, code)
     ])
@@ -53,36 +53,35 @@ var emailContributor = function (kind, contributor, sentCodeFieldName, mailerFun
         })
         .fail(function (err) {
             console.error("something went utterly wrong!: " + err);
-        })
-        .done();
+        });
 };
 
-var emailPasswordRecoveryRequests = function () {
+var pEmailPasswordRecoveryRequests = function () {
     return db.getContributors({password_reset_status: 'requested'})
         .then(function (contributors) {
             console.log("contributors that we'll send password reset emails to: " + JSON.stringify(contributors));
-            _.forEach(contributors, function (contributor) {
+            var pEmails = _.map(contributors, function (contributor) {
                 var mailerFunc = mailer.sendPasswordRecoveryEmail.bind(mailer); //.bind(mailer, contributor.email, lang, rootUrl, code);
-                return emailContributor('password_reset', contributor, 'password_reset_code', mailerFunc, {password_reset_status: 'emailed'});
+                return pEmailContributor('password_reset', contributor, 'password_reset_code', mailerFunc, {password_reset_status: 'emailed'});
             });
+            return Q.all(pEmails);
         });
 };
-var emailNewContributors = function () {
+var pEmailNewContributors = function () {
     return db.getContributors({status: 'new'})
         .then(function (contributors) {
             console.log("contributors that we'll send activation emails to: " + JSON.stringify(contributors));
-            _.forEach(contributors, function (contributor) {
+            var pEmails = _.map(contributors, function (contributor) {
                 var mailerFunc = mailer.sendAccountVerificationEmail.bind(mailer); //.bind(mailer, contributor.email, lang, rootUrl, code);
-                return emailContributor('account_verification', contributor, 'verification_code', mailerFunc, {status: 'pendingVerification'});
+                return pEmailContributor('account_verification', contributor, 'verification_code', mailerFunc, {status: 'pendingVerification'});
             });
+            return Q.all(pEmails);
         });
 };
 
 
-Q.fcall(emailNewContributors)
-    .then(function (res) {
-        return Q.fcall(emailPasswordRecoveryRequests)
-    })
+pEmailNewContributors()
+    .then(pEmailPasswordRecoveryRequests)
     .then(function () {
         return db.end();
     });
