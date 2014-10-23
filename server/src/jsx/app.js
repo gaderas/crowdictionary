@@ -80,6 +80,10 @@ var generate_random_code = function () {
 
 
 app.use(compress());
+appReact.use(function *(next) {
+    yield next;
+    this.set("Cache-Control", "no-cache");
+});
 appReact.use(router(appReact));
 app.keys = nconf.get("cookies:user:secrets").split(',');
 appWs.use(function *(next) {
@@ -731,7 +735,7 @@ _.forEach(routesInfo, function (routeInfo) {
                 setInitialState(state);
                 var markup = "<!DOCTYPE html>\n" + React.renderComponentToString(
                     <CrowDictionary nRouteInfo={nRouteInfo} />
-                ).replace(/<html /, '<html manifest="/static/assets/global_cache.manifest" ');
+                ).replace(/<html /, '<html '); // for now, don't use app cache. was: manifest="/static/assets/global_cache.manifest" 
                 this.body = markup;
                 return;
             }).bind(this))

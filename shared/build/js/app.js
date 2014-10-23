@@ -1541,7 +1541,6 @@ var CrowDictionary = React.createClass({displayName: 'CrowDictionary',
             mainContent = PhraseSearchResults( {topState:this.state, onSelectPhrase:this.handleSelectPhrase, onSetInfo:this.handleSetInfo, key:"PhraseSearchResults"});
         }
         var faviconUrl = aUrl("/static/assets/img/mexionario-64x64.png", this.state.shortLangCode);
-        //manifest="/static/assets/global_cache.manifest"
         return (
             React.DOM.html( {lang:"en-US", dir:"ltr"} , 
             React.DOM.head(null, 
