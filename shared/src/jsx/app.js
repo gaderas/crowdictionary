@@ -7,9 +7,8 @@ var React = require('react/addons');
 var LifecycleDebug = require('react-lifecycle-debug');
 var InfiniteScroll = require('react-infinite-scroll')(React, [LifecycleDebug({displayName: 'InfiniteScroll'})]);
 var l10n = require('./l10n.js');
-var Intl = global.Intl || require('intl');
+//var Intl = global.Intl || require('intl');
 var IntlMessageFormat = require('intl-messageformat');
-var bs = require('./bootstrap.js');
 var _ = require('lodash');
 var util = require('util');
 var querystring = require('querystring');
@@ -30,8 +29,6 @@ var pRequest,
         Router = incoming;
     };
 
-var Layout = bs.Layout;
-var Widget = bs.Widget;
 var mainReactComponentMounted = false;
 var PHRASES_PAGE_SIZE = 25;
 
@@ -3138,7 +3135,6 @@ var AddPhraseForm = React.createClass({
 });
 
 
-module.exports.bs = bs;
 module.exports.routesInfo = routesInfo;
 module.exports.getNormalizedRouteInfo = getNormalizedRouteInfo;
 module.exports.setupRoute = setupRoute;

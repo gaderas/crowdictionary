@@ -2,7 +2,7 @@
 
 var Q = require('q');
 var util = require('util');
-var React = require('react');
+var React = require('react/addons');
 var _ = require('lodash');
 var shared = require('../../../../shared/build/js/app.js');
 
@@ -10,8 +10,6 @@ var CrowDictionary = shared.CrowDictionary,
     routesInfo = shared.routesInfo,
     setPRequest = shared.setPRequest,
     setRouter = shared.setRouter;
-
-console.log('ehlos');
 
 var request = require('browser-request');
 var pRequest = Q.denodeify(request);

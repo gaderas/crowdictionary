@@ -1,5 +1,8 @@
 /** @jsx React.DOM */
 
+var path = require('path');
+var approot = path.dirname(path.dirname(path.dirname(__dirname)));
+
 var Q = require('q');
 var request = require('request');
 var React = require('react');
@@ -27,7 +30,10 @@ var url = require('url');
 
 var NODE_ENV = process.env.NODE_ENV;
 
-nconf.argv().env().file({file: './config/'+NODE_ENV+'.config.json'});
+
+console.log("server...app.js __dirname: " + __dirname);
+
+nconf.argv().env().file({file: approot + '/config/' + NODE_ENV + '.config.json'});
 
 console.log('nconf.get("NODE_ENV"): ' + nconf.get('NODE_ENV'));
 
@@ -79,6 +85,10 @@ var generate_random_code = function () {
 };
 
 
+app.use(function *(next) {
+    yield next;
+    console.log("host: %s", this.hostname);
+});
 app.use(compress());
 appReact.use(function *(next) {
     yield next;
@@ -752,6 +762,8 @@ app.use(mount('/static', serve('./client/build')));
 app.use(mount('/v1', appWs));
 app.use(mount('/', appReact));
 
-app.listen(3000);
+//app.listen(3000);
 
-console.log('listening on port 3000');
+//console.log('listening on port 3000');
+
+module.exports = appReact;
