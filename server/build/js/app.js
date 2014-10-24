@@ -96,7 +96,9 @@ appReact.use(function *(next) {
 });
 appReact.use(router(appReact));
 app.keys = nconf.get("cookies:user:secrets").split(',');
+appWs.keys = nconf.get("cookies:user:secrets").split(',');
 appWs.use(function *(next) {
+    this.keys = nconf.get("cookies:user:secrets").split(',');
     var browserId = this.cookies.get('browserId', {signed: true}),
         keygrip = new Keygrip(app.keys),
         crumb,
@@ -758,7 +760,7 @@ _.forEach(routesInfo, function (routeInfo) {
 });
 
 
-app.use(mount('/static', serve('./client/build')));
+app.use(mount('/static', serve(approot + '/client/build')));
 app.use(mount('/v1', appWs));
 app.use(mount('/', appReact));
 
@@ -766,4 +768,9 @@ app.use(mount('/', appReact));
 
 //console.log('listening on port 3000');
 
-module.exports = appReact;
+//module.exports = mount('/', serve('./client/build'));
+var testApp = koa();
+testApp.use(function *(next) {
+    this.body = "weee??";
+});
+module.exports = app;

@@ -51,6 +51,7 @@ TODO Features
 BUGS
 ----
 
+*   Pagination only showing 1 or 2 pages. Infinite scroll is able to load all content, but need pagination to render correct pagination links for SEO.
 *   ~~When the mysql library throws an exception (like "/Users/germoad/crowdictionary/node_modules/mysql/lib/protocol/Parser.js:82") hit kills the server~~
 *   ~~Sometimes (when infinite scroll pages are hit), the browser history is polluted with lots of wrong and unnecessary entries~~
 *   After hitting "/login?contributorAccountCreated=1" by hand, OK is not getting rid of the Info component

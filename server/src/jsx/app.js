@@ -97,10 +97,13 @@ appReact.use(function *(next) {
 appReact.use(router(appReact));
 app.keys = nconf.get("cookies:user:secrets").split(',');
 appWs.use(function *(next) {
-    var browserId = this.cookies.get('browserId', {signed: true}),
+    var browserId = this.cookies.get('browserId', {signed: true}), // requires .keys to be set on the *topmost* parent app,
+                                                                   // if this is run standalone, the parent of appWs is app,
+                                                                   // if this is run via the 'koa-composer' vhost approach,
+                                                                   // the parent is that app...
         keygrip = new Keygrip(app.keys),
         crumb,
-        now = new Date();;
+        now = new Date();
     if (!browserId) {
         try {
             browserId = keygrip.sign(crypto.randomBytes(256));
@@ -757,13 +760,11 @@ _.forEach(routesInfo, function (routeInfo) {
 
 });
 
-
-app.use(mount('/static', serve('./client/build')));
+app.use(mount('/static', serve(approot + '/client/build')));
 app.use(mount('/v1', appWs));
 app.use(mount('/', appReact));
 
 //app.listen(3000);
-
 //console.log('listening on port 3000');
 
-module.exports = appReact;
+module.exports = app;
