@@ -2703,7 +2703,8 @@ var PhraseSearchResults = React.createClass({displayName: 'PhraseSearchResults',
     getInitialState: function () {
         return _.merge(this.props.topState, {
             hasMore: this.hasMore(this.props.topState),
-            resetPageStart: false
+            resetPageStart: false,
+            showPagination: true
         });
     },
     componentWillReceiveProps: function (nextProps) {
@@ -2733,7 +2734,8 @@ var PhraseSearchResults = React.createClass({displayName: 'PhraseSearchResults',
                 this.setState({
                     searchResults: _.union(this.state.searchResults, reactState.searchResults),
                     hasMore: this.hasMore(reactState),
-                    resetPageStart: false
+                    resetPageStart: false,
+                    showPagination: false
                 });
             }.bind(this));
     },
@@ -2741,7 +2743,8 @@ var PhraseSearchResults = React.createClass({displayName: 'PhraseSearchResults',
         console.log("on page: " + page + ", this.hackPagination: " + this.hackPagination);
         var term = this.state.searchTerm,
             shortLangCode = this.state.shortLangCode,
-            page = !this.hackPagination ? parseInt(this.state.page, 10) : (parseInt(this.state.page, 10) + 1),
+            //page = !this.hackPagination ? parseInt(this.state.page, 10) : (parseInt(this.state.page, 10) + 1),
+            page = parseInt(this.state.page, 10),
             links = [];
         console.log("on page: " + page + ", this.hackPagination: " + this.hackPagination + ", this.state.page: " + this.state.page);
         this.hackPagination = true; // ugly hack to get around non asynchronous implementation. not very important since we only have pagination for SEO
@@ -2753,9 +2756,9 @@ var PhraseSearchResults = React.createClass({displayName: 'PhraseSearchResults',
         }
         links.push(React.DOM.li(null, React.DOM.span( {key:"current"}, page + 1)));
         if (this.state.hasMore) {
-            var nextPage = page + 2,
+            var nextPage = page + 1,
                 pageUrl = (term && aUrl(util.format("/?q=%s&page=%d", term, nextPage), shortLangCode)) || aUrl(util.format("/?page=%d", nextPage), shortLangCode);
-            links.push(React.DOM.li(null, React.DOM.a( {href:pageUrl, onClick:this.handleToLink.bind(this, pageUrl), key:"next"}, nextPage)));
+            links.push(React.DOM.li(null, React.DOM.a( {href:pageUrl, onClick:this.handleToLink.bind(this, pageUrl), key:"next"}, nextPage + 1)));
         }
         return (
             React.DOM.ol(null, 
@@ -2781,17 +2784,21 @@ var PhraseSearchResults = React.createClass({displayName: 'PhraseSearchResults',
                 phraseSearchResults
             ),
             searchTerm = this.props.topState.searchTerm,
-            topSearchCaption = (searchTerm && TopSearchCaption( {topState:this.props.topState})) || "" ;
+            topSearchCaption = (searchTerm && TopSearchCaption( {topState:this.props.topState})) || "",
+            paginationElements;
+        if (this.state.showPagination) {
+            paginationElements = React.DOM.section( {className:"pagination"}, 
+                React.DOM.h3(null, this.messages.Pagination.pages),
+                this.getPagination()
+            );
+        }
         return (
             React.DOM.main( {className:"phrase-list", id:"main"}, 
                 topSearchCaption,
                 React.DOM.ul( {className:"phraseSearchResultsList"}, 
                     infiniteScroll
                 ),
-                React.DOM.section( {className:"pagination"}, 
-                    React.DOM.h3(null, this.messages.Pagination.pages),
-                    this.getPagination()
-                )
+                paginationElements
             )
         );
     }
