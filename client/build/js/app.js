@@ -37341,7 +37341,7 @@ var CrowDictionary = React.createClass({displayName: 'CrowDictionary',
         return (
             React.DOM.html( {lang:"en-US", dir:"ltr"} , 
             React.DOM.head(null, 
-              React.DOM.meta( {charset:"utf-8"} ),
+              React.DOM.meta( {charSet:"utf-8"} ),
               React.DOM.meta( {name:"viewport", content:"width=device-width"} ),
               React.DOM.link( {rel:"icon", type:"image/png", href:faviconUrl} ),
               React.DOM.title(null, titleContent),

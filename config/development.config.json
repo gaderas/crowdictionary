@@ -37,7 +37,6 @@
         "default": "es-MX"
     },
     "localeRootMap": {
-        "es-MX": "http://www.mexico.com/",
         "es-MX": "http://127.0.0.1/",
         "es-CL": "http://www.espanol.com/cl",
         "es-PE": "http://www.espanol.com/pe",

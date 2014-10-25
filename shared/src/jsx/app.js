@@ -1542,7 +1542,7 @@ var CrowDictionary = React.createClass({
         return (
             <html lang="en-US" dir="ltr" >
             <head>
-              <meta charset="utf-8" />
+              <meta charSet="utf-8" />
               <meta name="viewport" content="width=device-width" />
               <link rel="icon" type="image/png" href={faviconUrl} />
               <title>{titleContent}</title>
