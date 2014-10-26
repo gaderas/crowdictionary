@@ -37729,16 +37729,19 @@ var DefinitionInDetails = React.createClass({displayName: 'DefinitionInDetails',
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
             phrase = this.props.topState.shownPhraseData.phrase,
             definition = definitionObj.definition,
-            definitionElements = _.map(definition.replace(/[\n]+/, "\n").split(/\n/), function (row, i) {
+            definitionP = _.map(definition.replace(/[\n]+/, "\n").split(/\n/), function (row, i) {
                 return React.DOM.p( {key:i}, row);
             }),
             examples = definitionObj.examples,
-            examplesElements = _.map(examples.replace(/[\n]+/, "\n").split(/\n/), function (row, i) {
+            examplesP = _.map(examples.replace(/[\n]+/, "\n").split(/\n/), function (row, i) {
                 return React.DOM.p( {key:i}, row);
             }),
-            tags = _.map(definitionObj.tags.split(/[,\n]/), function (tag, idx) {
+            tags = _.filter(_.map(definitionObj.tags.split(/\s*[,\n]\s*/), function (tag, idx) {
+                if (tag.match(/^\s*$/)) {
+                    return false;
+                }
                 return DefinitionTag( {topState:this.props.topState, tag:tag.replace(/(^\s*|\s*$)/, ''), key:idx})
-            }.bind(this)),
+            }.bind(this))),
             votesUpCount = _.filter(definitionObj.votes, {vote: "up"}).length,
             votesDownCount = _.filter(definitionObj.votes, {vote: "down"}).length,
             thumbsUpMessage = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsUpMessage), {numVotes: votesUpCount}),
@@ -37753,20 +37756,32 @@ var DefinitionInDetails = React.createClass({displayName: 'DefinitionInDetails',
             authorProfileUrl = aUrl(this.getEndpoint('contributorProfile', {contributor_id: definitionObj.contributor_id}), this.props.topState.shortLangCode),
             cx = React.addons.classSet,
             upClasses = ('up' === userVote && cx({up: true, voted: true})) || cx({up: true}),
-            downClasses = ('down' === userVote && cx({down: true, voted: true})) || cx({down: true});
+            downClasses = ('down' === userVote && cx({down: true, voted: true})) || cx({down: true}),
+            definitionElements = '',
+            examplesElements = '',
+            tagsElements = '';
+        if ('' !== definition.replace(/\s*/, '')) {
+            definitionElements = React.DOM.dd( {className:"definition"}, 
+                        React.DOM.span( {className:"abbr"}, definitionAbbr),
+                        definitionP
+                    );
+        }
+        if ('' !== examples.replace(/\s*/, '')) {
+            examplesElements = React.DOM.dd( {className:"examples"}, 
+                        React.DOM.span( {className:"abbr"}, exampleAbbr),
+                        examplesP
+                    );
+        }
+        if (tags.length) {
+            tagsElements = React.DOM.dd( {className:"tags"}, React.DOM.span(null, tagsCaption),React.DOM.ul(null, tags));
+        }
         return (
             React.DOM.li(null, 
                 React.DOM.dl(null, 
                     React.DOM.dt(null, phrase),
-                    React.DOM.dd( {className:"definition"}, 
-                        React.DOM.span( {className:"abbr"}, definitionAbbr),
-                        definitionElements
-                    ),
-                    React.DOM.dd( {className:"examples"}, 
-                        React.DOM.span( {className:"abbr"}, exampleAbbr),
-                        examplesElements
-                    ),
-                    React.DOM.dd( {className:"tags"}, React.DOM.span(null, tagsCaption),React.DOM.ul(null, tags))
+                    definitionElements,
+                    examplesElements,
+                    tagsElements
                 ),
                 React.DOM.div( {className:"author"}, 
                     React.DOM.span( {className:"by"}, byCaption, " ", React.DOM.a( {href:authorProfileUrl, onClick:this.handleToLink.bind(this, authorProfileUrl)}, authorNick))

@@ -1930,16 +1930,19 @@ var DefinitionInDetails = React.createClass({
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
             phrase = this.props.topState.shownPhraseData.phrase,
             definition = definitionObj.definition,
-            definitionElements = _.map(definition.replace(/[\n]+/, "\n").split(/\n/), function (row, i) {
+            definitionP = _.map(definition.replace(/[\n]+/, "\n").split(/\n/), function (row, i) {
                 return <p key={i}>{row}</p>;
             }),
             examples = definitionObj.examples,
-            examplesElements = _.map(examples.replace(/[\n]+/, "\n").split(/\n/), function (row, i) {
+            examplesP = _.map(examples.replace(/[\n]+/, "\n").split(/\n/), function (row, i) {
                 return <p key={i}>{row}</p>;
             }),
-            tags = _.map(definitionObj.tags.split(/[,\n]/), function (tag, idx) {
+            tags = _.filter(_.map(definitionObj.tags.split(/\s*[,\n]\s*/), function (tag, idx) {
+                if (tag.match(/^\s*$/)) {
+                    return false;
+                }
                 return <DefinitionTag topState={this.props.topState} tag={tag.replace(/(^\s*|\s*$)/, '')} key={idx}/>
-            }.bind(this)),
+            }.bind(this))),
             votesUpCount = _.filter(definitionObj.votes, {vote: "up"}).length,
             votesDownCount = _.filter(definitionObj.votes, {vote: "down"}).length,
             thumbsUpMessage = this.fmt(this.msg(this.messages.DefinitionInDetails.thumbsUpMessage), {numVotes: votesUpCount}),
@@ -1954,20 +1957,32 @@ var DefinitionInDetails = React.createClass({
             authorProfileUrl = aUrl(this.getEndpoint('contributorProfile', {contributor_id: definitionObj.contributor_id}), this.props.topState.shortLangCode),
             cx = React.addons.classSet,
             upClasses = ('up' === userVote && cx({up: true, voted: true})) || cx({up: true}),
-            downClasses = ('down' === userVote && cx({down: true, voted: true})) || cx({down: true});
+            downClasses = ('down' === userVote && cx({down: true, voted: true})) || cx({down: true}),
+            definitionElements = '',
+            examplesElements = '',
+            tagsElements = '';
+        if ('' !== definition.replace(/\s*/, '')) {
+            definitionElements = <dd className="definition">
+                        <span className="abbr">{definitionAbbr}</span>
+                        {definitionP}
+                    </dd>;
+        }
+        if ('' !== examples.replace(/\s*/, '')) {
+            examplesElements = <dd className="examples">
+                        <span className="abbr">{exampleAbbr}</span>
+                        {examplesP}
+                    </dd>;
+        }
+        if (tags.length) {
+            tagsElements = <dd className="tags"><span>{tagsCaption}</span><ul>{tags}</ul></dd>;
+        }
         return (
             <li>
                 <dl>
                     <dt>{phrase}</dt>
-                    <dd className="definition">
-                        <span className="abbr">{definitionAbbr}</span>
-                        {definitionElements}
-                    </dd>
-                    <dd className="examples">
-                        <span className="abbr">{exampleAbbr}</span>
-                        {examplesElements}
-                    </dd>
-                    <dd className="tags"><span>{tagsCaption}</span><ul>{tags}</ul></dd>
+                    {definitionElements}
+                    {examplesElements}
+                    {tagsElements}
                 </dl>
                 <div className="author">
                     <span className="by">{byCaption} <a href={authorProfileUrl} onClick={this.handleToLink.bind(this, authorProfileUrl)}>{authorNick}</a></span>
