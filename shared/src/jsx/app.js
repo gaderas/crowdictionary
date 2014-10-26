@@ -1493,6 +1493,7 @@ var CrowDictionary = React.createClass({
             // log out
             mainContent = <LogOutOutcome topState={this.state} doLogOut={this.doLogOut} key="LogOutOutcome"/>
         } else if (this.state.shownPhraseData) {
+            // phrase details
             titleContent = this.fmt(this.msg(this.messages.Titles.phrase), {phrase: this.state.shownPhraseData.phrase});
             mainContent = <PhraseDetails topState={this.state} onVote={this.handleDefinitionVote} onClosePhraseDetails={this.handleClosePhraseDetails} getSearchTermFromDOM={this.getSearchTermFromDOM} onSetInfo={this.handleSetInfo} key="PhraseDetails"/>;
         } else if (!_.isEmpty(this.state.contributorActivity)) {
@@ -1929,7 +1930,13 @@ var DefinitionInDetails = React.createClass({
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
             phrase = this.props.topState.shownPhraseData.phrase,
             definition = definitionObj.definition,
+            definitionElements = _.map(definition.replace(/[\n]+/, "\n").split(/\n/), function (row, i) {
+                return <p key={i}>{row}</p>;
+            }),
             examples = definitionObj.examples,
+            examplesElements = _.map(examples.replace(/[\n]+/, "\n").split(/\n/), function (row, i) {
+                return <p key={i}>{row}</p>;
+            }),
             tags = _.map(definitionObj.tags.split(/[,\n]/), function (tag, idx) {
                 return <DefinitionTag topState={this.props.topState} tag={tag.replace(/(^\s*|\s*$)/, '')} key={idx}/>
             }.bind(this)),
@@ -1954,13 +1961,11 @@ var DefinitionInDetails = React.createClass({
                     <dt>{phrase}</dt>
                     <dd className="definition">
                         <span className="abbr">{definitionAbbr}</span>
-                        {definition}
+                        {definitionElements}
                     </dd>
                     <dd className="examples">
                         <span className="abbr">{exampleAbbr}</span>
-                        <span className="oi" data-glyph="double-quote-serif-left"/>
-                            {examples}
-                        <span className="oi" data-glyph="double-quote-serif-right"/>
+                        {examplesElements}
                     </dd>
                     <dd className="tags"><span>{tagsCaption}</span><ul>{tags}</ul></dd>
                 </dl>

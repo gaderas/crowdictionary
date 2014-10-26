@@ -1493,6 +1493,7 @@ var CrowDictionary = React.createClass({displayName: 'CrowDictionary',
             // log out
             mainContent = LogOutOutcome( {topState:this.state, doLogOut:this.doLogOut, key:"LogOutOutcome"})
         } else if (this.state.shownPhraseData) {
+            // phrase details
             titleContent = this.fmt(this.msg(this.messages.Titles.phrase), {phrase: this.state.shownPhraseData.phrase});
             mainContent = PhraseDetails( {topState:this.state, onVote:this.handleDefinitionVote, onClosePhraseDetails:this.handleClosePhraseDetails, getSearchTermFromDOM:this.getSearchTermFromDOM, onSetInfo:this.handleSetInfo, key:"PhraseDetails"});
         } else if (!_.isEmpty(this.state.contributorActivity)) {
@@ -1929,7 +1930,13 @@ var DefinitionInDetails = React.createClass({displayName: 'DefinitionInDetails',
             definitionObj = this.props.topState.shownPhraseData.definitions[this.props.key],
             phrase = this.props.topState.shownPhraseData.phrase,
             definition = definitionObj.definition,
+            definitionElements = _.map(definition.replace(/[\n]+/, "\n").split(/\n/), function (row, i) {
+                return React.DOM.p( {key:i}, row);
+            }),
             examples = definitionObj.examples,
+            examplesElements = _.map(examples.replace(/[\n]+/, "\n").split(/\n/), function (row, i) {
+                return React.DOM.p( {key:i}, row);
+            }),
             tags = _.map(definitionObj.tags.split(/[,\n]/), function (tag, idx) {
                 return DefinitionTag( {topState:this.props.topState, tag:tag.replace(/(^\s*|\s*$)/, ''), key:idx})
             }.bind(this)),
@@ -1954,13 +1961,11 @@ var DefinitionInDetails = React.createClass({displayName: 'DefinitionInDetails',
                     React.DOM.dt(null, phrase),
                     React.DOM.dd( {className:"definition"}, 
                         React.DOM.span( {className:"abbr"}, definitionAbbr),
-                        definition
+                        definitionElements
                     ),
                     React.DOM.dd( {className:"examples"}, 
                         React.DOM.span( {className:"abbr"}, exampleAbbr),
-                        React.DOM.span( {className:"oi", 'data-glyph':"double-quote-serif-left"}),
-                            examples,
-                        React.DOM.span( {className:"oi", 'data-glyph':"double-quote-serif-right"})
+                        examplesElements
                     ),
                     React.DOM.dd( {className:"tags"}, React.DOM.span(null, tagsCaption),React.DOM.ul(null, tags))
                 ),
