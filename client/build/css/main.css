@@ -1581,7 +1581,6 @@ main.phrase-details > ul > li {
   border: 1px solid #aea6d9;
   border-radius: 20px;
   box-shadow: 0 0 40px 10px #36248f inset;
-  line-height: 1.8em;
   text-align: center;
   padding: 0.6em 0;
   position: relative;
@@ -1626,16 +1625,28 @@ main.phrase-details > ul > li .votes p {
 main.phrase-details > ul > li dt {
   font-weight: bold;
 }
-/* line 330, ../../src/css/main.scss */
+/* line 329, ../../src/css/main.scss */
+main.phrase-details > ul > li dd.definition {
+  line-height: 1.2em;
+}
+/* line 331, ../../src/css/main.scss */
 main.phrase-details > ul > li dd.definition span.abbr {
   padding-left: 0;
 }
 /* line 335, ../../src/css/main.scss */
+main.phrase-details > ul > li dd.definition p {
+  margin-bottom: 0.4em;
+}
+/* line 339, ../../src/css/main.scss */
 main.phrase-details > ul > li dd.examples {
   font-style: italic;
-  line-height: 1em;
+  line-height: 1.2em;
 }
-/* line 342, ../../src/css/main.scss */
+/* line 345, ../../src/css/main.scss */
+main.phrase-details > ul > li dd.examples p {
+  margin-bottom: 0.4em;
+}
+/* line 349, ../../src/css/main.scss */
 main.phrase-details > ul > li dd.tags {
   margin: 20px 0;
   padding: 20px;
@@ -1645,26 +1656,26 @@ main.phrase-details > ul > li dd.tags {
   border-radius: 20px;
   line-height: 1em;
 }
-/* line 350, ../../src/css/main.scss */
+/* line 357, ../../src/css/main.scss */
 main.phrase-details > ul > li dd.tags > span {
   font-size: 75%;
 }
-/* line 353, ../../src/css/main.scss */
+/* line 360, ../../src/css/main.scss */
 main.phrase-details > ul > li dd.tags li {
   display: inline-block;
   padding: 0 8px;
   margin-right: 24px;
 }
-/* line 358, ../../src/css/main.scss */
+/* line 365, ../../src/css/main.scss */
 main.phrase-details > ul > li dd.tags li.exists a {
   font-weight: bold;
   border-bottom: 2px solid #36248f;
 }
-/* line 364, ../../src/css/main.scss */
+/* line 371, ../../src/css/main.scss */
 main.phrase-details > ul > li dd.tags li.not-exists a {
   border-bottom: 2px dotted #36248f;
 }
-/* line 373, ../../src/css/main.scss */
+/* line 380, ../../src/css/main.scss */
 main.phrase-details > ul > li::before {
   color: #aea6d9;
   counter-increment: defNum;
@@ -1677,14 +1688,14 @@ main.phrase-details > ul > li::before {
   font-family: "Georgia","sans-serif",serif;
   z-index: -1;
 }
-/* line 386, ../../src/css/main.scss */
+/* line 393, ../../src/css/main.scss */
 main.phrase-details > div a.back::before {
   padding-left: 0.4em;
   padding-right: 0.6em;
   display: inline;
 }
 
-/* line 392, ../../src/css/main.scss */
+/* line 399, ../../src/css/main.scss */
 main.add-phrase {
   width: 100%;
   float: right;
@@ -1699,45 +1710,45 @@ main.add-phrase:after {
   display: block;
   clear: both;
 }
-/* line 396, ../../src/css/main.scss */
+/* line 403, ../../src/css/main.scss */
 main.add-phrase form {
   width: 100%;
   float: right;
   margin-right: 0;
   text-align: center;
 }
-/* line 399, ../../src/css/main.scss */
+/* line 406, ../../src/css/main.scss */
 main.add-phrase form fieldset {
   width: 60%;
   display: inline-block;
 }
-/* line 406, ../../src/css/main.scss */
+/* line 413, ../../src/css/main.scss */
 main.add-phrase form fieldset input[type="text"] {
   width: 90%;
   height: 1.1em;
   line-height: 1em;
   margin-bottom: 2em;
 }
-/* line 415, ../../src/css/main.scss */
+/* line 422, ../../src/css/main.scss */
 main.add-phrase form fieldset input {
   display: block;
   font-size: 20px;
 }
 
-/* line 462, ../../src/css/main.scss */
+/* line 469, ../../src/css/main.scss */
 main.login {
   width: 100%;
   float: right;
   margin-right: 0;
 }
-/* line 464, ../../src/css/main.scss */
+/* line 471, ../../src/css/main.scss */
 main.login form.login {
   width: 100%;
   float: right;
   margin-right: 0;
   margin-bottom: 4.0404%;
 }
-/* line 425, ../../src/css/main.scss */
+/* line 432, ../../src/css/main.scss */
 main.login form.login fieldset {
   width: 89.89899%;
   float: right;
@@ -1746,38 +1757,38 @@ main.login form.login fieldset {
   padding-top: 4.0404%;
   padding-bottom: 4.0404%;
 }
-/* line 431, ../../src/css/main.scss */
+/* line 438, ../../src/css/main.scss */
 main.login form.login fieldset legend {
   padding-left: 1em;
 }
-/* line 435, ../../src/css/main.scss */
+/* line 442, ../../src/css/main.scss */
 main.login form.login fieldset p {
   font-size: 70%;
   margin-bottom: 4.0404%;
 }
-/* line 439, ../../src/css/main.scss */
+/* line 446, ../../src/css/main.scss */
 main.login form.login fieldset p, main.login form.login fieldset label.username, main.login form.login fieldset label.password {
   width: 89.89899%;
   float: right;
   margin-right: 0;
   margin-right: 5.05051%;
 }
-/* line 443, ../../src/css/main.scss */
+/* line 450, ../../src/css/main.scss */
 main.login form.login fieldset label.username, main.login form.login fieldset label.password {
   margin-bottom: 2.0202%;
 }
-/* line 445, ../../src/css/main.scss */
+/* line 452, ../../src/css/main.scss */
 main.login form.login fieldset label.username > span, main.login form.login fieldset label.password > span {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 448, ../../src/css/main.scss */
+/* line 455, ../../src/css/main.scss */
 main.login form.login fieldset label.username > input, main.login form.login fieldset label.password > input {
   width: 94.73684%;
 }
-/* line 452, ../../src/css/main.scss */
+/* line 459, ../../src/css/main.scss */
 main.login form.login fieldset label.submit {
   width: 24.24242%;
   float: left;
@@ -1785,7 +1796,7 @@ main.login form.login fieldset label.submit {
   margin-left: 10.10101%;
   margin-top: 4.0404%;
 }
-/* line 469, ../../src/css/main.scss */
+/* line 476, ../../src/css/main.scss */
 main.login form.login fieldset section.forgotPassword {
   width: 49.49495%;
   float: right;
@@ -1794,13 +1805,13 @@ main.login form.login fieldset section.forgotPassword {
   font-size: 40%;
   color: #aea6d9;
 }
-/* line 478, ../../src/css/main.scss */
+/* line 485, ../../src/css/main.scss */
 main.login form.signup {
   width: 100%;
   float: right;
   margin-right: 0;
 }
-/* line 425, ../../src/css/main.scss */
+/* line 432, ../../src/css/main.scss */
 main.login form.signup fieldset {
   width: 89.89899%;
   float: right;
@@ -1809,38 +1820,38 @@ main.login form.signup fieldset {
   padding-top: 4.0404%;
   padding-bottom: 4.0404%;
 }
-/* line 431, ../../src/css/main.scss */
+/* line 438, ../../src/css/main.scss */
 main.login form.signup fieldset legend {
   padding-left: 1em;
 }
-/* line 435, ../../src/css/main.scss */
+/* line 442, ../../src/css/main.scss */
 main.login form.signup fieldset p {
   font-size: 70%;
   margin-bottom: 4.0404%;
 }
-/* line 439, ../../src/css/main.scss */
+/* line 446, ../../src/css/main.scss */
 main.login form.signup fieldset p, main.login form.signup fieldset label.username, main.login form.signup fieldset label.password, main.login form.signup fieldset label.nickname, main.login form.signup fieldset label.firstName, main.login form.signup fieldset label.lastName {
   width: 89.89899%;
   float: right;
   margin-right: 0;
   margin-right: 5.05051%;
 }
-/* line 443, ../../src/css/main.scss */
+/* line 450, ../../src/css/main.scss */
 main.login form.signup fieldset label.username, main.login form.signup fieldset label.password, main.login form.signup fieldset label.nickname, main.login form.signup fieldset label.firstName, main.login form.signup fieldset label.lastName {
   margin-bottom: 2.0202%;
 }
-/* line 445, ../../src/css/main.scss */
+/* line 452, ../../src/css/main.scss */
 main.login form.signup fieldset label.username > span, main.login form.signup fieldset label.password > span, main.login form.signup fieldset label.nickname > span, main.login form.signup fieldset label.firstName > span, main.login form.signup fieldset label.lastName > span {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 448, ../../src/css/main.scss */
+/* line 455, ../../src/css/main.scss */
 main.login form.signup fieldset label.username > input, main.login form.signup fieldset label.password > input, main.login form.signup fieldset label.nickname > input, main.login form.signup fieldset label.firstName > input, main.login form.signup fieldset label.lastName > input {
   width: 94.73684%;
 }
-/* line 452, ../../src/css/main.scss */
+/* line 459, ../../src/css/main.scss */
 main.login form.signup fieldset label.submit {
   width: 24.24242%;
   float: left;
@@ -1849,7 +1860,7 @@ main.login form.signup fieldset label.submit {
   margin-top: 4.0404%;
 }
 
-/* line 482, ../../src/css/main.scss */
+/* line 489, ../../src/css/main.scss */
 main.initiate-password-recovery {
   width: 100%;
   float: right;
@@ -1864,13 +1875,13 @@ main.initiate-password-recovery:after {
   display: block;
   clear: both;
 }
-/* line 485, ../../src/css/main.scss */
+/* line 492, ../../src/css/main.scss */
 main.initiate-password-recovery form {
   width: 100%;
   float: right;
   margin-right: 0;
 }
-/* line 425, ../../src/css/main.scss */
+/* line 432, ../../src/css/main.scss */
 main.initiate-password-recovery form fieldset {
   width: 89.89899%;
   float: right;
@@ -1879,38 +1890,38 @@ main.initiate-password-recovery form fieldset {
   padding-top: 4.0404%;
   padding-bottom: 4.0404%;
 }
-/* line 431, ../../src/css/main.scss */
+/* line 438, ../../src/css/main.scss */
 main.initiate-password-recovery form fieldset legend {
   padding-left: 1em;
 }
-/* line 435, ../../src/css/main.scss */
+/* line 442, ../../src/css/main.scss */
 main.initiate-password-recovery form fieldset p {
   font-size: 70%;
   margin-bottom: 4.0404%;
 }
-/* line 439, ../../src/css/main.scss */
+/* line 446, ../../src/css/main.scss */
 main.initiate-password-recovery form fieldset p, main.initiate-password-recovery form fieldset label.email {
   width: 89.89899%;
   float: right;
   margin-right: 0;
   margin-right: 5.05051%;
 }
-/* line 443, ../../src/css/main.scss */
+/* line 450, ../../src/css/main.scss */
 main.initiate-password-recovery form fieldset label.email {
   margin-bottom: 2.0202%;
 }
-/* line 445, ../../src/css/main.scss */
+/* line 452, ../../src/css/main.scss */
 main.initiate-password-recovery form fieldset label.email > span {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 448, ../../src/css/main.scss */
+/* line 455, ../../src/css/main.scss */
 main.initiate-password-recovery form fieldset label.email > input {
   width: 94.73684%;
 }
-/* line 452, ../../src/css/main.scss */
+/* line 459, ../../src/css/main.scss */
 main.initiate-password-recovery form fieldset label.submit {
   width: 24.24242%;
   float: left;
@@ -1919,7 +1930,7 @@ main.initiate-password-recovery form fieldset label.submit {
   margin-top: 4.0404%;
 }
 
-/* line 489, ../../src/css/main.scss */
+/* line 496, ../../src/css/main.scss */
 main.password-recovery {
   width: 100%;
   float: right;
@@ -1934,13 +1945,13 @@ main.password-recovery:after {
   display: block;
   clear: both;
 }
-/* line 492, ../../src/css/main.scss */
+/* line 499, ../../src/css/main.scss */
 main.password-recovery form {
   width: 100%;
   float: right;
   margin-right: 0;
 }
-/* line 425, ../../src/css/main.scss */
+/* line 432, ../../src/css/main.scss */
 main.password-recovery form fieldset {
   width: 89.89899%;
   float: right;
@@ -1949,38 +1960,38 @@ main.password-recovery form fieldset {
   padding-top: 4.0404%;
   padding-bottom: 4.0404%;
 }
-/* line 431, ../../src/css/main.scss */
+/* line 438, ../../src/css/main.scss */
 main.password-recovery form fieldset legend {
   padding-left: 1em;
 }
-/* line 435, ../../src/css/main.scss */
+/* line 442, ../../src/css/main.scss */
 main.password-recovery form fieldset p {
   font-size: 70%;
   margin-bottom: 4.0404%;
 }
-/* line 439, ../../src/css/main.scss */
+/* line 446, ../../src/css/main.scss */
 main.password-recovery form fieldset p, main.password-recovery form fieldset label.email, main.password-recovery form fieldset label.password_reset_code, main.password-recovery form fieldset label.new_password, main.password-recovery form fieldset label.new_password_confirm {
   width: 89.89899%;
   float: right;
   margin-right: 0;
   margin-right: 5.05051%;
 }
-/* line 443, ../../src/css/main.scss */
+/* line 450, ../../src/css/main.scss */
 main.password-recovery form fieldset label.email, main.password-recovery form fieldset label.password_reset_code, main.password-recovery form fieldset label.new_password, main.password-recovery form fieldset label.new_password_confirm {
   margin-bottom: 2.0202%;
 }
-/* line 445, ../../src/css/main.scss */
+/* line 452, ../../src/css/main.scss */
 main.password-recovery form fieldset label.email > span, main.password-recovery form fieldset label.password_reset_code > span, main.password-recovery form fieldset label.new_password > span, main.password-recovery form fieldset label.new_password_confirm > span {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 448, ../../src/css/main.scss */
+/* line 455, ../../src/css/main.scss */
 main.password-recovery form fieldset label.email > input, main.password-recovery form fieldset label.password_reset_code > input, main.password-recovery form fieldset label.new_password > input, main.password-recovery form fieldset label.new_password_confirm > input {
   width: 94.73684%;
 }
-/* line 452, ../../src/css/main.scss */
+/* line 459, ../../src/css/main.scss */
 main.password-recovery form fieldset label.submit {
   width: 24.24242%;
   float: left;
@@ -1989,7 +2000,7 @@ main.password-recovery form fieldset label.submit {
   margin-top: 4.0404%;
 }
 
-/* line 496, ../../src/css/main.scss */
+/* line 503, ../../src/css/main.scss */
 main.edit-profile {
   width: 100%;
   float: right;
@@ -2004,13 +2015,13 @@ main.edit-profile:after {
   display: block;
   clear: both;
 }
-/* line 499, ../../src/css/main.scss */
+/* line 506, ../../src/css/main.scss */
 main.edit-profile form {
   width: 100%;
   float: right;
   margin-right: 0;
 }
-/* line 425, ../../src/css/main.scss */
+/* line 432, ../../src/css/main.scss */
 main.edit-profile form fieldset {
   width: 89.89899%;
   float: right;
@@ -2019,38 +2030,38 @@ main.edit-profile form fieldset {
   padding-top: 4.0404%;
   padding-bottom: 4.0404%;
 }
-/* line 431, ../../src/css/main.scss */
+/* line 438, ../../src/css/main.scss */
 main.edit-profile form fieldset legend {
   padding-left: 1em;
 }
-/* line 435, ../../src/css/main.scss */
+/* line 442, ../../src/css/main.scss */
 main.edit-profile form fieldset p {
   font-size: 70%;
   margin-bottom: 4.0404%;
 }
-/* line 439, ../../src/css/main.scss */
+/* line 446, ../../src/css/main.scss */
 main.edit-profile form fieldset p, main.edit-profile form fieldset label.nickname, main.edit-profile form fieldset label.first_name, main.edit-profile form fieldset label.last_name {
   width: 89.89899%;
   float: right;
   margin-right: 0;
   margin-right: 5.05051%;
 }
-/* line 443, ../../src/css/main.scss */
+/* line 450, ../../src/css/main.scss */
 main.edit-profile form fieldset label.nickname, main.edit-profile form fieldset label.first_name, main.edit-profile form fieldset label.last_name {
   margin-bottom: 2.0202%;
 }
-/* line 445, ../../src/css/main.scss */
+/* line 452, ../../src/css/main.scss */
 main.edit-profile form fieldset label.nickname > span, main.edit-profile form fieldset label.first_name > span, main.edit-profile form fieldset label.last_name > span {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 448, ../../src/css/main.scss */
+/* line 455, ../../src/css/main.scss */
 main.edit-profile form fieldset label.nickname > input, main.edit-profile form fieldset label.first_name > input, main.edit-profile form fieldset label.last_name > input {
   width: 94.73684%;
 }
-/* line 452, ../../src/css/main.scss */
+/* line 459, ../../src/css/main.scss */
 main.edit-profile form fieldset label.submit {
   width: 24.24242%;
   float: left;
@@ -2059,7 +2070,7 @@ main.edit-profile form fieldset label.submit {
   margin-top: 4.0404%;
 }
 
-/* line 503, ../../src/css/main.scss */
+/* line 510, ../../src/css/main.scss */
 main.yesno-message, main.error-message, main.info-message {
   width: 100%;
   float: right;
@@ -2074,14 +2085,14 @@ main.yesno-message:after, main.error-message:after, main.info-message:after {
   display: block;
   clear: both;
 }
-/* line 506, ../../src/css/main.scss */
+/* line 513, ../../src/css/main.scss */
 main.yesno-message section.message, main.error-message section.message, main.info-message section.message {
   width: 100%;
   float: right;
   margin-right: 0;
   text-align: center;
 }
-/* line 509, ../../src/css/main.scss */
+/* line 516, ../../src/css/main.scss */
 main.yesno-message section.message p, main.error-message section.message p, main.info-message section.message p {
   margin-top: 1em;
   display: inline-block;
@@ -2089,7 +2100,7 @@ main.yesno-message section.message p, main.error-message section.message p, main
   font-size: 60%;
   text-align: left;
 }
-/* line 517, ../../src/css/main.scss */
+/* line 524, ../../src/css/main.scss */
 main.yesno-message section.choices, main.error-message section.choices, main.info-message section.choices {
   width: 100%;
   float: right;
@@ -2098,20 +2109,20 @@ main.yesno-message section.choices, main.error-message section.choices, main.inf
   margin: 1em 0;
   text-align: left;
 }
-/* line 522, ../../src/css/main.scss */
+/* line 529, ../../src/css/main.scss */
 main.yesno-message section.choices a, main.error-message section.choices a, main.info-message section.choices a {
   margin: 1em;
   padding: 0 12px;
 }
 
-/* line 531, ../../src/css/main.scss */
+/* line 538, ../../src/css/main.scss */
 main.add-definition form {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 533, ../../src/css/main.scss */
+/* line 540, ../../src/css/main.scss */
 main.add-definition form > h2 {
   width: 100%;
   float: left;
@@ -2125,7 +2136,7 @@ main.add-definition form > h2 {
   text-indent: 3%;
   margin-bottom: 5.26316%;
 }
-/* line 538, ../../src/css/main.scss */
+/* line 545, ../../src/css/main.scss */
 main.add-definition form > label {
   width: 100%;
   float: left;
@@ -2133,13 +2144,13 @@ main.add-definition form > label {
   margin-right: 0;
   margin-bottom: 5.26316%;
 }
-/* line 541, ../../src/css/main.scss */
+/* line 548, ../../src/css/main.scss */
 main.add-definition form > label span {
   width: 37.48126%;
   float: left;
   margin-right: 1.87406%;
 }
-/* line 544, ../../src/css/main.scss */
+/* line 551, ../../src/css/main.scss */
 main.add-definition form > label textarea {
   width: 60.64468%;
   float: right;
@@ -2148,21 +2159,21 @@ main.add-definition form > label textarea {
   padding: 0;
   height: 250px;
 }
-/* line 551, ../../src/css/main.scss */
+/* line 558, ../../src/css/main.scss */
 main.add-definition form > section.submit {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 553, ../../src/css/main.scss */
+/* line 560, ../../src/css/main.scss */
 main.add-definition form > section.submit input[type="submit"] {
   width: 60.64468%;
   float: right;
   margin-right: 0;
 }
 
-/* line 560, ../../src/css/main.scss */
+/* line 567, ../../src/css/main.scss */
 main.verification-prompt {
   max-width: 100%;
   margin-left: auto;
@@ -2174,14 +2185,14 @@ main.verification-prompt:after {
   display: block;
   clear: both;
 }
-/* line 562, ../../src/css/main.scss */
+/* line 569, ../../src/css/main.scss */
 main.verification-prompt form {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 564, ../../src/css/main.scss */
+/* line 571, ../../src/css/main.scss */
 main.verification-prompt form fieldset {
   border: 1px solid;
   width: 79.79798%;
@@ -2194,7 +2205,7 @@ main.verification-prompt form fieldset {
   padding-top: 4.0404%;
   padding-bottom: 4.0404%;
 }
-/* line 574, ../../src/css/main.scss */
+/* line 581, ../../src/css/main.scss */
 main.verification-prompt form fieldset label {
   width: 100%;
   float: left;
@@ -2202,13 +2213,13 @@ main.verification-prompt form fieldset label {
   margin-right: 0;
   margin-bottom: 4.0404%;
 }
-/* line 577, ../../src/css/main.scss */
+/* line 584, ../../src/css/main.scss */
 main.verification-prompt form fieldset label span {
   width: 37.48126%;
   float: left;
   margin-right: 1.87406%;
 }
-/* line 580, ../../src/css/main.scss */
+/* line 587, ../../src/css/main.scss */
 main.verification-prompt form fieldset label input {
   width: 60.64468%;
   float: right;
@@ -2216,21 +2227,21 @@ main.verification-prompt form fieldset label input {
   border: 0px none red;
   padding: 0;
 }
-/* line 586, ../../src/css/main.scss */
+/* line 593, ../../src/css/main.scss */
 main.verification-prompt form fieldset section.submit {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 588, ../../src/css/main.scss */
+/* line 595, ../../src/css/main.scss */
 main.verification-prompt form fieldset section.submit input[type="submit"] {
   width: 60.64468%;
   float: right;
   margin-right: 0;
 }
 
-/* line 596, ../../src/css/main.scss */
+/* line 603, ../../src/css/main.scss */
 main.contributor-profile {
   max-width: 100%;
   margin-left: auto;
@@ -2242,7 +2253,7 @@ main.contributor-profile:after {
   display: block;
   clear: both;
 }
-/* line 598, ../../src/css/main.scss */
+/* line 605, ../../src/css/main.scss */
 main.contributor-profile > h2 {
   width: 89.89899%;
   float: right;
@@ -2257,13 +2268,13 @@ main.contributor-profile > h2 {
   text-indent: 3%;
   margin-bottom: 1em;
 }
-/* line 605, ../../src/css/main.scss */
+/* line 612, ../../src/css/main.scss */
 main.contributor-profile section.contributor-info {
   width: 37.48126%;
   float: left;
   margin-right: 1.87406%;
 }
-/* line 613, ../../src/css/main.scss */
+/* line 620, ../../src/css/main.scss */
 main.contributor-profile section.contributor-info > dl {
   width: 89.89899%;
   float: left;
@@ -2277,20 +2288,20 @@ main.contributor-profile section.contributor-info > dl {
   margin-bottom: 5.26316%;
   font-size: 60%;
 }
-/* line 622, ../../src/css/main.scss */
+/* line 629, ../../src/css/main.scss */
 main.contributor-profile section.contributor-info > dl dt {
   width: 37.48126%;
   float: left;
   margin-right: 1.87406%;
 }
-/* line 625, ../../src/css/main.scss */
+/* line 632, ../../src/css/main.scss */
 main.contributor-profile section.contributor-info > dl dd {
   width: 60.64468%;
   float: right;
   margin-right: 0;
   font-weight: bold;
 }
-/* line 630, ../../src/css/main.scss */
+/* line 637, ../../src/css/main.scss */
 main.contributor-profile section.contributor-info > a {
   width: 89.89899%;
   float: left;
@@ -2299,11 +2310,11 @@ main.contributor-profile section.contributor-info > a {
   margin-right: 5.05051%;
   text-align: center;
 }
-/* line 635, ../../src/css/main.scss */
+/* line 642, ../../src/css/main.scss */
 main.contributor-profile section.contributor-info > a::before {
   margin-right: 0.5em;
 }
-/* line 640, ../../src/css/main.scss */
+/* line 647, ../../src/css/main.scss */
 main.contributor-profile section.contributor-activity {
   width: 60.64468%;
   float: right;
@@ -2313,14 +2324,14 @@ main.contributor-profile section.contributor-activity {
   margin-bottom: 5.26316%;
   line-height: 1.2em;
 }
-/* line 646, ../../src/css/main.scss */
+/* line 653, ../../src/css/main.scss */
 main.contributor-profile section.contributor-activity > div {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 648, ../../src/css/main.scss */
+/* line 655, ../../src/css/main.scss */
 main.contributor-profile section.contributor-activity > div div.activity-item {
   box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.07);
   border-bottom: 1px solid #aea6d9;
@@ -2328,7 +2339,7 @@ main.contributor-profile section.contributor-activity > div div.activity-item {
   padding-bottom: 1em;
   position: relative;
 }
-/* line 654, ../../src/css/main.scss */
+/* line 661, ../../src/css/main.scss */
 main.contributor-profile section.contributor-activity > div div.activity-item a::before {
   position: absolute;
   width: 100%;
@@ -2338,14 +2349,14 @@ main.contributor-profile section.contributor-activity > div div.activity-item a:
   content: "";
 }
 
-/* line 666, ../../src/css/main.scss */
+/* line 673, ../../src/css/main.scss */
 main.leaderboard {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 668, ../../src/css/main.scss */
+/* line 675, ../../src/css/main.scss */
 main.leaderboard > h2 {
   width: 89.89899%;
   float: left;
@@ -2360,14 +2371,14 @@ main.leaderboard > h2 {
   text-indent: 3%;
   margin-bottom: 1em;
 }
-/* line 675, ../../src/css/main.scss */
+/* line 682, ../../src/css/main.scss */
 main.leaderboard > table {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 677, ../../src/css/main.scss */
+/* line 684, ../../src/css/main.scss */
 main.leaderboard > table thead tr {
   width: 100%;
   float: left;
@@ -2377,24 +2388,24 @@ main.leaderboard > table thead tr {
   border-bottom: 2px solid #aea6d9;
   text-align: center;
 }
-/* line 681, ../../src/css/main.scss */
+/* line 688, ../../src/css/main.scss */
 main.leaderboard > table thead tr th:nth-of-type(1) {
   width: 44.44444%;
   float: left;
   margin-right: 11.11111%;
 }
-/* line 684, ../../src/css/main.scss */
+/* line 691, ../../src/css/main.scss */
 main.leaderboard > table thead tr th:nth-of-type(2) {
   width: 44.44444%;
   float: right;
   margin-right: 0;
 }
-/* line 688, ../../src/css/main.scss */
+/* line 695, ../../src/css/main.scss */
 main.leaderboard > table tbody {
   font-size: 80%;
   line-height: 1.5em;
 }
-/* line 692, ../../src/css/main.scss */
+/* line 699, ../../src/css/main.scss */
 main.leaderboard > table tbody tr {
   width: 100%;
   float: left;
@@ -2404,7 +2415,7 @@ main.leaderboard > table tbody tr {
   border-bottom: 1px solid #aea6d9;
   text-align: center;
 }
-/* line 696, ../../src/css/main.scss */
+/* line 703, ../../src/css/main.scss */
 main.leaderboard > table tbody tr td:nth-of-type(1) {
   width: 44.44444%;
   float: left;
@@ -2414,14 +2425,14 @@ main.leaderboard > table tbody tr td:nth-of-type(1) {
   width: 43.44444%;
   border-style: dotted;
 }
-/* line 702, ../../src/css/main.scss */
+/* line 709, ../../src/css/main.scss */
 main.leaderboard > table tbody tr td:nth-of-type(2) {
   width: 44.44444%;
   float: right;
   margin-right: 0;
 }
 
-/* line 708, ../../src/css/main.scss */
+/* line 715, ../../src/css/main.scss */
 section.pagination {
   width: 89.89899%;
   float: right;
@@ -2431,25 +2442,25 @@ section.pagination {
   font-size: 80%;
   margin-top: 0.4em;
 }
-/* line 714, ../../src/css/main.scss */
+/* line 721, ../../src/css/main.scss */
 section.pagination h3 {
   display: inline;
 }
-/* line 717, ../../src/css/main.scss */
+/* line 724, ../../src/css/main.scss */
 section.pagination ol {
   display: inline;
 }
-/* line 719, ../../src/css/main.scss */
+/* line 726, ../../src/css/main.scss */
 section.pagination ol li {
   display: inline;
 }
-/* line 721, ../../src/css/main.scss */
+/* line 728, ../../src/css/main.scss */
 section.pagination ol li::after {
   display: inline;
   content: " ";
 }
 
-/* line 728, ../../src/css/main.scss */
+/* line 735, ../../src/css/main.scss */
 .base-submit-input, main.add-phrase form fieldset input[type="submit"], main.login form.login fieldset label.submit input[type="submit"], main.login form.signup fieldset label.submit input[type="submit"], main.initiate-password-recovery form fieldset label.submit input[type="submit"], main.password-recovery form fieldset label.submit input[type="submit"], main.edit-profile form fieldset label.submit input[type="submit"], main.yesno-message section.choices a, main.error-message section.choices a, main.info-message section.choices a, main.add-definition form > section.submit input[type="submit"], main.verification-prompt form fieldset section.submit input[type="submit"] {
   color: #6653c6;
   background: #aea6d9;
@@ -2458,37 +2469,37 @@ section.pagination ol li::after {
   box-shadow: 0 0 10px 0 #e0deed inset, 0 0 10px 0 white;
 }
 
-/* line 735, ../../src/css/main.scss */
+/* line 742, ../../src/css/main.scss */
 .base-legend, main.add-phrase form fieldset legend, main.login form.login fieldset legend, main.login form.signup fieldset legend, main.initiate-password-recovery form fieldset legend, main.password-recovery form fieldset legend, main.edit-profile form fieldset legend {
   color: #6653c6;
   text-align: left;
   font-size: 80%;
 }
 
-/* line 740, ../../src/css/main.scss */
+/* line 747, ../../src/css/main.scss */
 .base-base-fieldset, main.login form.login fieldset, main.login form.signup fieldset, main.initiate-password-recovery form fieldset, main.password-recovery form fieldset, main.edit-profile form fieldset, main.verification-prompt form fieldset, .base-fieldset, main.add-phrase form fieldset {
   border: 1px solid #aea6d9;
   border-radius: 20px;
   box-shadow: 0px 1px 30px 0 #6653c6;
 }
 
-/* line 745, ../../src/css/main.scss */
+/* line 752, ../../src/css/main.scss */
 .base-fieldset, main.add-phrase form fieldset {
   padding: 2em;
   margin-top: 25px;
 }
 
-/* line 752, ../../src/css/main.scss */
+/* line 759, ../../src/css/main.scss */
 .thumbs.container {
   position: relative;
 }
 
-/* line 756, ../../src/css/main.scss */
+/* line 763, ../../src/css/main.scss */
 .thumbs.container * {
   z-index: -1;
 }
 
-/* line 760, ../../src/css/main.scss */
+/* line 767, ../../src/css/main.scss */
 .thumbs.container .overlay {
   position: absolute;
   top: 0;
@@ -2498,24 +2509,24 @@ section.pagination ol li::after {
   height: 20px;
 }
 
-/* line 769, ../../src/css/main.scss */
+/* line 776, ../../src/css/main.scss */
 .thumbs.container object {
   width: 20px;
   height: 20px;
 }
 
-/* line 774, ../../src/css/main.scss */
+/* line 781, ../../src/css/main.scss */
 .hidden {
   display: none;
 }
 
-/* line 778, ../../src/css/main.scss */
+/* line 785, ../../src/css/main.scss */
 input.error, p.global.error {
   background-color: #f5f6ee !important;
   color: #7d8f24;
 }
 
-/* line 782, ../../src/css/main.scss */
+/* line 789, ../../src/css/main.scss */
 input[type="text"], input[type="password"], textarea, input[type="email"], input[type="search"], input[type="submit"] {
   color: #140b41;
   font-size: 20px;
@@ -2542,37 +2553,37 @@ input[type="text"]:-ms-input-placeholder, input[type="password"]:-ms-input-place
   color: #6653c6;
 }
 
-/* line 798, ../../src/css/main.scss */
+/* line 805, ../../src/css/main.scss */
 .main-enter {
   opacity: 0.01;
   transition: opacity .5s ease-in;
 }
 
-/* line 803, ../../src/css/main.scss */
+/* line 810, ../../src/css/main.scss */
 .main-enter.main-enter-active {
   opacity: 1;
 }
 
-/* line 807, ../../src/css/main.scss */
+/* line 814, ../../src/css/main.scss */
 .main-leave {
   opacity: 0.0000001;
   transition: opacity 0.000001s ease-in;
 }
 
-/* line 813, ../../src/css/main.scss */
+/* line 820, ../../src/css/main.scss */
 .main-leave.main-leave-active {
   opacity: 0;
 }
 
 @media (min-width: 980px) {
-  /* line 818, ../../src/css/main.scss */
+  /* line 825, ../../src/css/main.scss */
   body {
     max-width: 980px;
   }
 }
 
 @media (min-width: 980px) {
-  /* line 823, ../../src/css/main.scss */
+  /* line 830, ../../src/css/main.scss */
   header.TopBar {
     width: 100%;
     float: left;
@@ -2581,7 +2592,7 @@ input[type="text"]:-ms-input-placeholder, input[type="password"]:-ms-input-place
   }
 }
 @media (min-width: 980px) {
-  /* line 827, ../../src/css/main.scss */
+  /* line 834, ../../src/css/main.scss */
   header.TopBar nav.NavBar {
     width: 50%;
     float: right;
@@ -2589,7 +2600,7 @@ input[type="text"]:-ms-input-placeholder, input[type="password"]:-ms-input-place
   }
 }
 @media (min-width: 980px) {
-  /* line 832, ../../src/css/main.scss */
+  /* line 839, ../../src/css/main.scss */
   header.TopBar section.SearchBar {
     width: 50%;
     float: left;
@@ -2601,7 +2612,7 @@ input[type="text"]:-ms-input-placeholder, input[type="password"]:-ms-input-place
   }
 }
 @media (min-width: 980px) {
-  /* line 841, ../../src/css/main.scss */
+  /* line 848, ../../src/css/main.scss */
   header.TopBar section.SearchBar form.SearchBar {
     left: 200px;
     margin-left: 0;

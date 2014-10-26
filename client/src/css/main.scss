@@ -291,7 +291,7 @@ main.phrase-details {
             border: 1px solid $less-contrast-1;
             border-radius: 20px;
             box-shadow: 0 0 40px 10px $base-color inset;
-            line-height: 1.8em;
+            //line-height: 1.8em;
             text-align: center;
             > * {
                 //margin-left: 0.9em;
@@ -327,16 +327,23 @@ main.phrase-details {
                 font-weight: bold;
             }
             dd.definition {
+                line-height: 1.2em;
                 span.abbr {
                     @extend .quote-padding;
                     padding-left: 0;
                 }
+                p {
+                    margin-bottom: 0.4em;
+                }
             }
             dd.examples {
                 font-style: italic;
-                line-height: 1em;
+                line-height: 1.2em;
                 span::before {
                     @extend .quote-padding;
+                }
+                p {
+                    margin-bottom: 0.4em;
                 }
             }
             dd.tags {
