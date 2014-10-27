@@ -37352,10 +37352,8 @@ var CrowDictionary = React.createClass({displayName: 'CrowDictionary',
               React.DOM.link( {href:"/static/css/main.css", rel:"stylesheet"} )
             ),
             React.DOM.body(null, 
-            React.DOM.div(null, 
                 TopBar( {onUserInput:this.handleUserInput, onGlobalLangChange:this.handleGlobalLangChange, onToggleLoginPrompt:this.handleToggleLoginPrompt, onLogOut:this.handleLogOut, onToMyActivity:this.handleToMyActivity, topState:this.state, ref:"topBar"} ),
-                    mainContent
-            ),
+                    mainContent,
             React.DOM.footer(null, this.messages.Footer.copyrightNotice),
             React.DOM.script( {src:"/static/js/app.js"} )
             )

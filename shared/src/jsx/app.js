@@ -1553,10 +1553,8 @@ var CrowDictionary = React.createClass({
               <link href="/static/css/main.css" rel="stylesheet" />
             </head>
             <body>
-            <div>
                 <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} onToMyActivity={this.handleToMyActivity} topState={this.state} ref="topBar" />
                     {mainContent}
-            </div>
             <footer>{this.messages.Footer.copyrightNotice}</footer>
             <script src="/static/js/app.js" />
             </body>
