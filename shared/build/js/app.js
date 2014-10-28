@@ -1553,9 +1553,13 @@ var CrowDictionary = React.createClass({displayName: 'CrowDictionary',
               React.DOM.link( {href:"/static/css/main.css", rel:"stylesheet"} )
             ),
             React.DOM.body(null, 
-                TopBar( {onUserInput:this.handleUserInput, onGlobalLangChange:this.handleGlobalLangChange, onToggleLoginPrompt:this.handleToggleLoginPrompt, onLogOut:this.handleLogOut, onToMyActivity:this.handleToMyActivity, topState:this.state, ref:"topBar"} ),
+                React.DOM.div( {className:"top"}, 
+                    TopBar( {onUserInput:this.handleUserInput, onGlobalLangChange:this.handleGlobalLangChange, onToggleLoginPrompt:this.handleToggleLoginPrompt, onLogOut:this.handleLogOut, onToMyActivity:this.handleToMyActivity, topState:this.state, ref:"topBar"} )
+                ),
+                React.DOM.div( {className:"rest"}, 
                     mainContent,
-            React.DOM.footer(null, this.messages.Footer.copyrightNotice),
+                    React.DOM.footer(null, this.messages.Footer.copyrightNotice)
+                ),
             React.DOM.script( {src:"/static/js/app.js"} )
             )
             )
@@ -2088,7 +2092,7 @@ var NavBar = React.createClass({displayName: 'NavBar',
             homeUrl = aUrl("/", this.props.topState.shortLangCode);
         return (
             React.DOM.nav( {className:"NavBar"}, 
-                React.DOM.h2( {className:"home"}, React.DOM.a( {className:"oi", 'data-glyph':"home", title:home, onClick:this.handleToLink.bind(this, homeUrl), href:homeUrl})),
+                React.DOM.h2( {className:"home"}, React.DOM.a( {className:"oi", 'data-glyph':"home", title:home, onClick:this.handleToLink.bind(this, homeUrl), href:homeUrl}, home)),
                 UserLinks( {phraseData:this.props.topState.shownPhraseData, topState:this.props.topState, onToMyActivity:this.props.onToMyActivity}),
                 LoginStatus( {topState:this.props.topState, onToggleLoginPrompt:this.props.onToggleLoginPrompt, onLogOut:this.props.onLogOut})
             )
@@ -2127,9 +2131,9 @@ var UserLinks = React.createClass({displayName: 'UserLinks',
             }
             return (
                 React.DOM.h2( {className:"user-links"}, 
-                    React.DOM.a( {className:"oi", 'data-glyph':"person", title:myActivityMessage, href:myActivityUrl, onClick:this.handleToLink.bind(this, myActivityUrl)}),
-                    React.DOM.a( {className:"oi", 'data-glyph':"people", title:leaderboardMessage, href:leaderboardUrl, onClick:this.handleToLink.bind(this, leaderboardUrl)}),
-                    React.DOM.a( {className:"oi", 'data-glyph':"plus", title:addMessage, href:addUrl, onClick:this.handleToLink.bind(this, addUrl)})
+                    React.DOM.a( {className:"oi", 'data-glyph':"person", title:myActivityMessage, href:myActivityUrl, onClick:this.handleToLink.bind(this, myActivityUrl)}, myActivityMessage),
+                    React.DOM.a( {className:"oi", 'data-glyph':"people", title:leaderboardMessage, href:leaderboardUrl, onClick:this.handleToLink.bind(this, leaderboardUrl)}, leaderboardMessage),
+                    React.DOM.a( {className:"oi", 'data-glyph':"plus", title:addMessage, href:addUrl, onClick:this.handleToLink.bind(this, addUrl)}, addMessage)
                 )
             );
         }
@@ -2157,7 +2161,7 @@ var LoginStatus = React.createClass({displayName: 'LoginStatus',
             var greeting = this.messages.LoginStatus.notLoggedInGreeting,
                 loginUrl = aUrl(this.getEndpoint('login'), shortLangCode);
             return (
-                React.DOM.h2( {className:"login-info"}, React.DOM.a( {className:"oi", 'data-glyph':"account-login", title:greeting, href:loginUrl, onClick:this.handleToLink.bind(this, loginUrl)}))
+                React.DOM.h2( {className:"login-info"}, React.DOM.a( {className:"oi", 'data-glyph':"account-login", title:greeting, href:loginUrl, onClick:this.handleToLink.bind(this, loginUrl)}, greeting))
             );
         } else {
             var //greeting = this.fmt(this.msg(this.messages.LoginStatus.loggedInGreeting), {username: loginInfo.email}),
@@ -2167,7 +2171,7 @@ var LoginStatus = React.createClass({displayName: 'LoginStatus',
                 addUrl;
             return (
                 React.DOM.h2( {className:"login-info"}, 
-                    React.DOM.a( {className:"oi", 'data-glyph':"account-logout", title:logOutMessage, href:logOutUrl, onClick:this.handleToLink.bind(this, logOutUrl)})
+                    React.DOM.a( {className:"oi", 'data-glyph':"account-logout", title:logOutMessage, href:logOutUrl, onClick:this.handleToLink.bind(this, logOutUrl)}, logOutMessage)
                 )
             );
         }
@@ -2813,9 +2817,7 @@ var PhraseSearchResults = React.createClass({displayName: 'PhraseSearchResults',
         return (
             React.DOM.main( {className:"phrase-list", id:"main"}, 
                 topSearchCaption,
-                React.DOM.ul( {className:"phraseSearchResultsList"}, 
-                    infiniteScroll
-                ),
+                infiniteScroll,
                 paginationElements
             )
         );
@@ -3082,10 +3084,10 @@ var PhraseSearchResult = React.createClass({displayName: 'PhraseSearchResult',
         if (this.props.searchResult && this.props.searchResult.topDefinition && this.props.searchResult.topDefinition.definition) {
             definitionOrMessage = DefinitionInList( {searchResult:this.props.searchResult, topState:this.props.topState});
         } else {
-            definitionOrMessage = React.DOM.div( {className:"missing-definition"}, missingDefinitionMessage)
+            definitionOrMessage = React.DOM.dd( {className:"missing-definition"}, React.DOM.span(null, missingDefinitionMessage))
         }
         return (
-            React.DOM.dl(null, 
+            React.DOM.dl( {className:"PhraseSearchResult"}, 
                 PhraseInList( {searchResult:this.props.searchResult, onSelectPhrase:this.props.onSelectPhrase, topState:this.props.topState}),
                 definitionOrMessage
             )

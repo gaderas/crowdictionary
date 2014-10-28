@@ -36,10 +36,10 @@
             "placeHolder": "busca..."
         },
         "UserLinks": {
-            "addPhrase": "agrega una nueva frase o palabra",
-            "addDefinition": "agrega tu propia definición de la frase/palabra \"{phrase}\"",
-            "myActivity": "ver mi perfil",
-            "leaderboard": "ver tabla de puntuación"
+            "addPhrase": "agrega frase o palabra",
+            "addDefinition": "agrega definición",
+            "myActivity": "mi perfil",
+            "leaderboard": "tabla de puntuación"
         },
         "LoginStatus": {
             "loggedInGreeting": "¡Hola {username}!",
@@ -196,11 +196,11 @@
             "points": "Puntos"
         },
         "Titles": {
-            "home": "Significados de palabras, frases, diccionario - MexiOnario",
-            "search": "({phrase}), resultados de búsqueda - MexiOnario",
-            "phrase": "({phrase}), significados - MexiOnario",
-            "leaderboard": "Tabla de puntuación. Palabras, significados, definiciones - MexiOnario",
-            "profile": "({nickname}) - perfil - Votos, significados, frases y palabras - MexiOnario"
+            "home": "Significados de palabras, frases, diccionario - MexiOnario, el diccionario de México",
+            "search": "{phrase}, resultados de búsqueda - MexiOnario, el diccionario de México",
+            "phrase": "{phrase}, significados, definiciones - MexiOnario, el diccionario de México",
+            "leaderboard": "Tabla de puntuación. Palabras, significados, definiciones - MexiOnario, el diccionario de México",
+            "profile": "{nickname} - perfil - Votos, significados, frases y palabras - MexiOnario, el diccionario de México"
         }
     }
 }

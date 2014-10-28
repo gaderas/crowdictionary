@@ -1553,9 +1553,13 @@ var CrowDictionary = React.createClass({
               <link href="/static/css/main.css" rel="stylesheet" />
             </head>
             <body>
-                <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} onToMyActivity={this.handleToMyActivity} topState={this.state} ref="topBar" />
+                <div className="top">
+                    <TopBar onUserInput={this.handleUserInput} onGlobalLangChange={this.handleGlobalLangChange} onToggleLoginPrompt={this.handleToggleLoginPrompt} onLogOut={this.handleLogOut} onToMyActivity={this.handleToMyActivity} topState={this.state} ref="topBar" />
+                </div>
+                <div className="rest">
                     {mainContent}
-            <footer>{this.messages.Footer.copyrightNotice}</footer>
+                    <footer>{this.messages.Footer.copyrightNotice}</footer>
+                </div>
             <script src="/static/js/app.js" />
             </body>
             </html>
@@ -2088,7 +2092,7 @@ var NavBar = React.createClass({
             homeUrl = aUrl("/", this.props.topState.shortLangCode);
         return (
             <nav className="NavBar">
-                <h2 className="home"><a className="oi" data-glyph="home" title={home} onClick={this.handleToLink.bind(this, homeUrl)} href={homeUrl}></a></h2>
+                <h2 className="home"><a className="oi" data-glyph="home" title={home} onClick={this.handleToLink.bind(this, homeUrl)} href={homeUrl}>{home}</a></h2>
                 <UserLinks phraseData={this.props.topState.shownPhraseData} topState={this.props.topState} onToMyActivity={this.props.onToMyActivity}/>
                 <LoginStatus topState={this.props.topState} onToggleLoginPrompt={this.props.onToggleLoginPrompt} onLogOut={this.props.onLogOut}/>
             </nav>
@@ -2127,9 +2131,9 @@ var UserLinks = React.createClass({
             }
             return (
                 <h2 className="user-links">
-                    <a className="oi" data-glyph="person" title={myActivityMessage} href={myActivityUrl} onClick={this.handleToLink.bind(this, myActivityUrl)}></a>
-                    <a className="oi" data-glyph="people" title={leaderboardMessage} href={leaderboardUrl} onClick={this.handleToLink.bind(this, leaderboardUrl)}></a>
-                    <a className="oi" data-glyph="plus" title={addMessage} href={addUrl} onClick={this.handleToLink.bind(this, addUrl)}></a>
+                    <a className="oi" data-glyph="person" title={myActivityMessage} href={myActivityUrl} onClick={this.handleToLink.bind(this, myActivityUrl)}>{myActivityMessage}</a>
+                    <a className="oi" data-glyph="people" title={leaderboardMessage} href={leaderboardUrl} onClick={this.handleToLink.bind(this, leaderboardUrl)}>{leaderboardMessage}</a>
+                    <a className="oi" data-glyph="plus" title={addMessage} href={addUrl} onClick={this.handleToLink.bind(this, addUrl)}>{addMessage}</a>
                 </h2>
             );
         }
@@ -2157,7 +2161,7 @@ var LoginStatus = React.createClass({
             var greeting = this.messages.LoginStatus.notLoggedInGreeting,
                 loginUrl = aUrl(this.getEndpoint('login'), shortLangCode);
             return (
-                <h2 className="login-info"><a className="oi" data-glyph="account-login" title={greeting} href={loginUrl} onClick={this.handleToLink.bind(this, loginUrl)}></a></h2>
+                <h2 className="login-info"><a className="oi" data-glyph="account-login" title={greeting} href={loginUrl} onClick={this.handleToLink.bind(this, loginUrl)}>{greeting}</a></h2>
             );
         } else {
             var //greeting = this.fmt(this.msg(this.messages.LoginStatus.loggedInGreeting), {username: loginInfo.email}),
@@ -2167,7 +2171,7 @@ var LoginStatus = React.createClass({
                 addUrl;
             return (
                 <h2 className="login-info">
-                    <a className="oi" data-glyph="account-logout" title={logOutMessage} href={logOutUrl} onClick={this.handleToLink.bind(this, logOutUrl)}></a>
+                    <a className="oi" data-glyph="account-logout" title={logOutMessage} href={logOutUrl} onClick={this.handleToLink.bind(this, logOutUrl)}>{logOutMessage}</a>
                 </h2>
             );
         }
@@ -2813,9 +2817,7 @@ var PhraseSearchResults = React.createClass({
         return (
             <main className="phrase-list" id="main">
                 {topSearchCaption}
-                <ul className="phraseSearchResultsList">
-                    {infiniteScroll}
-                </ul>
+                {infiniteScroll}
                 {paginationElements}
             </main>
         );
@@ -3082,10 +3084,10 @@ var PhraseSearchResult = React.createClass({
         if (this.props.searchResult && this.props.searchResult.topDefinition && this.props.searchResult.topDefinition.definition) {
             definitionOrMessage = <DefinitionInList searchResult={this.props.searchResult} topState={this.props.topState}/>;
         } else {
-            definitionOrMessage = <div className="missing-definition">{missingDefinitionMessage}</div>
+            definitionOrMessage = <dd className="missing-definition"><span>{missingDefinitionMessage}</span></dd>
         }
         return (
-            <dl>
+            <dl className="PhraseSearchResult">
                 <PhraseInList searchResult={this.props.searchResult} onSelectPhrase={this.props.onSelectPhrase} topState={this.props.topState}/>
                 {definitionOrMessage}
             </dl>

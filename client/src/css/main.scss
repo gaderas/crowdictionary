@@ -4,3 +4,166 @@
 @import "open-iconic";
 @import "compass/reset";
 
+$large-screen: 960px;
+$large-screen-right-col-width: 300px;
+$topbar-background-color: #FCF22A;
+$definition-block-layout: 1.5 90 1.5;
+
+body {
+    @include container();
+    background-color: #E9EAED;
+    color: #141823;
+}
+body {
+    @include breakpoint($large-screen) {
+        //max-width: $large-screen;
+        @include span(1 of 1);
+    }
+}
+$large-screen-layout: 1 ($large-screen) center;
+div.top {
+    //@include span(960px (1) center);
+    //max-width: $large-screen;
+    //@include span(1 of $large-screen-layout);
+    //@include container(960px center);
+    //@include bleed(0 1em 0 1em);
+    @include span(1 of 1);
+    background-image: linear-gradient(180deg, $topbar-background-color, darken($topbar-background-color, 10%));
+    background-color: $topbar-background-color;
+    border-color: darken($topbar-background-color, 5%);
+    padding-top: 7px;
+    padding-bottom: 7px;
+    border-width: 0 0 1px;
+    border-style: none none solid;
+    box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.52);
+    margin-bottom: span(1 of $definition-block-layout);
+    header.TopBar {
+        @include container(960px center);
+        nav.NavBar {
+            @include span(2 of 3 0);
+            h2 {
+                &:nth-of-type(1) {
+                    @include span(1 of 5 0.05);
+                }
+                &:nth-of-type(2) {
+                    @include span(3 of 5 0.05);
+                }
+                &:nth-of-type(3) {
+                    @include span(1 of 5 0.05 last);
+                }
+                a {
+                    display: inline;
+                    text-decoration: none;
+                    color: #444;
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
+            }
+            h2.home a {
+                display: block;
+                width: 100px;
+                height: 63px;
+                background: url(/static/assets/img/mexionario-200x126.png);
+                background-size: 100px 63px;
+                text-indent: 100%;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+            h2.user-links, h2.login-info {
+                a {
+                    @include span(1 of 4);
+                }
+            }
+        }
+        section.SearchBar {
+            @include span(1 of 3 last 0);
+        }
+    }
+}
+
+div.rest {
+    @include container($large-screen);
+    main {
+        //@include span(1 of 1);
+        @include span(1 at 1 of (660/960 300/960) 0);
+        > h2 {
+            @include span(1 of 1);
+            font-weight: bold;
+            font-style: italic;
+        }
+        > div, section.pagination { //InfiniteScroll introduces this div
+            @include span(1 of 1);
+        }
+    }
+    footer {
+        //@include span(1 at 2 of (660/960 300/960) 0);
+        @include span(1 at 2 of (660/960 300/960) 0);
+    }
+}
+section.pagination {
+    h3, ol, li {
+        display: inline;
+    }
+    li {
+        padding: 0.6em;
+    }
+
+}
+
+dl.PhraseSearchResult {
+    @include span(1 at 2 of $definition-block-layout);
+    @include pre(1 of $definition-block-layout);
+    @include post(1 of $definition-block-layout);
+    //margin-top: 0;
+    margin-bottom: span(1 of $definition-block-layout);
+    border-width: 1px;
+    border-style: solid;
+    border-color: #E5E6E9 #DFE0E4 #D0D1D5;
+    border-radius: 3px;
+    background-color: #FFF;
+    dt {
+        @include span(1 of 1);
+        padding: span(1 at 1 of $definition-block-layout);
+        width: span(1 at 2 of $definition-block-layout) - span(1 at 1 of $definition-block-layout);
+        font-weight: bold;
+    }
+    dd {
+        @include span(1 of 1);
+        padding: span(1 at 1 of $definition-block-layout);
+        padding-top: 0;
+        width: span(1 at 2 of $definition-block-layout) - span(1 at 1 of $definition-block-layout);
+        &.missing-definition {
+            text-align: center;
+            font-style: italic;
+        }
+    }
+    a {
+        color: #3B5998;
+        text-decoration: none;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+.oi[data-glyph=person]:before {
+  content: '\e0a5\A';
+  white-space: pre;
+  display: inline;
+}
+.oi[data-glyph=people]:before {
+  content: '\e0a4\A';
+  white-space: pre;
+  display: inline;
+}
+.oi[data-glyph=plus]:before {
+  content: '\e0aa\A';
+  white-space: pre;
+  display: inline;
+}
+.oi[data-glyph=account-logout]:before {
+  content: '\e001\A';
+  white-space: pre;
+  display: inline;
+}
