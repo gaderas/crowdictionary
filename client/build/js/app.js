@@ -37445,11 +37445,13 @@ var ErrorMessage = React.createClass({displayName: 'ErrorMessage',
             OK = this.messages.Errors.OK;
         return (
             React.DOM.main( {className:"error-message", id:"main"}, 
-                React.DOM.section( {className:"message"}, 
-                    React.DOM.div(null, errorMessage)
-                ),
-                React.DOM.section( {className:"choices"}, 
-                    React.DOM.a( {href:"#", onClick:this.handleClearError}, OK)
+                React.DOM.div( {className:"error message"}, 
+                    React.DOM.section( {className:"message"}, 
+                        React.DOM.div(null, errorMessage)
+                    ),
+                    React.DOM.section( {className:"choices"}, 
+                        React.DOM.a( {href:"#", onClick:this.handleClearError}, OK)
+                    )
                 )
             )
         );
@@ -37471,11 +37473,13 @@ var InfoMessage = React.createClass({displayName: 'InfoMessage',
             OK = this.messages.Errors.OK;
         return (
             React.DOM.main( {className:"info-message", id:"main"}, 
-                React.DOM.section( {className:"message"}, 
-                    React.DOM.div(null, message)
-                ),
-                React.DOM.section( {className:"choices"}, 
-                    React.DOM.a( {href:"#", onClick:this.handleClearInfo}, OK)
+                React.DOM.div( {className:"info message"}, 
+                    React.DOM.section( {className:"message"}, 
+                        React.DOM.div(null, message)
+                    ),
+                    React.DOM.section( {className:"choices"}, 
+                        React.DOM.a( {href:"#", onClick:this.handleClearInfo}, OK)
+                    )
                 )
             )
         );
@@ -37501,12 +37505,14 @@ var YesnoMessage = React.createClass({displayName: 'YesnoMessage',
             no = this.messages.Errors.no;
         return (
             React.DOM.main( {className:"yesno-message", id:"main"}, 
-                React.DOM.section( {className:"message"}, 
-                    React.DOM.p(null, message)
-                ),
-                React.DOM.section( {className:"choices"}, 
-                    React.DOM.a( {href:"#", onClick:this.handleYes}, yes),
-                    React.DOM.a( {href:"#", onClick:this.handleNo}, no)
+                React.DOM.div( {className:"yesno message"}, 
+                    React.DOM.section( {className:"message"}, 
+                        React.DOM.p(null, message)
+                    ),
+                    React.DOM.section( {className:"choices"}, 
+                        React.DOM.a( {href:"#", onClick:this.handleYes}, yes),
+                        React.DOM.a( {href:"#", onClick:this.handleNo}, no)
+                    )
                 )
             )
         );
@@ -37586,21 +37592,24 @@ console.log("myPreviousDefinition: " + JSON.stringify(myPreviousDefinition));
         return (
             React.DOM.main( {className:"add-definition", id:"main"}, 
                 React.DOM.form( {onSubmit:this.handleSubmit}, 
-                    React.DOM.h2(null, addDefinition),
-                    React.DOM.label(null, 
-                        React.DOM.span(null, definitionLabel),
-                        React.DOM.textarea( {placeholder:placeholderDefinition, ref:"newDefinition", autoCorrect:"off", autoCapitalize:"none", spellCheck:"false", defaultValue:defaultDefinition})
-                    ),
-                    React.DOM.label(null, 
-                        React.DOM.span(null, examplesLabel),
-                        React.DOM.textarea( {placeholder:placeholderExamples, ref:"examples", autoCorrect:"off", autoCapitalize:"none", spellCheck:"false", defaultValue:defaultExamples})
-                    ),
-                    React.DOM.label(null, 
-                        React.DOM.span(null, tagsLabel),
-                        React.DOM.textarea( {placeholder:placeholderTags, ref:"tags", autoCorrect:"off", autoCapitalize:"none", spellCheck:"false", defaultValue:defaultTags})
-                    ),
-                    React.DOM.section( {className:"submit"}, 
-                        React.DOM.input( {type:"submit", value:submit})
+                    React.DOM.fieldset(null, 
+                        React.DOM.legend(null, addDefinition),
+                        React.DOM.label(null, 
+                            React.DOM.span(null, definitionLabel),
+                            React.DOM.textarea( {placeholder:placeholderDefinition, ref:"newDefinition", autoCorrect:"off", autoCapitalize:"none", spellCheck:"false", defaultValue:defaultDefinition})
+                        ),
+                        React.DOM.label(null, 
+                            React.DOM.span(null, examplesLabel),
+                            React.DOM.textarea( {placeholder:placeholderExamples, ref:"examples", autoCorrect:"off", autoCapitalize:"none", spellCheck:"false", defaultValue:defaultExamples})
+                        ),
+                        React.DOM.label(null, 
+                            React.DOM.span(null, tagsLabel),
+                            React.DOM.textarea( {placeholder:placeholderTags, ref:"tags", autoCorrect:"off", autoCapitalize:"none", spellCheck:"false", defaultValue:defaultTags})
+                        ),
+                        React.DOM.label(null, 
+                            React.DOM.span(null),
+                            React.DOM.input( {type:"submit", value:submit})
+                        )
                     )
                 )
             )
@@ -37619,7 +37628,9 @@ var PhraseInDetails = React.createClass({displayName: 'PhraseInDetails',
         return (
             React.DOM.section( {className:"phrase-top"}, 
                 React.DOM.h2(null, phrase),
-                addDefinitionElem
+                React.DOM.div( {className:"addDefinitionCTA"}, 
+                    addDefinitionElem
+                )
             )
         );
     }
@@ -37783,19 +37794,19 @@ var DefinitionInDetails = React.createClass({displayName: 'DefinitionInDetails',
                     React.DOM.dt(null, phrase),
                     definitionElements,
                     examplesElements,
-                    tagsElements
-                ),
-                React.DOM.div( {className:"author"}, 
-                    React.DOM.span( {className:"by"}, byCaption, " ", React.DOM.a( {href:authorProfileUrl, onClick:this.handleToLink.bind(this, authorProfileUrl)}, authorNick))
-                ),
-                React.DOM.div( {className:"votes"}, 
-                    React.DOM.div( {className:upClasses}, 
-                        React.DOM.a( {className:"up oi", href:"#", 'data-glyph':"thumb-up", title:thumbsUpTitle, onClick:this.handleVote}),
-                        React.DOM.p(null, thumbsUpMessage)
+                    tagsElements,
+                    React.DOM.dd( {className:"author"}, 
+                        React.DOM.span( {className:"by"}, byCaption, " ", React.DOM.a( {href:authorProfileUrl, onClick:this.handleToLink.bind(this, authorProfileUrl)}, authorNick))
                     ),
-                    React.DOM.div( {className:downClasses}, 
-                        React.DOM.a( {className:"down oi", href:"#", 'data-glyph':"thumb-down", title:thumbsDownTitle, onClick:this.handleVote}),
-                        React.DOM.p(null, thumbsDownMessage)
+                    React.DOM.dd( {className:"votes"}, 
+                        React.DOM.div( {className:upClasses}, 
+                            React.DOM.a( {className:"up oi", href:"#", 'data-glyph':"thumb-up", title:thumbsUpTitle, onClick:this.handleVote}),
+                            React.DOM.p(null, thumbsUpMessage)
+                        ),
+                        React.DOM.div( {className:downClasses}, 
+                            React.DOM.a( {className:"down oi", href:"#", 'data-glyph':"thumb-down", title:thumbsDownTitle, onClick:this.handleVote}),
+                            React.DOM.p(null, thumbsDownMessage)
+                        )
                     )
                 )
             )
@@ -38684,9 +38695,11 @@ var Leaderboard = React.createClass({displayName: 'Leaderboard',
         return (
             React.DOM.main( {className:"leaderboard", id:"main"}, 
                 React.DOM.h2(null, m.leaderboard),
-                React.DOM.table(null, 
-                    React.DOM.thead(null, React.DOM.tr(null, React.DOM.th(null, m.user),React.DOM.th( {title:m.pointCalculationRulesTitle}, m.points))),
-                    React.DOM.tbody(null, infiniteScroll)
+                React.DOM.div( {className:"leaderboard"}, 
+                    React.DOM.table(null, 
+                        React.DOM.thead(null, React.DOM.tr(null, React.DOM.th(null, m.user),React.DOM.th( {title:m.pointCalculationRulesTitle}, m.points))),
+                        React.DOM.tbody(null, infiniteScroll)
+                    )
                 )
             )
         );

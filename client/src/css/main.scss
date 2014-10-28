@@ -8,7 +8,35 @@ $large-screen: 960px;
 $large-screen-right-col-width: 300px;
 $topbar-background-color: #FCF22A;
 $definition-block-layout: 1.5 90 1.5;
+@mixin base-block() {
+    @include span(1 at 2 of $definition-block-layout);
+    @include pre(1 of $definition-block-layout);
+    @include post(1 of $definition-block-layout);
+    //margin-top: 0;
+    margin-bottom: span(1 of $definition-block-layout);
+    border-width: 1px;
+    border-style: solid;
+    border-color: #E5E6E9 #DFE0E4 #D0D1D5;
+    border-radius: 3px;
+    background-color: #FFF;
+}
+$base-block-padding: span(1 at 1 of $definition-block-layout);
+@mixin base-block-contents() {
+        @include span(1 of 1);
+        padding: $base-block-padding;
+        width: span(1 at 2 of $definition-block-layout) - span(1 at 1 of $definition-block-layout);
+}
 
+a {
+    color: #3B5998;
+    text-decoration: none;
+    &:hover {
+        text-decoration: underline;
+    }
+    &:before {
+        margin-right: 5px;
+    }
+}
 body {
     @include container();
     background-color: #E9EAED;
@@ -87,13 +115,216 @@ div.rest {
     main {
         //@include span(1 of 1);
         @include span(1 at 1 of (660/960 300/960) 0);
-        > h2 {
+        section.phrase-top {
+            @include span(1 of 1);
+            div.addDefinitionCTA {
+                @include span(1 of 1);
+                @include base-block();
+                > p {
+                    @include base-block-contents();
+                }
+            }
+        }
+        > h2, section.phrase-top > h2 {
             @include span(1 of 1);
             font-weight: bold;
             font-style: italic;
         }
         > div, section.pagination { //InfiniteScroll introduces this div
             @include span(1 of 1);
+        }
+        > ul { // phrase details
+            @include span(1 of 1);
+            span.abbr {
+                font-size: 70%;
+            }
+            > li {
+                @include span(1 of 1);
+                @include base-block();
+                dl {
+                    @include span(1 of 1);
+                    @include base-block-contents();
+                    position: relative;
+                    dt {
+                        @include span(1 of 1);
+                        font-weight: bold;
+                        padding-bottom: $base-block-padding/2;
+                    }
+                    dd {
+                        @include span(1 of 1);
+                        &.examples p {
+                            font-style: italic;
+                        }
+                        &.definition, &.examples {
+                            padding-bottom: $base-block-padding/2;
+                            padding-top: $base-block-padding/2;
+                            span.abbr {
+                                @include span(1 of 20);
+                            }
+                            p {
+                                @include span(19 of 20 last);
+                            }
+                        }
+                        &.tags {
+                            @include span(5 of 10);
+                            padding-bottom: $base-block-padding/2;
+                            padding-top: $base-block-padding/2;
+                            ul li {
+                                display: inline;
+                                margin-left: 10px;
+                                &:after {
+                                    content: ',';
+                                }
+                                &:last-of-type:after {
+                                    content: '';
+                                }
+                                &:first-of-type {
+                                    margin-left: 0;
+                                }
+                            }
+                        }
+                        &.author {
+                            @include span(2 of 10);
+                            position: absolute;
+                            bottom: 0;
+                            padding-bottom: $base-block-padding;
+                            left: span(5 of 10) + gutter()/2;
+                        }
+                        &.votes {
+                            @include span(3 of 10 last);
+                            position: absolute;
+                            bottom: 0;
+                            padding-bottom: $base-block-padding;
+                            left: span(7 of 10) + gutter();
+                            div {
+                                @include span(1 of 1);
+                                a {
+                                    @include span(1 of 10);
+                                }
+                                p {
+                                    @include span(9 of 10 last);
+                                    line-height: 20px;
+                                    font-size: 80%;
+                                }
+                                &.up.voted a {
+                                    color: #4EA600;
+                                }
+                                &.down.voted a {
+                                    color: #B90000;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        section.contributor-info { // user/contributor profile
+            @include base-block();
+            @include span(1 of 4);
+            @include pre(0);
+            @include post(0);
+            dl, a {
+                @include base-block-contents();
+            }
+        }
+        section.contributor-activity { // user/contributor activity
+            @include base-block();
+            @include span(3 of 4 last);
+            @include pre(0);
+            @include post(1 of $definition-block-layout);
+            > div {
+                @include base-block-contents();
+                div div {
+                    margin: $base-block-padding 0;
+                    &:first-of-type {
+                        margin: 0;
+                    }
+                }
+            }
+        }
+        div.leaderboard { // leaderboard
+            @include base-block();
+            table {
+                @include base-block-contents();
+                thead {
+                    @include span(1 of 1);
+                    tr {
+                        @include span(1 of 1);
+                        th {
+                            @include span(1 at 2 of (1 50 1 1 50 1));
+                            @include pre(1 at 1 of (1 50 1 1 50 1));
+                            @include post(1 at 1 of (1 50 1 1 50 1));
+                            padding-top: span(1 at 1 of (1 50 1 1 50 1));
+                            padding-bottom: span(1 at 1 of (1 50 1 1 50 1));
+                            &:last-of-type {
+                                @include span(1 at 5 of (1 50 1 1 50 1) last);
+                            }
+                        }
+                    }
+                }
+                tbody {
+                    @include span(1 of 1);
+                    tr {
+                        @include span(1 of 1);
+                        td {
+                            @include span(1 at 2 of (1 50 1 1 50 1));
+                            @include pre(1 at 1 of (1 50 1 1 50 1));
+                            @include post(1 at 1 of (1 50 1 1 50 1));
+                            padding-top: span(1 at 1 of (1 50 1 1 50 1));
+                            padding-bottom: span(1 at 1 of (1 50 1 1 50 1));
+                            &:last-of-type {
+                                @include span(1 at 5 of (1 50 1 1 50 1) last);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        form { // add phrase, login
+            @include base-block();
+            fieldset {
+                @include base-block-contents();
+                legend {
+                    font-weight: bold;
+                }
+                p {
+                    margin-bottom: $base-block-padding;
+                }
+                label {
+                    @include span(1 of 1);
+                    margin-bottom: $base-block-padding;
+                    span {
+                        @include span(1 at 1 of (20 1 30) 0 );
+                    }
+                    input, textarea {
+                        @include span(1 at 3 of (20 1 30) 0 last);
+                        &[type="submit"] {
+                            width: auto;
+                            float: none;
+                            margin-left: span(1 at 1 of (20 1 30) 0);
+                        }
+                    }
+                    textarea {
+                        height: 10em;
+                    }
+                }
+                section.forgotPassword {
+                    @include span(1 of 1);
+                    text-align: right;
+                }
+            }
+        }
+        > div.message { // error, info, yesno messages
+            @include base-block();
+            section {
+                @include base-block-contents();
+                &.choices {
+                    text-align: center;
+                    a {
+                        margin-right: 1em;
+                    }
+                }
+            }
         }
     }
     footer {
@@ -112,37 +343,17 @@ section.pagination {
 }
 
 dl.PhraseSearchResult {
-    @include span(1 at 2 of $definition-block-layout);
-    @include pre(1 of $definition-block-layout);
-    @include post(1 of $definition-block-layout);
-    //margin-top: 0;
-    margin-bottom: span(1 of $definition-block-layout);
-    border-width: 1px;
-    border-style: solid;
-    border-color: #E5E6E9 #DFE0E4 #D0D1D5;
-    border-radius: 3px;
-    background-color: #FFF;
+    @include base-block();
     dt {
-        @include span(1 of 1);
-        padding: span(1 at 1 of $definition-block-layout);
-        width: span(1 at 2 of $definition-block-layout) - span(1 at 1 of $definition-block-layout);
+        @include base-block-contents();
         font-weight: bold;
     }
     dd {
-        @include span(1 of 1);
-        padding: span(1 at 1 of $definition-block-layout);
+        @include base-block-contents();
         padding-top: 0;
-        width: span(1 at 2 of $definition-block-layout) - span(1 at 1 of $definition-block-layout);
         &.missing-definition {
             text-align: center;
             font-style: italic;
-        }
-    }
-    a {
-        color: #3B5998;
-        text-decoration: none;
-        &:hover {
-            text-decoration: underline;
         }
     }
 }
@@ -166,4 +377,8 @@ dl.PhraseSearchResult {
   content: '\e001\A';
   white-space: pre;
   display: inline;
+}
+input.error, p.global.error {
+    //background-color: //complement($base-background-color)!important;
+    color: red;
 }

@@ -1646,12 +1646,14 @@ var ErrorMessage = React.createClass({
             OK = this.messages.Errors.OK;
         return (
             <main className="error-message" id="main">
-                <section className="message">
-                    <div>{errorMessage}</div>
-                </section>
-                <section className="choices">
-                    <a href="#" onClick={this.handleClearError}>{OK}</a>
-                </section>
+                <div className="error message">
+                    <section className="message">
+                        <div>{errorMessage}</div>
+                    </section>
+                    <section className="choices">
+                        <a href="#" onClick={this.handleClearError}>{OK}</a>
+                    </section>
+                </div>
             </main>
         );
     }
@@ -1672,12 +1674,14 @@ var InfoMessage = React.createClass({
             OK = this.messages.Errors.OK;
         return (
             <main className="info-message" id="main">
-                <section className="message">
-                    <div>{message}</div>
-                </section>
-                <section className="choices">
-                    <a href="#" onClick={this.handleClearInfo}>{OK}</a>
-                </section>
+                <div className="info message">
+                    <section className="message">
+                        <div>{message}</div>
+                    </section>
+                    <section className="choices">
+                        <a href="#" onClick={this.handleClearInfo}>{OK}</a>
+                    </section>
+                </div>
             </main>
         );
     }
@@ -1702,13 +1706,15 @@ var YesnoMessage = React.createClass({
             no = this.messages.Errors.no;
         return (
             <main className="yesno-message" id="main">
-                <section className="message">
-                    <p>{message}</p>
-                </section>
-                <section className="choices">
-                    <a href="#" onClick={this.handleYes}>{yes}</a>
-                    <a href="#" onClick={this.handleNo}>{no}</a>
-                </section>
+                <div className="yesno message">
+                    <section className="message">
+                        <p>{message}</p>
+                    </section>
+                    <section className="choices">
+                        <a href="#" onClick={this.handleYes}>{yes}</a>
+                        <a href="#" onClick={this.handleNo}>{no}</a>
+                    </section>
+                </div>
             </main>
         );
     }
@@ -1787,22 +1793,25 @@ console.log("myPreviousDefinition: " + JSON.stringify(myPreviousDefinition));
         return (
             <main className="add-definition" id="main">
                 <form onSubmit={this.handleSubmit}>
-                    <h2>{addDefinition}</h2>
-                    <label>
-                        <span>{definitionLabel}</span>
-                        <textarea placeholder={placeholderDefinition} ref="newDefinition" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultDefinition}/>
-                    </label>
-                    <label>
-                        <span>{examplesLabel}</span>
-                        <textarea placeholder={placeholderExamples} ref="examples" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultExamples}/>
-                    </label>
-                    <label>
-                        <span>{tagsLabel}</span>
-                        <textarea placeholder={placeholderTags} ref="tags" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultTags}/>
-                    </label>
-                    <section className="submit">
-                        <input type="submit" value={submit}/>
-                    </section>
+                    <fieldset>
+                        <legend>{addDefinition}</legend>
+                        <label>
+                            <span>{definitionLabel}</span>
+                            <textarea placeholder={placeholderDefinition} ref="newDefinition" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultDefinition}/>
+                        </label>
+                        <label>
+                            <span>{examplesLabel}</span>
+                            <textarea placeholder={placeholderExamples} ref="examples" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultExamples}/>
+                        </label>
+                        <label>
+                            <span>{tagsLabel}</span>
+                            <textarea placeholder={placeholderTags} ref="tags" autoCorrect="off" autoCapitalize="none" spellCheck="false" defaultValue={defaultTags}/>
+                        </label>
+                        <label>
+                            <span></span>
+                            <input type="submit" value={submit}/>
+                        </label>
+                    </fieldset>
                 </form>
             </main>
         );
@@ -1820,7 +1829,9 @@ var PhraseInDetails = React.createClass({
         return (
             <section className="phrase-top">
                 <h2>{phrase}</h2>
-                {addDefinitionElem}
+                <div className="addDefinitionCTA">
+                    {addDefinitionElem}
+                </div>
             </section>
         );
     }
@@ -1985,20 +1996,20 @@ var DefinitionInDetails = React.createClass({
                     {definitionElements}
                     {examplesElements}
                     {tagsElements}
+                    <dd className="author">
+                        <span className="by">{byCaption} <a href={authorProfileUrl} onClick={this.handleToLink.bind(this, authorProfileUrl)}>{authorNick}</a></span>
+                    </dd>
+                    <dd className="votes">
+                        <div className={upClasses}>
+                            <a className="up oi" href="#" data-glyph="thumb-up" title={thumbsUpTitle} onClick={this.handleVote}></a>
+                            <p>{thumbsUpMessage}</p>
+                        </div>
+                        <div className={downClasses}>
+                            <a className="down oi" href="#" data-glyph="thumb-down" title={thumbsDownTitle} onClick={this.handleVote}></a>
+                            <p>{thumbsDownMessage}</p>
+                        </div>
+                    </dd>
                 </dl>
-                <div className="author">
-                    <span className="by">{byCaption} <a href={authorProfileUrl} onClick={this.handleToLink.bind(this, authorProfileUrl)}>{authorNick}</a></span>
-                </div>
-                <div className="votes">
-                    <div className={upClasses}>
-                        <a className="up oi" href="#" data-glyph="thumb-up" title={thumbsUpTitle} onClick={this.handleVote}></a>
-                        <p>{thumbsUpMessage}</p>
-                    </div>
-                    <div className={downClasses}>
-                        <a className="down oi" href="#" data-glyph="thumb-down" title={thumbsDownTitle} onClick={this.handleVote}></a>
-                        <p>{thumbsDownMessage}</p>
-                    </div>
-                </div>
             </li>
         );
     }
@@ -2885,10 +2896,12 @@ var Leaderboard = React.createClass({
         return (
             <main className="leaderboard" id="main">
                 <h2>{m.leaderboard}</h2>
-                <table>
-                    <thead><tr><th>{m.user}</th><th title={m.pointCalculationRulesTitle}>{m.points}</th></tr></thead>
-                    <tbody>{infiniteScroll}</tbody>
-                </table>
+                <div className="leaderboard">
+                    <table>
+                        <thead><tr><th>{m.user}</th><th title={m.pointCalculationRulesTitle}>{m.points}</th></tr></thead>
+                        <tbody>{infiniteScroll}</tbody>
+                    </table>
+                </div>
             </main>
         );
     }
