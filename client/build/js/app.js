@@ -37624,13 +37624,11 @@ var PhraseInDetails = React.createClass({displayName: 'PhraseInDetails',
             loginInfo = this.props.topState.loginInfo,
             addDefinitionCaption = this.messages.PhraseInDetails.addDefinitionCaption,
             addUrl = aUrl(this.getEndpoint('addDefinition') + "?phrase=" + phrase, this.props.topState.shortLangCode),
-            addDefinitionElem = (loginInfo && React.DOM.p(null, addDefinitionCaption,": ", React.DOM.a( {className:"oi", 'data-glyph':"plus", title:addDefinitionCaption, href:addUrl, onClick:this.handleToLink.bind(this, addUrl)}))) || "";
+            addDefinitionCTA = (loginInfo && React.DOM.div( {className:"addDefinitionCTA"}, React.DOM.p(null, addDefinitionCaption,": ", React.DOM.a( {className:"oi", 'data-glyph':"plus", title:addDefinitionCaption, href:addUrl, onClick:this.handleToLink.bind(this, addUrl)})))) || "";
         return (
             React.DOM.section( {className:"phrase-top"}, 
                 React.DOM.h2(null, phrase),
-                React.DOM.div( {className:"addDefinitionCTA"}, 
-                    addDefinitionElem
-                )
+                addDefinitionCTA
             )
         );
     }

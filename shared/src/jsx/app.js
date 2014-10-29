@@ -1825,13 +1825,11 @@ var PhraseInDetails = React.createClass({
             loginInfo = this.props.topState.loginInfo,
             addDefinitionCaption = this.messages.PhraseInDetails.addDefinitionCaption,
             addUrl = aUrl(this.getEndpoint('addDefinition') + "?phrase=" + phrase, this.props.topState.shortLangCode),
-            addDefinitionElem = (loginInfo && <p>{addDefinitionCaption}: <a className="oi" data-glyph="plus" title={addDefinitionCaption} href={addUrl} onClick={this.handleToLink.bind(this, addUrl)}></a></p>) || "";
+            addDefinitionCTA = (loginInfo && <div className="addDefinitionCTA"><p>{addDefinitionCaption}: <a className="oi" data-glyph="plus" title={addDefinitionCaption} href={addUrl} onClick={this.handleToLink.bind(this, addUrl)}></a></p></div>) || "";
         return (
             <section className="phrase-top">
                 <h2>{phrase}</h2>
-                <div className="addDefinitionCTA">
-                    {addDefinitionElem}
-                </div>
+                {addDefinitionCTA}
             </section>
         );
     }

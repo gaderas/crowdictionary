@@ -68,21 +68,41 @@ div.top {
     header.TopBar {
         @include container(960px center);
         nav.NavBar {
-            @include span(2 of 3 0);
+            @include breakpoint($large-screen) {
+                @include span(2 of 3 0);
+            }
+            @include span(1 of 1);
             h2 {
+                text-align: center;
                 &:nth-of-type(1) {
-                    @include span(1 of 5 0.05);
+                    @include breakpoint($large-screen) {
+                        @include span(1 of 5 0.05);
+                    }
+                    @include span(1 of 3);
                 }
                 &:nth-of-type(2) {
-                    @include span(3 of 5 0.05);
+                    @include breakpoint($large-screen) {
+                        @include span(3 of 5 0.05);
+                    }
+                    @include span(1 of 3);
                 }
                 &:nth-of-type(3) {
-                    @include span(1 of 5 0.05 last);
+                    @include breakpoint($large-screen) {
+                        @include span(1 of 5 0.05 last);
+                    }
+                    @include span(1 of 3 last);
                 }
                 a {
                     display: inline;
                     text-decoration: none;
                     color: #444;
+                    visibility: hidden;
+                    @include breakpoint($large-screen) {
+                        visibility: visible;
+                    }
+                    &:before {
+                        visibility: visible;
+                    }
                     &:hover {
                         text-decoration: underline;
                     }
@@ -97,6 +117,7 @@ div.top {
                 text-indent: 100%;
                 white-space: nowrap;
                 overflow: hidden;
+                visibility: visible;
             }
             h2.user-links, h2.login-info {
                 a {
@@ -105,7 +126,36 @@ div.top {
             }
         }
         section.SearchBar {
-            @include span(1 of 3 last 0);
+            @include breakpoint($large-screen) {
+                @include span(1 of 3 last 0);
+                margin-top: auto;
+            }
+            margin-top: -40px;
+            @include span(2 of 3 last);
+            form {
+                @include span(1 of 1);
+                input {
+                    font-size: 150%;
+                    @include breakpoint($large-screen) {
+                        width: 85%;
+                    }
+                    width: 170px;
+                }
+                /*input {
+                    @include span(1 of 1);
+                    margin-top: -20px;
+                    height: 20px;
+                    line-height: 20px;
+                    //font-size: 18px;
+                    text-indent: 10px;
+                    //position: absolute;
+                    &:before {
+                        @include span(1 of 1);
+                        line-height: 20px;
+                        font-size: 18px;
+                    }
+                }*/
+            }
         }
     }
 }
@@ -114,7 +164,9 @@ div.rest {
     @include container($large-screen);
     main {
         //@include span(1 of 1);
-        @include span(1 at 1 of (660/960 300/960) 0);
+        @include breakpoint($large-screen) {
+            @include span(1 at 1 of (660/960 300/960) 0);
+        }
         section.phrase-top {
             @include span(1 of 1);
             div.addDefinitionCTA {
@@ -159,16 +211,21 @@ div.rest {
                             padding-bottom: $base-block-padding/2;
                             padding-top: $base-block-padding/2;
                             span.abbr {
-                                @include span(1 of 20);
+                                @include span(2 of 20);
                             }
                             p {
-                                @include span(19 of 20 last);
+                                @include span(18 of 20 last);
                             }
                         }
                         &.tags {
-                            @include span(5 of 10);
-                            padding-bottom: $base-block-padding/2;
+                            @include breakpoint($large-screen) {
+                                @include span(5 of 10);
+                                border-bottom: 0px none black;
+                            }
+                            @include span(1 of 1);
+                            padding-bottom: $base-block-padding;
                             padding-top: $base-block-padding/2;
+                            border-bottom: 1px dotted black;
                             ul li {
                                 display: inline;
                                 margin-left: 10px;
@@ -184,25 +241,39 @@ div.rest {
                             }
                         }
                         &.author {
-                            @include span(2 of 10);
-                            position: absolute;
-                            bottom: 0;
-                            padding-bottom: $base-block-padding;
-                            left: span(5 of 10) + gutter()/2;
+                            @include breakpoint($large-screen) {
+                                @include span(2 of 10);
+                                position: absolute;
+                                bottom: 0;
+                                padding-bottom: $base-block-padding;
+                                left: span(5 of 10) + gutter()/2;
+
+                                border-top: 0px none black;
+                                padding-top: auto;
+                            }
+                            @include span(1 of 2);
+                            padding-top: $base-block-padding;
                         }
                         &.votes {
-                            @include span(3 of 10 last);
-                            position: absolute;
-                            bottom: 0;
-                            padding-bottom: $base-block-padding;
-                            left: span(7 of 10) + gutter();
+                            @include breakpoint($large-screen) {
+                                @include span(3 of 10 last);
+                                position: absolute;
+                                bottom: 0;
+                                padding-bottom: $base-block-padding;
+                                left: span(7 of 10) + gutter();
+
+                                border-top: 0px none black;
+                                padding-top: auto;
+                            }
+                            @include span(1 of 2 last);
+                            padding-top: $base-block-padding;
                             div {
                                 @include span(1 of 1);
                                 a {
-                                    @include span(1 of 10);
+                                    @include span(3 of 20);
                                 }
                                 p {
-                                    @include span(9 of 10 last);
+                                    @include span(17 of 20 last);
                                     line-height: 20px;
                                     font-size: 80%;
                                 }
@@ -329,7 +400,9 @@ div.rest {
     }
     footer {
         //@include span(1 at 2 of (660/960 300/960) 0);
-        @include span(1 at 2 of (660/960 300/960) 0);
+        @include breakpoint($large-screen) {
+            @include span(1 at 2 of (660/960 300/960) 0);
+        }
     }
 }
 section.pagination {
