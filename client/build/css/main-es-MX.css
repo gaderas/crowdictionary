@@ -1248,21 +1248,21 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, menu,
   display: block;
 }
 
-/* line 30, ../../src/css/main.scss */
+/* line 30, ../../src/css/_main.scss */
 a {
   color: #3B5998;
   text-decoration: none;
 }
-/* line 33, ../../src/css/main.scss */
+/* line 33, ../../src/css/_main.scss */
 a:hover {
   text-decoration: underline;
 }
-/* line 36, ../../src/css/main.scss */
+/* line 36, ../../src/css/_main.scss */
 a:before {
   margin-right: 5px;
 }
 
-/* line 40, ../../src/css/main.scss */
+/* line 40, ../../src/css/_main.scss */
 body {
   max-width: 100%;
   margin-left: auto;
@@ -1278,7 +1278,7 @@ body:after {
 }
 
 @media (min-width: 960px) {
-  /* line 45, ../../src/css/main.scss */
+  /* line 45, ../../src/css/_main.scss */
   body {
     width: 100%;
     float: left;
@@ -1287,7 +1287,7 @@ body:after {
   }
 }
 
-/* line 52, ../../src/css/main.scss */
+/* line 52, ../../src/css/_main.scss */
 div.top {
   width: 100%;
   float: left;
@@ -1303,7 +1303,7 @@ div.top {
   box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.52);
   margin-bottom: 1.60428%;
 }
-/* line 68, ../../src/css/main.scss */
+/* line 68, ../../src/css/_main.scss */
 div.top header.TopBar {
   max-width: 960px;
   margin-left: auto;
@@ -1315,7 +1315,7 @@ div.top header.TopBar:after {
   display: block;
   clear: both;
 }
-/* line 70, ../../src/css/main.scss */
+/* line 70, ../../src/css/_main.scss */
 div.top header.TopBar nav.NavBar {
   width: 100%;
   float: left;
@@ -1323,59 +1323,59 @@ div.top header.TopBar nav.NavBar {
   margin-right: 0;
 }
 @media (min-width: 960px) {
-  /* line 70, ../../src/css/main.scss */
+  /* line 70, ../../src/css/_main.scss */
   div.top header.TopBar nav.NavBar {
     width: 66.66667%;
     float: left;
   }
 }
-/* line 75, ../../src/css/main.scss */
+/* line 75, ../../src/css/_main.scss */
 div.top header.TopBar nav.NavBar h2 {
   text-align: center;
 }
-/* line 77, ../../src/css/main.scss */
+/* line 77, ../../src/css/_main.scss */
 div.top header.TopBar nav.NavBar h2:nth-of-type(1) {
   width: 28.57143%;
   float: left;
   margin-right: 7.14286%;
 }
 @media (min-width: 960px) {
-  /* line 77, ../../src/css/main.scss */
+  /* line 77, ../../src/css/_main.scss */
   div.top header.TopBar nav.NavBar h2:nth-of-type(1) {
     width: 19.23077%;
     float: left;
     margin-right: 0.96154%;
   }
 }
-/* line 83, ../../src/css/main.scss */
+/* line 83, ../../src/css/_main.scss */
 div.top header.TopBar nav.NavBar h2:nth-of-type(2) {
   width: 28.57143%;
   float: left;
   margin-right: 7.14286%;
 }
 @media (min-width: 960px) {
-  /* line 83, ../../src/css/main.scss */
+  /* line 83, ../../src/css/_main.scss */
   div.top header.TopBar nav.NavBar h2:nth-of-type(2) {
     width: 59.61538%;
     float: left;
     margin-right: 0.96154%;
   }
 }
-/* line 89, ../../src/css/main.scss */
+/* line 89, ../../src/css/_main.scss */
 div.top header.TopBar nav.NavBar h2:nth-of-type(3) {
   width: 28.57143%;
   float: right;
   margin-right: 0;
 }
 @media (min-width: 960px) {
-  /* line 89, ../../src/css/main.scss */
+  /* line 89, ../../src/css/_main.scss */
   div.top header.TopBar nav.NavBar h2:nth-of-type(3) {
     width: 19.23077%;
     float: right;
     margin-right: 0;
   }
 }
-/* line 95, ../../src/css/main.scss */
+/* line 95, ../../src/css/_main.scss */
 div.top header.TopBar nav.NavBar h2 a {
   display: inline;
   text-decoration: none;
@@ -1383,20 +1383,20 @@ div.top header.TopBar nav.NavBar h2 a {
   visibility: hidden;
 }
 @media (min-width: 960px) {
-  /* line 95, ../../src/css/main.scss */
+  /* line 95, ../../src/css/_main.scss */
   div.top header.TopBar nav.NavBar h2 a {
     visibility: visible;
   }
 }
-/* line 103, ../../src/css/main.scss */
+/* line 103, ../../src/css/_main.scss */
 div.top header.TopBar nav.NavBar h2 a:before {
   visibility: visible;
 }
-/* line 106, ../../src/css/main.scss */
+/* line 106, ../../src/css/_main.scss */
 div.top header.TopBar nav.NavBar h2 a:hover {
   text-decoration: underline;
 }
-/* line 111, ../../src/css/main.scss */
+/* line 111, ../../src/css/_main.scss */
 div.top header.TopBar nav.NavBar h2.home a {
   display: block;
   width: 100px;
@@ -1408,13 +1408,13 @@ div.top header.TopBar nav.NavBar h2.home a {
   overflow: hidden;
   visibility: visible;
 }
-/* line 123, ../../src/css/main.scss */
+/* line 123, ../../src/css/_main.scss */
 div.top header.TopBar nav.NavBar h2.user-links a, div.top header.TopBar nav.NavBar h2.login-info a {
   width: 21.05263%;
   float: left;
   margin-right: 5.26316%;
 }
-/* line 128, ../../src/css/main.scss */
+/* line 128, ../../src/css/_main.scss */
 div.top header.TopBar section.SearchBar {
   margin-top: -40px;
   width: 64.28571%;
@@ -1422,7 +1422,7 @@ div.top header.TopBar section.SearchBar {
   margin-right: 0;
 }
 @media (min-width: 960px) {
-  /* line 128, ../../src/css/main.scss */
+  /* line 128, ../../src/css/_main.scss */
   div.top header.TopBar section.SearchBar {
     width: 33.33333%;
     float: right;
@@ -1430,7 +1430,7 @@ div.top header.TopBar section.SearchBar {
     margin-top: auto;
   }
 }
-/* line 135, ../../src/css/main.scss */
+/* line 135, ../../src/css/_main.scss */
 div.top header.TopBar section.SearchBar form {
   width: 100%;
   float: left;
@@ -1451,19 +1451,19 @@ div.top header.TopBar section.SearchBar form {
       }
   }*/
 }
-/* line 137, ../../src/css/main.scss */
+/* line 137, ../../src/css/_main.scss */
 div.top header.TopBar section.SearchBar form input {
   font-size: 150%;
   width: 170px;
 }
 @media (min-width: 960px) {
-  /* line 137, ../../src/css/main.scss */
+  /* line 137, ../../src/css/_main.scss */
   div.top header.TopBar section.SearchBar form input {
     width: 85%;
   }
 }
 
-/* line 163, ../../src/css/main.scss */
+/* line 163, ../../src/css/_main.scss */
 div.rest {
   max-width: 960px;
   margin-left: auto;
@@ -1476,20 +1476,20 @@ div.rest:after {
   clear: both;
 }
 @media (min-width: 960px) {
-  /* line 165, ../../src/css/main.scss */
+  /* line 165, ../../src/css/_main.scss */
   div.rest main {
     width: 68.75%;
     float: left;
   }
 }
-/* line 170, ../../src/css/main.scss */
+/* line 170, ../../src/css/_main.scss */
 div.rest main section.phrase-top {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 172, ../../src/css/main.scss */
+/* line 172, ../../src/css/_main.scss */
 div.rest main section.phrase-top div.addDefinitionCTA {
   width: 100%;
   float: left;
@@ -1507,7 +1507,7 @@ div.rest main section.phrase-top div.addDefinitionCTA {
   border-radius: 3px;
   background-color: #FFF;
 }
-/* line 175, ../../src/css/main.scss */
+/* line 175, ../../src/css/_main.scss */
 div.rest main section.phrase-top div.addDefinitionCTA > p {
   width: 100%;
   float: left;
@@ -1516,7 +1516,7 @@ div.rest main section.phrase-top div.addDefinitionCTA > p {
   padding: 1.60428%;
   width: 94.65241%;
 }
-/* line 180, ../../src/css/main.scss */
+/* line 180, ../../src/css/_main.scss */
 div.rest main > h2, div.rest main section.phrase-top > h2 {
   width: 100%;
   float: left;
@@ -1525,25 +1525,25 @@ div.rest main > h2, div.rest main section.phrase-top > h2 {
   font-weight: bold;
   font-style: italic;
 }
-/* line 185, ../../src/css/main.scss */
+/* line 185, ../../src/css/_main.scss */
 div.rest main > div, div.rest main section.pagination {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 188, ../../src/css/main.scss */
+/* line 188, ../../src/css/_main.scss */
 div.rest main > ul {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 190, ../../src/css/main.scss */
+/* line 190, ../../src/css/_main.scss */
 div.rest main > ul span.abbr {
   font-size: 70%;
 }
-/* line 193, ../../src/css/main.scss */
+/* line 193, ../../src/css/_main.scss */
 div.rest main > ul > li {
   width: 100%;
   float: left;
@@ -1561,7 +1561,7 @@ div.rest main > ul > li {
   border-radius: 3px;
   background-color: #FFF;
 }
-/* line 196, ../../src/css/main.scss */
+/* line 196, ../../src/css/_main.scss */
 div.rest main > ul > li dl {
   width: 100%;
   float: left;
@@ -1575,7 +1575,7 @@ div.rest main > ul > li dl {
   width: 94.65241%;
   position: relative;
 }
-/* line 200, ../../src/css/main.scss */
+/* line 200, ../../src/css/_main.scss */
 div.rest main > ul > li dl dt {
   width: 100%;
   float: left;
@@ -1584,35 +1584,35 @@ div.rest main > ul > li dl dt {
   font-weight: bold;
   padding-bottom: 0.80214%;
 }
-/* line 205, ../../src/css/main.scss */
+/* line 205, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 207, ../../src/css/main.scss */
+/* line 207, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.examples p {
   font-style: italic;
 }
-/* line 210, ../../src/css/main.scss */
+/* line 210, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.definition, div.rest main > ul > li dl dd.examples {
   padding-bottom: 0.80214%;
   padding-top: 0.80214%;
 }
-/* line 213, ../../src/css/main.scss */
+/* line 213, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.definition span.abbr, div.rest main > ul > li dl dd.examples span.abbr {
   width: 9.09091%;
   float: left;
   margin-right: 1.0101%;
 }
-/* line 216, ../../src/css/main.scss */
+/* line 216, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.definition p, div.rest main > ul > li dl dd.examples p {
   width: 89.89899%;
   float: right;
   margin-right: 0;
 }
-/* line 220, ../../src/css/main.scss */
+/* line 220, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.tags {
   width: 100%;
   float: left;
@@ -1623,7 +1623,7 @@ div.rest main > ul > li dl dd.tags {
   border-bottom: 1px dotted black;
 }
 @media (min-width: 960px) {
-  /* line 220, ../../src/css/main.scss */
+  /* line 220, ../../src/css/_main.scss */
   div.rest main > ul > li dl dd.tags {
     width: 48.97959%;
     float: left;
@@ -1632,24 +1632,24 @@ div.rest main > ul > li dl dd.tags {
     min-height: 40px;
   }
 }
-/* line 230, ../../src/css/main.scss */
+/* line 230, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.tags ul li {
   display: inline;
   margin-left: 10px;
 }
-/* line 233, ../../src/css/main.scss */
+/* line 233, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.tags ul li:after {
   content: ',';
 }
-/* line 236, ../../src/css/main.scss */
+/* line 236, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.tags ul li:last-of-type:after {
   content: '';
 }
-/* line 239, ../../src/css/main.scss */
+/* line 239, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.tags ul li:first-of-type {
   margin-left: 0;
 }
-/* line 244, ../../src/css/main.scss */
+/* line 244, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.author {
   width: 44.44444%;
   float: left;
@@ -1657,7 +1657,7 @@ div.rest main > ul > li dl dd.author {
   padding-top: 1.60428%;
 }
 @media (min-width: 960px) {
-  /* line 244, ../../src/css/main.scss */
+  /* line 244, ../../src/css/_main.scss */
   div.rest main > ul > li dl dd.author {
     width: 18.36735%;
     float: left;
@@ -1670,7 +1670,7 @@ div.rest main > ul > li dl dd.author {
     padding-top: auto;
   }
 }
-/* line 258, ../../src/css/main.scss */
+/* line 258, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.votes {
   width: 44.44444%;
   float: right;
@@ -1678,7 +1678,7 @@ div.rest main > ul > li dl dd.votes {
   padding-top: 1.60428%;
 }
 @media (min-width: 960px) {
-  /* line 258, ../../src/css/main.scss */
+  /* line 258, ../../src/css/_main.scss */
   div.rest main > ul > li dl dd.votes {
     width: 28.57143%;
     float: right;
@@ -1691,20 +1691,20 @@ div.rest main > ul > li dl dd.votes {
     padding-top: auto;
   }
 }
-/* line 271, ../../src/css/main.scss */
+/* line 271, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.votes div {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 273, ../../src/css/main.scss */
+/* line 273, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.votes div a {
   width: 14.14141%;
   float: left;
   margin-right: 1.0101%;
 }
-/* line 276, ../../src/css/main.scss */
+/* line 276, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.votes div p {
   width: 84.84848%;
   float: right;
@@ -1712,15 +1712,15 @@ div.rest main > ul > li dl dd.votes div p {
   line-height: 20px;
   font-size: 80%;
 }
-/* line 281, ../../src/css/main.scss */
+/* line 281, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.votes div.up.voted a {
   color: #4EA600;
 }
-/* line 284, ../../src/css/main.scss */
+/* line 284, ../../src/css/_main.scss */
 div.rest main > ul > li dl dd.votes div.down.voted a {
   color: #B90000;
 }
-/* line 293, ../../src/css/main.scss */
+/* line 293, ../../src/css/_main.scss */
 div.rest main section.contributor-info {
   width: 96.25668%;
   float: left;
@@ -1739,7 +1739,7 @@ div.rest main section.contributor-info {
   margin-left: 0%;
   margin-right: 0%;
 }
-/* line 298, ../../src/css/main.scss */
+/* line 298, ../../src/css/_main.scss */
 div.rest main section.contributor-info dl, div.rest main section.contributor-info a {
   width: 100%;
   float: left;
@@ -1748,7 +1748,7 @@ div.rest main section.contributor-info dl, div.rest main section.contributor-inf
   padding: 1.60428%;
   width: 94.65241%;
 }
-/* line 302, ../../src/css/main.scss */
+/* line 302, ../../src/css/_main.scss */
 div.rest main section.contributor-activity {
   width: 96.25668%;
   float: left;
@@ -1767,7 +1767,7 @@ div.rest main section.contributor-activity {
   margin-left: 0%;
   margin-right: 1.87166%;
 }
-/* line 307, ../../src/css/main.scss */
+/* line 307, ../../src/css/_main.scss */
 div.rest main section.contributor-activity > div {
   width: 100%;
   float: left;
@@ -1776,15 +1776,15 @@ div.rest main section.contributor-activity > div {
   padding: 1.60428%;
   width: 94.65241%;
 }
-/* line 309, ../../src/css/main.scss */
+/* line 309, ../../src/css/_main.scss */
 div.rest main section.contributor-activity > div div div {
   margin: 1.60428% 0;
 }
-/* line 311, ../../src/css/main.scss */
+/* line 311, ../../src/css/_main.scss */
 div.rest main section.contributor-activity > div div div:first-of-type {
   margin: 0;
 }
-/* line 317, ../../src/css/main.scss */
+/* line 317, ../../src/css/_main.scss */
 div.rest main div.leaderboard {
   width: 96.25668%;
   float: left;
@@ -1798,7 +1798,7 @@ div.rest main div.leaderboard {
   border-radius: 3px;
   background-color: #FFF;
 }
-/* line 319, ../../src/css/main.scss */
+/* line 319, ../../src/css/_main.scss */
 div.rest main div.leaderboard table {
   width: 100%;
   float: left;
@@ -1807,21 +1807,21 @@ div.rest main div.leaderboard table {
   padding: 1.60428%;
   width: 94.65241%;
 }
-/* line 321, ../../src/css/main.scss */
+/* line 321, ../../src/css/_main.scss */
 div.rest main div.leaderboard table thead {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 323, ../../src/css/main.scss */
+/* line 323, ../../src/css/_main.scss */
 div.rest main div.leaderboard table thead tr {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 325, ../../src/css/main.scss */
+/* line 325, ../../src/css/_main.scss */
 div.rest main div.leaderboard table thead tr th {
   width: 47.50594%;
   float: left;
@@ -1831,27 +1831,27 @@ div.rest main div.leaderboard table thead tr th {
   padding-top: 0.95012%;
   padding-bottom: 0.95012%;
 }
-/* line 331, ../../src/css/main.scss */
+/* line 331, ../../src/css/_main.scss */
 div.rest main div.leaderboard table thead tr th:last-of-type {
   width: 47.50594%;
   float: right;
   margin-right: 0;
 }
-/* line 337, ../../src/css/main.scss */
+/* line 337, ../../src/css/_main.scss */
 div.rest main div.leaderboard table tbody {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 339, ../../src/css/main.scss */
+/* line 339, ../../src/css/_main.scss */
 div.rest main div.leaderboard table tbody tr {
   width: 100%;
   float: left;
   margin-left: 0;
   margin-right: 0;
 }
-/* line 341, ../../src/css/main.scss */
+/* line 341, ../../src/css/_main.scss */
 div.rest main div.leaderboard table tbody tr td {
   width: 47.50594%;
   float: left;
@@ -1861,13 +1861,13 @@ div.rest main div.leaderboard table tbody tr td {
   padding-top: 0.95012%;
   padding-bottom: 0.95012%;
 }
-/* line 347, ../../src/css/main.scss */
+/* line 347, ../../src/css/_main.scss */
 div.rest main div.leaderboard table tbody tr td:last-of-type {
   width: 47.50594%;
   float: right;
   margin-right: 0;
 }
-/* line 355, ../../src/css/main.scss */
+/* line 355, ../../src/css/_main.scss */
 div.rest main form {
   width: 96.25668%;
   float: left;
@@ -1881,7 +1881,7 @@ div.rest main form {
   border-radius: 3px;
   background-color: #FFF;
 }
-/* line 357, ../../src/css/main.scss */
+/* line 357, ../../src/css/_main.scss */
 div.rest main form fieldset {
   width: 100%;
   float: left;
@@ -1890,15 +1890,15 @@ div.rest main form fieldset {
   padding: 1.60428%;
   width: 94.65241%;
 }
-/* line 359, ../../src/css/main.scss */
+/* line 359, ../../src/css/_main.scss */
 div.rest main form fieldset legend {
   font-weight: bold;
 }
-/* line 362, ../../src/css/main.scss */
+/* line 362, ../../src/css/_main.scss */
 div.rest main form fieldset p {
   margin-bottom: 1.60428%;
 }
-/* line 365, ../../src/css/main.scss */
+/* line 365, ../../src/css/_main.scss */
 div.rest main form fieldset label {
   width: 100%;
   float: left;
@@ -1906,28 +1906,28 @@ div.rest main form fieldset label {
   margin-right: 0;
   margin-bottom: 1.60428%;
 }
-/* line 368, ../../src/css/main.scss */
+/* line 368, ../../src/css/_main.scss */
 div.rest main form fieldset label span {
   width: 39.21569%;
   float: left;
 }
-/* line 371, ../../src/css/main.scss */
+/* line 371, ../../src/css/_main.scss */
 div.rest main form fieldset label input, div.rest main form fieldset label textarea {
   width: 58.82353%;
   float: right;
   margin-right: 0;
 }
-/* line 373, ../../src/css/main.scss */
+/* line 373, ../../src/css/_main.scss */
 div.rest main form fieldset label input[type="submit"], div.rest main form fieldset label textarea[type="submit"] {
   width: auto;
   float: none;
   margin-left: 39.21569%;
 }
-/* line 379, ../../src/css/main.scss */
+/* line 379, ../../src/css/_main.scss */
 div.rest main form fieldset label textarea {
   height: 10em;
 }
-/* line 383, ../../src/css/main.scss */
+/* line 383, ../../src/css/_main.scss */
 div.rest main form fieldset section.forgotPassword {
   width: 100%;
   float: left;
@@ -1935,7 +1935,7 @@ div.rest main form fieldset section.forgotPassword {
   margin-right: 0;
   text-align: right;
 }
-/* line 389, ../../src/css/main.scss */
+/* line 389, ../../src/css/_main.scss */
 div.rest main > div.message {
   width: 96.25668%;
   float: left;
@@ -1949,7 +1949,7 @@ div.rest main > div.message {
   border-radius: 3px;
   background-color: #FFF;
 }
-/* line 391, ../../src/css/main.scss */
+/* line 391, ../../src/css/_main.scss */
 div.rest main > div.message section {
   width: 100%;
   float: left;
@@ -1958,16 +1958,16 @@ div.rest main > div.message section {
   padding: 1.60428%;
   width: 94.65241%;
 }
-/* line 393, ../../src/css/main.scss */
+/* line 393, ../../src/css/_main.scss */
 div.rest main > div.message section.choices {
   text-align: center;
 }
-/* line 395, ../../src/css/main.scss */
+/* line 395, ../../src/css/_main.scss */
 div.rest main > div.message section.choices a {
   margin-right: 1em;
 }
 @media (min-width: 960px) {
-  /* line 402, ../../src/css/main.scss */
+  /* line 402, ../../src/css/_main.scss */
   div.rest footer {
     width: 31.25%;
     float: right;
@@ -1975,16 +1975,16 @@ div.rest main > div.message section.choices a {
   }
 }
 
-/* line 410, ../../src/css/main.scss */
+/* line 410, ../../src/css/_main.scss */
 section.pagination h3, section.pagination ol, section.pagination li {
   display: inline;
 }
-/* line 413, ../../src/css/main.scss */
+/* line 413, ../../src/css/_main.scss */
 section.pagination li {
   padding: 0.6em;
 }
 
-/* line 419, ../../src/css/main.scss */
+/* line 419, ../../src/css/_main.scss */
 dl.PhraseSearchResult {
   width: 96.25668%;
   float: left;
@@ -1998,7 +1998,7 @@ dl.PhraseSearchResult {
   border-radius: 3px;
   background-color: #FFF;
 }
-/* line 421, ../../src/css/main.scss */
+/* line 421, ../../src/css/_main.scss */
 dl.PhraseSearchResult dt {
   width: 100%;
   float: left;
@@ -2008,7 +2008,7 @@ dl.PhraseSearchResult dt {
   width: 94.65241%;
   font-weight: bold;
 }
-/* line 425, ../../src/css/main.scss */
+/* line 425, ../../src/css/_main.scss */
 dl.PhraseSearchResult dd {
   width: 100%;
   float: left;
@@ -2018,41 +2018,41 @@ dl.PhraseSearchResult dd {
   width: 94.65241%;
   padding-top: 0;
 }
-/* line 428, ../../src/css/main.scss */
+/* line 428, ../../src/css/_main.scss */
 dl.PhraseSearchResult dd.missing-definition {
   text-align: center;
   font-style: italic;
 }
 
-/* line 435, ../../src/css/main.scss */
+/* line 435, ../../src/css/_main.scss */
 .oi[data-glyph=person]:before {
   content: '\e0a5\A';
   white-space: pre;
   display: inline;
 }
 
-/* line 440, ../../src/css/main.scss */
+/* line 440, ../../src/css/_main.scss */
 .oi[data-glyph=people]:before {
   content: '\e0a4\A';
   white-space: pre;
   display: inline;
 }
 
-/* line 445, ../../src/css/main.scss */
+/* line 445, ../../src/css/_main.scss */
 .oi[data-glyph=plus]:before {
   content: '\e0aa\A';
   white-space: pre;
   display: inline;
 }
 
-/* line 450, ../../src/css/main.scss */
+/* line 450, ../../src/css/_main.scss */
 .oi[data-glyph=account-logout]:before {
   content: '\e001\A';
   white-space: pre;
   display: inline;
 }
 
-/* line 455, ../../src/css/main.scss */
+/* line 455, ../../src/css/_main.scss */
 input.error, p.global.error {
   color: red;
 }

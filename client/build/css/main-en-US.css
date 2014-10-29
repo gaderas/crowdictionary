@@ -1,0 +1,2071 @@
+@font-face {
+  font-family: 'Icons';
+  src: url("/static/assets/fonts/open-iconic/open-iconic.eot");
+  src: url("/static/assets/fonts/open-iconic/open-iconic.eot?#iconic-sm") format("embedded-opentype"), url("/static/assets/fonts/open-iconic/open-iconic.woff") format("woff"), url("/static/assets/fonts/open-iconic/open-iconic.ttf") format("truetype"), url("/static/assets/fonts/open-iconic/open-iconic.otf") format("opentype"), url("/static/assets/fonts/open-iconic/open-iconic.svg#iconic-sm") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+/* line 11, ../../src/css/_open-iconic.scss */
+.oi[data-glyph].oi-text-replace {
+  font-size: 0;
+  line-height: 0;
+}
+
+/* line 16, ../../src/css/_open-iconic.scss */
+.oi[data-glyph].oi-text-replace:before {
+  width: 1em;
+  text-align: center;
+}
+
+/* line 22, ../../src/css/_open-iconic.scss */
+.oi[data-glyph]:before {
+  position: relative;
+  top: 1px;
+  font-family: 'Icons';
+  display: inline-block;
+  speak: none;
+  line-height: 1;
+  vertical-align: baseline;
+  font-weight: normal;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+/* line 36, ../../src/css/_open-iconic.scss */
+.oi[data-glyph]:empty:before {
+  width: 1em;
+  text-align: center;
+  box-sizing: content-box;
+}
+/* line 42, ../../src/css/_open-iconic.scss */
+.oi[data-glyph].oi-align-left:before {
+  text-align: left;
+}
+/* line 45, ../../src/css/_open-iconic.scss */
+.oi[data-glyph].oi-align-right:before {
+  text-align: right;
+}
+/* line 48, ../../src/css/_open-iconic.scss */
+.oi[data-glyph].oi-align-center:before {
+  text-align: center;
+}
+/* line 52, ../../src/css/_open-iconic.scss */
+.oi[data-glyph].oi-flip-horizontal:before {
+  -webkit-transform: scale(-1, 1);
+  -ms-transform: scale(-1, 1);
+  transform: scale(-1, 1);
+}
+/* line 58, ../../src/css/_open-iconic.scss */
+.oi[data-glyph].oi-flip-vertical:before {
+  -webkit-transform: scale(1, -1);
+  -ms-transform: scale(-1, 1);
+  transform: scale(1, -1);
+}
+/* line 64, ../../src/css/_open-iconic.scss */
+.oi[data-glyph].oi-flip-horizontal-vertical:before {
+  -webkit-transform: scale(-1, -1);
+  -ms-transform: scale(-1, 1);
+  transform: scale(-1, -1);
+}
+
+/* line 72, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=account-login]:before {
+  content: '\e000';
+}
+
+/* line 76, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=account-logout]:before {
+  content: '\e001';
+}
+
+/* line 80, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=action-redo]:before {
+  content: '\e002';
+}
+
+/* line 84, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=action-undo]:before {
+  content: '\e003';
+}
+
+/* line 88, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=align-center]:before {
+  content: '\e004';
+}
+
+/* line 92, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=align-left]:before {
+  content: '\e005';
+}
+
+/* line 96, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=align-right]:before {
+  content: '\e006';
+}
+
+/* line 100, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=aperture]:before {
+  content: '\e007';
+}
+
+/* line 104, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=arrow-bottom]:before {
+  content: '\e008';
+}
+
+/* line 108, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=arrow-circle-bottom]:before {
+  content: '\e009';
+}
+
+/* line 112, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=arrow-circle-left]:before {
+  content: '\e00a';
+}
+
+/* line 116, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=arrow-circle-right]:before {
+  content: '\e00b';
+}
+
+/* line 120, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=arrow-circle-top]:before {
+  content: '\e00c';
+}
+
+/* line 124, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=arrow-left]:before {
+  content: '\e00d';
+}
+
+/* line 128, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=arrow-right]:before {
+  content: '\e00e';
+}
+
+/* line 132, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=arrow-thick-bottom]:before {
+  content: '\e00f';
+}
+
+/* line 136, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=arrow-thick-left]:before {
+  content: '\e010';
+}
+
+/* line 140, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=arrow-thick-right]:before {
+  content: '\e011';
+}
+
+/* line 144, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=arrow-thick-top]:before {
+  content: '\e012';
+}
+
+/* line 148, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=arrow-top]:before {
+  content: '\e013';
+}
+
+/* line 152, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=audio-spectrum]:before {
+  content: '\e014';
+}
+
+/* line 156, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=audio]:before {
+  content: '\e015';
+}
+
+/* line 160, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=badge]:before {
+  content: '\e016';
+}
+
+/* line 164, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=ban]:before {
+  content: '\e017';
+}
+
+/* line 168, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=bar-chart]:before {
+  content: '\e018';
+}
+
+/* line 172, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=basket]:before {
+  content: '\e019';
+}
+
+/* line 176, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=battery-empty]:before {
+  content: '\e01a';
+}
+
+/* line 180, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=battery-full]:before {
+  content: '\e01b';
+}
+
+/* line 184, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=beaker]:before {
+  content: '\e01c';
+}
+
+/* line 188, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=bell]:before {
+  content: '\e01d';
+}
+
+/* line 192, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=bluetooth]:before {
+  content: '\e01e';
+}
+
+/* line 196, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=bold]:before {
+  content: '\e01f';
+}
+
+/* line 200, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=bolt]:before {
+  content: '\e020';
+}
+
+/* line 204, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=book]:before {
+  content: '\e021';
+}
+
+/* line 208, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=bookmark]:before {
+  content: '\e022';
+}
+
+/* line 212, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=box]:before {
+  content: '\e023';
+}
+
+/* line 216, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=briefcase]:before {
+  content: '\e024';
+}
+
+/* line 220, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=british-pound]:before {
+  content: '\e025';
+}
+
+/* line 224, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=browser]:before {
+  content: '\e026';
+}
+
+/* line 228, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=brush]:before {
+  content: '\e027';
+}
+
+/* line 232, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=bug]:before {
+  content: '\e028';
+}
+
+/* line 236, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=bullhorn]:before {
+  content: '\e029';
+}
+
+/* line 240, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=calculator]:before {
+  content: '\e02a';
+}
+
+/* line 244, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=calendar]:before {
+  content: '\e02b';
+}
+
+/* line 248, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=camera-slr]:before {
+  content: '\e02c';
+}
+
+/* line 252, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=caret-bottom]:before {
+  content: '\e02d';
+}
+
+/* line 256, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=caret-left]:before {
+  content: '\e02e';
+}
+
+/* line 260, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=caret-right]:before {
+  content: '\e02f';
+}
+
+/* line 264, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=caret-top]:before {
+  content: '\e030';
+}
+
+/* line 268, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=cart]:before {
+  content: '\e031';
+}
+
+/* line 272, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=chat]:before {
+  content: '\e032';
+}
+
+/* line 276, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=check]:before {
+  content: '\e033';
+}
+
+/* line 280, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=chevron-bottom]:before {
+  content: '\e034';
+}
+
+/* line 284, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=chevron-left]:before {
+  content: '\e035';
+}
+
+/* line 288, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=chevron-right]:before {
+  content: '\e036';
+}
+
+/* line 292, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=chevron-top]:before {
+  content: '\e037';
+}
+
+/* line 296, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=circle-check]:before {
+  content: '\e038';
+}
+
+/* line 300, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=circle-x]:before {
+  content: '\e039';
+}
+
+/* line 304, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=clipboard]:before {
+  content: '\e03a';
+}
+
+/* line 308, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=clock]:before {
+  content: '\e03b';
+}
+
+/* line 312, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=cloud-download]:before {
+  content: '\e03c';
+}
+
+/* line 316, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=cloud-upload]:before {
+  content: '\e03d';
+}
+
+/* line 320, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=cloud]:before {
+  content: '\e03e';
+}
+
+/* line 324, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=cloudy]:before {
+  content: '\e03f';
+}
+
+/* line 328, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=code]:before {
+  content: '\e040';
+}
+
+/* line 332, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=cog]:before {
+  content: '\e041';
+}
+
+/* line 336, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=collapse-down]:before {
+  content: '\e042';
+}
+
+/* line 340, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=collapse-left]:before {
+  content: '\e043';
+}
+
+/* line 344, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=collapse-right]:before {
+  content: '\e044';
+}
+
+/* line 348, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=collapse-up]:before {
+  content: '\e045';
+}
+
+/* line 352, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=command]:before {
+  content: '\e046';
+}
+
+/* line 356, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=comment-square]:before {
+  content: '\e047';
+}
+
+/* line 360, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=compass]:before {
+  content: '\e048';
+}
+
+/* line 364, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=contrast]:before {
+  content: '\e049';
+}
+
+/* line 368, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=copywriting]:before {
+  content: '\e04a';
+}
+
+/* line 372, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=credit-card]:before {
+  content: '\e04b';
+}
+
+/* line 376, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=crop]:before {
+  content: '\e04c';
+}
+
+/* line 380, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=dashboard]:before {
+  content: '\e04d';
+}
+
+/* line 384, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=data-transfer-download]:before {
+  content: '\e04e';
+}
+
+/* line 388, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=data-transfer-upload]:before {
+  content: '\e04f';
+}
+
+/* line 392, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=delete]:before {
+  content: '\e050';
+}
+
+/* line 396, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=dial]:before {
+  content: '\e051';
+}
+
+/* line 400, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=document]:before {
+  content: '\e052';
+}
+
+/* line 404, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=dollar]:before {
+  content: '\e053';
+}
+
+/* line 408, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=double-quote-sans-left]:before {
+  content: '\e054';
+}
+
+/* line 412, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=double-quote-sans-right]:before {
+  content: '\e055';
+}
+
+/* line 416, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=double-quote-serif-left]:before {
+  content: '\e056';
+}
+
+/* line 420, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=double-quote-serif-right]:before {
+  content: '\e057';
+}
+
+/* line 424, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=droplet]:before {
+  content: '\e058';
+}
+
+/* line 428, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=eject]:before {
+  content: '\e059';
+}
+
+/* line 432, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=elevator]:before {
+  content: '\e05a';
+}
+
+/* line 436, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=ellipses]:before {
+  content: '\e05b';
+}
+
+/* line 440, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=envelope-closed]:before {
+  content: '\e05c';
+}
+
+/* line 444, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=envelope-open]:before {
+  content: '\e05d';
+}
+
+/* line 448, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=euro]:before {
+  content: '\e05e';
+}
+
+/* line 452, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=excerpt]:before {
+  content: '\e05f';
+}
+
+/* line 456, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=expand-down]:before {
+  content: '\e060';
+}
+
+/* line 460, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=expand-left]:before {
+  content: '\e061';
+}
+
+/* line 464, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=expand-right]:before {
+  content: '\e062';
+}
+
+/* line 468, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=expand-up]:before {
+  content: '\e063';
+}
+
+/* line 472, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=external-link]:before {
+  content: '\e064';
+}
+
+/* line 476, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=eye]:before {
+  content: '\e065';
+}
+
+/* line 480, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=eyedropper]:before {
+  content: '\e066';
+}
+
+/* line 484, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=file]:before {
+  content: '\e067';
+}
+
+/* line 488, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=fire]:before {
+  content: '\e068';
+}
+
+/* line 492, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=flag]:before {
+  content: '\e069';
+}
+
+/* line 496, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=flash]:before {
+  content: '\e06a';
+}
+
+/* line 500, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=folder]:before {
+  content: '\e06b';
+}
+
+/* line 504, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=fork]:before {
+  content: '\e06c';
+}
+
+/* line 508, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=fullscreen-enter]:before {
+  content: '\e06d';
+}
+
+/* line 512, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=fullscreen-exit]:before {
+  content: '\e06e';
+}
+
+/* line 516, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=globe]:before {
+  content: '\e06f';
+}
+
+/* line 520, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=graph]:before {
+  content: '\e070';
+}
+
+/* line 524, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=grid-four-up]:before {
+  content: '\e071';
+}
+
+/* line 528, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=grid-three-up]:before {
+  content: '\e072';
+}
+
+/* line 532, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=grid-two-up]:before {
+  content: '\e073';
+}
+
+/* line 536, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=hard-drive]:before {
+  content: '\e074';
+}
+
+/* line 540, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=header]:before {
+  content: '\e075';
+}
+
+/* line 544, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=headphones]:before {
+  content: '\e076';
+}
+
+/* line 548, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=heart]:before {
+  content: '\e077';
+}
+
+/* line 552, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=home]:before {
+  content: '\e078';
+}
+
+/* line 556, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=image]:before {
+  content: '\e079';
+}
+
+/* line 560, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=inbox]:before {
+  content: '\e07a';
+}
+
+/* line 564, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=infinity]:before {
+  content: '\e07b';
+}
+
+/* line 568, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=info]:before {
+  content: '\e07c';
+}
+
+/* line 572, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=italic]:before {
+  content: '\e07d';
+}
+
+/* line 576, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=justify-center]:before {
+  content: '\e07e';
+}
+
+/* line 580, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=justify-left]:before {
+  content: '\e07f';
+}
+
+/* line 584, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=justify-right]:before {
+  content: '\e080';
+}
+
+/* line 588, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=key]:before {
+  content: '\e081';
+}
+
+/* line 592, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=laptop]:before {
+  content: '\e082';
+}
+
+/* line 596, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=layers]:before {
+  content: '\e083';
+}
+
+/* line 600, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=lightbulb]:before {
+  content: '\e084';
+}
+
+/* line 604, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=link-broken]:before {
+  content: '\e085';
+}
+
+/* line 608, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=link-intact]:before {
+  content: '\e086';
+}
+
+/* line 612, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=list-rich]:before {
+  content: '\e087';
+}
+
+/* line 616, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=list]:before {
+  content: '\e088';
+}
+
+/* line 620, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=location]:before {
+  content: '\e089';
+}
+
+/* line 624, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=lock-locked]:before {
+  content: '\e08a';
+}
+
+/* line 628, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=lock-unlocked]:before {
+  content: '\e08b';
+}
+
+/* line 632, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=loop-circular]:before {
+  content: '\e08c';
+}
+
+/* line 636, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=loop-square]:before {
+  content: '\e08d';
+}
+
+/* line 640, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=loop]:before {
+  content: '\e08e';
+}
+
+/* line 644, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=magnifying-glass]:before {
+  content: '\e08f';
+}
+
+/* line 648, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=map-marker]:before {
+  content: '\e090';
+}
+
+/* line 652, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=map]:before {
+  content: '\e091';
+}
+
+/* line 656, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=media-pause]:before {
+  content: '\e092';
+}
+
+/* line 660, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=media-play]:before {
+  content: '\e093';
+}
+
+/* line 664, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=media-record]:before {
+  content: '\e094';
+}
+
+/* line 668, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=media-skip-backward]:before {
+  content: '\e095';
+}
+
+/* line 672, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=media-skip-forward]:before {
+  content: '\e096';
+}
+
+/* line 676, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=media-step-backward]:before {
+  content: '\e097';
+}
+
+/* line 680, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=media-step-forward]:before {
+  content: '\e098';
+}
+
+/* line 684, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=media-stop]:before {
+  content: '\e099';
+}
+
+/* line 688, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=medical-cross]:before {
+  content: '\e09a';
+}
+
+/* line 692, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=menu]:before {
+  content: '\e09b';
+}
+
+/* line 696, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=microphone]:before {
+  content: '\e09c';
+}
+
+/* line 700, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=minus]:before {
+  content: '\e09d';
+}
+
+/* line 704, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=monitor]:before {
+  content: '\e09e';
+}
+
+/* line 708, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=moon]:before {
+  content: '\e09f';
+}
+
+/* line 712, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=move]:before {
+  content: '\e0a0';
+}
+
+/* line 716, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=musical-note]:before {
+  content: '\e0a1';
+}
+
+/* line 720, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=paperclip]:before {
+  content: '\e0a2';
+}
+
+/* line 724, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=pencil]:before {
+  content: '\e0a3';
+}
+
+/* line 728, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=people]:before {
+  content: '\e0a4';
+}
+
+/* line 732, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=person]:before {
+  content: '\e0a5';
+}
+
+/* line 736, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=phone]:before {
+  content: '\e0a6';
+}
+
+/* line 740, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=pie-chart]:before {
+  content: '\e0a7';
+}
+
+/* line 744, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=pin]:before {
+  content: '\e0a8';
+}
+
+/* line 748, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=play-circle]:before {
+  content: '\e0a9';
+}
+
+/* line 752, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=plus]:before {
+  content: '\e0aa';
+}
+
+/* line 756, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=power-standby]:before {
+  content: '\e0ab';
+}
+
+/* line 760, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=print]:before {
+  content: '\e0ac';
+}
+
+/* line 764, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=project]:before {
+  content: '\e0ad';
+}
+
+/* line 768, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=pulse]:before {
+  content: '\e0ae';
+}
+
+/* line 772, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=puzzle-piece]:before {
+  content: '\e0af';
+}
+
+/* line 776, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=question-mark]:before {
+  content: '\e0b0';
+}
+
+/* line 780, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=rain]:before {
+  content: '\e0b1';
+}
+
+/* line 784, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=random]:before {
+  content: '\e0b2';
+}
+
+/* line 788, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=reload]:before {
+  content: '\e0b3';
+}
+
+/* line 792, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=resize-both]:before {
+  content: '\e0b4';
+}
+
+/* line 796, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=resize-height]:before {
+  content: '\e0b5';
+}
+
+/* line 800, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=resize-width]:before {
+  content: '\e0b6';
+}
+
+/* line 804, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=rss-alt]:before {
+  content: '\e0b7';
+}
+
+/* line 808, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=rss]:before {
+  content: '\e0b8';
+}
+
+/* line 812, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=script]:before {
+  content: '\e0b9';
+}
+
+/* line 816, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=share-boxed]:before {
+  content: '\e0ba';
+}
+
+/* line 820, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=share]:before {
+  content: '\e0bb';
+}
+
+/* line 824, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=shield]:before {
+  content: '\e0bc';
+}
+
+/* line 828, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=signal]:before {
+  content: '\e0bd';
+}
+
+/* line 832, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=signpost]:before {
+  content: '\e0be';
+}
+
+/* line 836, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=sort-ascending]:before {
+  content: '\e0bf';
+}
+
+/* line 840, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=sort-descending]:before {
+  content: '\e0c0';
+}
+
+/* line 844, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=spreadsheet]:before {
+  content: '\e0c1';
+}
+
+/* line 848, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=star]:before {
+  content: '\e0c2';
+}
+
+/* line 852, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=sun]:before {
+  content: '\e0c3';
+}
+
+/* line 856, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=tablet]:before {
+  content: '\e0c4';
+}
+
+/* line 860, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=tag]:before {
+  content: '\e0c5';
+}
+
+/* line 864, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=tags]:before {
+  content: '\e0c6';
+}
+
+/* line 868, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=target]:before {
+  content: '\e0c7';
+}
+
+/* line 872, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=task]:before {
+  content: '\e0c8';
+}
+
+/* line 876, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=terminal]:before {
+  content: '\e0c9';
+}
+
+/* line 880, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=text]:before {
+  content: '\e0ca';
+}
+
+/* line 884, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=thumb-down]:before {
+  content: '\e0cb';
+}
+
+/* line 888, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=thumb-up]:before {
+  content: '\e0cc';
+}
+
+/* line 892, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=timer]:before {
+  content: '\e0cd';
+}
+
+/* line 896, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=transfer]:before {
+  content: '\e0ce';
+}
+
+/* line 900, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=trash]:before {
+  content: '\e0cf';
+}
+
+/* line 904, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=underline]:before {
+  content: '\e0d0';
+}
+
+/* line 908, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=vertical-align-bottom]:before {
+  content: '\e0d1';
+}
+
+/* line 912, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=vertical-align-center]:before {
+  content: '\e0d2';
+}
+
+/* line 916, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=vertical-align-top]:before {
+  content: '\e0d3';
+}
+
+/* line 920, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=video]:before {
+  content: '\e0d4';
+}
+
+/* line 924, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=volume-high]:before {
+  content: '\e0d5';
+}
+
+/* line 928, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=volume-low]:before {
+  content: '\e0d6';
+}
+
+/* line 932, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=volume-off]:before {
+  content: '\e0d7';
+}
+
+/* line 936, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=warning]:before {
+  content: '\e0d8';
+}
+
+/* line 940, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=wifi]:before {
+  content: '\e0d9';
+}
+
+/* line 944, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=wrench]:before {
+  content: '\e0da';
+}
+
+/* line 948, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=x]:before {
+  content: '\e0db';
+}
+
+/* line 952, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=yen]:before {
+  content: '\e0dc';
+}
+
+/* line 956, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=zoom-in]:before {
+  content: '\e0dd';
+}
+
+/* line 960, ../../src/css/_open-iconic.scss */
+.oi[data-glyph=zoom-out]:before {
+  content: '\e0de';
+}
+
+/* line 5, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  font-size: 100%;
+  vertical-align: baseline;
+}
+
+/* line 22, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
+html {
+  line-height: 1;
+}
+
+/* line 24, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
+ol, ul {
+  list-style: none;
+}
+
+/* line 26, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* line 28, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
+caption, th, td {
+  text-align: left;
+  font-weight: normal;
+  vertical-align: middle;
+}
+
+/* line 30, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
+q, blockquote {
+  quotes: none;
+}
+/* line 103, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
+q:before, q:after, blockquote:before, blockquote:after {
+  content: "";
+  content: none;
+}
+
+/* line 32, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
+a img {
+  border: none;
+}
+
+/* line 116, ../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.1/stylesheets/compass/reset/_utilities.scss */
+article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section, summary {
+  display: block;
+}
+
+/* line 30, ../../src/css/_main.scss */
+a {
+  color: #3B5998;
+  text-decoration: none;
+}
+/* line 33, ../../src/css/_main.scss */
+a:hover {
+  text-decoration: underline;
+}
+/* line 36, ../../src/css/_main.scss */
+a:before {
+  margin-right: 5px;
+}
+
+/* line 40, ../../src/css/_main.scss */
+body {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #E9EAED;
+  color: #141823;
+}
+/* line 12, ../../../../../../Library/Ruby/Gems/2.0.0/gems/susy-2.1.3/sass/susy/output/support/_clearfix.scss */
+body:after {
+  content: " ";
+  display: block;
+  clear: both;
+}
+
+@media (min-width: 960px) {
+  /* line 45, ../../src/css/_main.scss */
+  body {
+    width: 100%;
+    float: left;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* line 52, ../../src/css/_main.scss */
+div.top {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  background-image: linear-gradient(180deg, #FCF22A, #f0e403);
+  background-color: #FCF22A;
+  border-color: #fcf011;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  border-width: 0 0 1px;
+  border-style: none none solid;
+  box-shadow: 0 2px 2px -2px rgba(0, 0, 0, 0.52);
+  margin-bottom: 1.60428%;
+}
+/* line 68, ../../src/css/_main.scss */
+div.top header.TopBar {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* line 12, ../../../../../../Library/Ruby/Gems/2.0.0/gems/susy-2.1.3/sass/susy/output/support/_clearfix.scss */
+div.top header.TopBar:after {
+  content: " ";
+  display: block;
+  clear: both;
+}
+/* line 70, ../../src/css/_main.scss */
+div.top header.TopBar nav.NavBar {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+@media (min-width: 960px) {
+  /* line 70, ../../src/css/_main.scss */
+  div.top header.TopBar nav.NavBar {
+    width: 66.66667%;
+    float: left;
+  }
+}
+/* line 75, ../../src/css/_main.scss */
+div.top header.TopBar nav.NavBar h2 {
+  text-align: center;
+}
+/* line 77, ../../src/css/_main.scss */
+div.top header.TopBar nav.NavBar h2:nth-of-type(1) {
+  width: 28.57143%;
+  float: left;
+  margin-right: 7.14286%;
+}
+@media (min-width: 960px) {
+  /* line 77, ../../src/css/_main.scss */
+  div.top header.TopBar nav.NavBar h2:nth-of-type(1) {
+    width: 19.23077%;
+    float: left;
+    margin-right: 0.96154%;
+  }
+}
+/* line 83, ../../src/css/_main.scss */
+div.top header.TopBar nav.NavBar h2:nth-of-type(2) {
+  width: 28.57143%;
+  float: left;
+  margin-right: 7.14286%;
+}
+@media (min-width: 960px) {
+  /* line 83, ../../src/css/_main.scss */
+  div.top header.TopBar nav.NavBar h2:nth-of-type(2) {
+    width: 59.61538%;
+    float: left;
+    margin-right: 0.96154%;
+  }
+}
+/* line 89, ../../src/css/_main.scss */
+div.top header.TopBar nav.NavBar h2:nth-of-type(3) {
+  width: 28.57143%;
+  float: right;
+  margin-right: 0;
+}
+@media (min-width: 960px) {
+  /* line 89, ../../src/css/_main.scss */
+  div.top header.TopBar nav.NavBar h2:nth-of-type(3) {
+    width: 19.23077%;
+    float: right;
+    margin-right: 0;
+  }
+}
+/* line 95, ../../src/css/_main.scss */
+div.top header.TopBar nav.NavBar h2 a {
+  display: inline;
+  text-decoration: none;
+  color: #444;
+  visibility: hidden;
+}
+@media (min-width: 960px) {
+  /* line 95, ../../src/css/_main.scss */
+  div.top header.TopBar nav.NavBar h2 a {
+    visibility: visible;
+  }
+}
+/* line 103, ../../src/css/_main.scss */
+div.top header.TopBar nav.NavBar h2 a:before {
+  visibility: visible;
+}
+/* line 106, ../../src/css/_main.scss */
+div.top header.TopBar nav.NavBar h2 a:hover {
+  text-decoration: underline;
+}
+/* line 111, ../../src/css/_main.scss */
+div.top header.TopBar nav.NavBar h2.home a {
+  display: block;
+  width: 100px;
+  height: 63px;
+  background: url(/static/assets/img/mexionario-200x126.png);
+  background-size: 100px 63px;
+  text-indent: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  visibility: visible;
+}
+/* line 123, ../../src/css/_main.scss */
+div.top header.TopBar nav.NavBar h2.user-links a, div.top header.TopBar nav.NavBar h2.login-info a {
+  width: 21.05263%;
+  float: left;
+  margin-right: 5.26316%;
+}
+/* line 128, ../../src/css/_main.scss */
+div.top header.TopBar section.SearchBar {
+  margin-top: -40px;
+  width: 64.28571%;
+  float: right;
+  margin-right: 0;
+}
+@media (min-width: 960px) {
+  /* line 128, ../../src/css/_main.scss */
+  div.top header.TopBar section.SearchBar {
+    width: 33.33333%;
+    float: right;
+    margin-right: 0;
+    margin-top: auto;
+  }
+}
+/* line 135, ../../src/css/_main.scss */
+div.top header.TopBar section.SearchBar form {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  /*input {
+      @include span(1 of 1);
+      margin-top: -20px;
+      height: 20px;
+      line-height: 20px;
+      //font-size: 18px;
+      text-indent: 10px;
+      //position: absolute;
+      &:before {
+          @include span(1 of 1);
+          line-height: 20px;
+          font-size: 18px;
+      }
+  }*/
+}
+/* line 137, ../../src/css/_main.scss */
+div.top header.TopBar section.SearchBar form input {
+  font-size: 150%;
+  width: 170px;
+}
+@media (min-width: 960px) {
+  /* line 137, ../../src/css/_main.scss */
+  div.top header.TopBar section.SearchBar form input {
+    width: 85%;
+  }
+}
+
+/* line 163, ../../src/css/_main.scss */
+div.rest {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* line 12, ../../../../../../Library/Ruby/Gems/2.0.0/gems/susy-2.1.3/sass/susy/output/support/_clearfix.scss */
+div.rest:after {
+  content: " ";
+  display: block;
+  clear: both;
+}
+@media (min-width: 960px) {
+  /* line 165, ../../src/css/_main.scss */
+  div.rest main {
+    width: 68.75%;
+    float: left;
+  }
+}
+/* line 170, ../../src/css/_main.scss */
+div.rest main section.phrase-top {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+/* line 172, ../../src/css/_main.scss */
+div.rest main section.phrase-top div.addDefinitionCTA {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  width: 96.25668%;
+  float: left;
+  margin-right: 0.26738%;
+  margin-left: 1.87166%;
+  margin-right: 1.87166%;
+  margin-bottom: 1.60428%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #E5E6E9 #DFE0E4 #D0D1D5;
+  border-radius: 3px;
+  background-color: #FFF;
+}
+/* line 175, ../../src/css/_main.scss */
+div.rest main section.phrase-top div.addDefinitionCTA > p {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 1.60428%;
+  width: 94.65241%;
+}
+/* line 180, ../../src/css/_main.scss */
+div.rest main > h2, div.rest main section.phrase-top > h2 {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
+  font-style: italic;
+}
+/* line 185, ../../src/css/_main.scss */
+div.rest main > div, div.rest main section.pagination {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+/* line 188, ../../src/css/_main.scss */
+div.rest main > ul {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+/* line 190, ../../src/css/_main.scss */
+div.rest main > ul span.abbr {
+  font-size: 70%;
+}
+/* line 193, ../../src/css/_main.scss */
+div.rest main > ul > li {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  width: 96.25668%;
+  float: left;
+  margin-right: 0.26738%;
+  margin-left: 1.87166%;
+  margin-right: 1.87166%;
+  margin-bottom: 1.60428%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #E5E6E9 #DFE0E4 #D0D1D5;
+  border-radius: 3px;
+  background-color: #FFF;
+}
+/* line 196, ../../src/css/_main.scss */
+div.rest main > ul > li dl {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 1.60428%;
+  width: 94.65241%;
+  position: relative;
+}
+/* line 200, ../../src/css/_main.scss */
+div.rest main > ul > li dl dt {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
+  padding-bottom: 0.80214%;
+}
+/* line 205, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+/* line 207, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.examples p {
+  font-style: italic;
+}
+/* line 210, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.definition, div.rest main > ul > li dl dd.examples {
+  padding-bottom: 0.80214%;
+  padding-top: 0.80214%;
+}
+/* line 213, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.definition span.abbr, div.rest main > ul > li dl dd.examples span.abbr {
+  width: 9.09091%;
+  float: left;
+  margin-right: 1.0101%;
+}
+/* line 216, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.definition p, div.rest main > ul > li dl dd.examples p {
+  width: 89.89899%;
+  float: right;
+  margin-right: 0;
+}
+/* line 220, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.tags {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  padding-bottom: 1.60428%;
+  padding-top: 0.80214%;
+  border-bottom: 1px dotted black;
+}
+@media (min-width: 960px) {
+  /* line 220, ../../src/css/_main.scss */
+  div.rest main > ul > li dl dd.tags {
+    width: 48.97959%;
+    float: left;
+    margin-right: 2.04082%;
+    border-bottom: 0px none black;
+    min-height: 40px;
+  }
+}
+/* line 230, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.tags ul li {
+  display: inline;
+  margin-left: 10px;
+}
+/* line 233, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.tags ul li:after {
+  content: ',';
+}
+/* line 236, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.tags ul li:last-of-type:after {
+  content: '';
+}
+/* line 239, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.tags ul li:first-of-type {
+  margin-left: 0;
+}
+/* line 244, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.author {
+  width: 44.44444%;
+  float: left;
+  margin-right: 11.11111%;
+  padding-top: 1.60428%;
+}
+@media (min-width: 960px) {
+  /* line 244, ../../src/css/_main.scss */
+  div.rest main > ul > li dl dd.author {
+    width: 18.36735%;
+    float: left;
+    margin-right: 2.04082%;
+    position: absolute;
+    bottom: 0;
+    padding-bottom: 1.60428%;
+    left: 51.61117%;
+    border-top: 0px none black;
+    padding-top: auto;
+  }
+}
+/* line 258, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.votes {
+  width: 44.44444%;
+  float: right;
+  margin-right: 0;
+  padding-top: 1.60428%;
+}
+@media (min-width: 960px) {
+  /* line 258, ../../src/css/_main.scss */
+  div.rest main > ul > li dl dd.votes {
+    width: 28.57143%;
+    float: right;
+    margin-right: 0;
+    position: absolute;
+    bottom: 0;
+    padding-bottom: 1.60428%;
+    left: 74.65091%;
+    border-top: 0px none black;
+    padding-top: auto;
+  }
+}
+/* line 271, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.votes div {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+/* line 273, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.votes div a {
+  width: 14.14141%;
+  float: left;
+  margin-right: 1.0101%;
+}
+/* line 276, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.votes div p {
+  width: 84.84848%;
+  float: right;
+  margin-right: 0;
+  line-height: 20px;
+  font-size: 80%;
+}
+/* line 281, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.votes div.up.voted a {
+  color: #4EA600;
+}
+/* line 284, ../../src/css/_main.scss */
+div.rest main > ul > li dl dd.votes div.down.voted a {
+  color: #B90000;
+}
+/* line 293, ../../src/css/_main.scss */
+div.rest main section.contributor-info {
+  width: 96.25668%;
+  float: left;
+  margin-right: 0.26738%;
+  margin-left: 1.87166%;
+  margin-right: 1.87166%;
+  margin-bottom: 1.60428%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #E5E6E9 #DFE0E4 #D0D1D5;
+  border-radius: 3px;
+  background-color: #FFF;
+  width: 21.05263%;
+  float: left;
+  margin-right: 5.26316%;
+  margin-left: 0%;
+  margin-right: 0%;
+}
+/* line 298, ../../src/css/_main.scss */
+div.rest main section.contributor-info dl, div.rest main section.contributor-info a {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 1.60428%;
+  width: 94.65241%;
+}
+/* line 302, ../../src/css/_main.scss */
+div.rest main section.contributor-activity {
+  width: 96.25668%;
+  float: left;
+  margin-right: 0.26738%;
+  margin-left: 1.87166%;
+  margin-right: 1.87166%;
+  margin-bottom: 1.60428%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #E5E6E9 #DFE0E4 #D0D1D5;
+  border-radius: 3px;
+  background-color: #FFF;
+  width: 73.68421%;
+  float: right;
+  margin-right: 0;
+  margin-left: 0%;
+  margin-right: 1.87166%;
+}
+/* line 307, ../../src/css/_main.scss */
+div.rest main section.contributor-activity > div {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 1.60428%;
+  width: 94.65241%;
+}
+/* line 309, ../../src/css/_main.scss */
+div.rest main section.contributor-activity > div div div {
+  margin: 1.60428% 0;
+}
+/* line 311, ../../src/css/_main.scss */
+div.rest main section.contributor-activity > div div div:first-of-type {
+  margin: 0;
+}
+/* line 317, ../../src/css/_main.scss */
+div.rest main div.leaderboard {
+  width: 96.25668%;
+  float: left;
+  margin-right: 0.26738%;
+  margin-left: 1.87166%;
+  margin-right: 1.87166%;
+  margin-bottom: 1.60428%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #E5E6E9 #DFE0E4 #D0D1D5;
+  border-radius: 3px;
+  background-color: #FFF;
+}
+/* line 319, ../../src/css/_main.scss */
+div.rest main div.leaderboard table {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 1.60428%;
+  width: 94.65241%;
+}
+/* line 321, ../../src/css/_main.scss */
+div.rest main div.leaderboard table thead {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+/* line 323, ../../src/css/_main.scss */
+div.rest main div.leaderboard table thead tr {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+/* line 325, ../../src/css/_main.scss */
+div.rest main div.leaderboard table thead tr th {
+  width: 47.50594%;
+  float: left;
+  margin-right: 0.23753%;
+  margin-left: 1.18765%;
+  margin-right: 1.18765%;
+  padding-top: 0.95012%;
+  padding-bottom: 0.95012%;
+}
+/* line 331, ../../src/css/_main.scss */
+div.rest main div.leaderboard table thead tr th:last-of-type {
+  width: 47.50594%;
+  float: right;
+  margin-right: 0;
+}
+/* line 337, ../../src/css/_main.scss */
+div.rest main div.leaderboard table tbody {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+/* line 339, ../../src/css/_main.scss */
+div.rest main div.leaderboard table tbody tr {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+/* line 341, ../../src/css/_main.scss */
+div.rest main div.leaderboard table tbody tr td {
+  width: 47.50594%;
+  float: left;
+  margin-right: 0.23753%;
+  margin-left: 1.18765%;
+  margin-right: 1.18765%;
+  padding-top: 0.95012%;
+  padding-bottom: 0.95012%;
+}
+/* line 347, ../../src/css/_main.scss */
+div.rest main div.leaderboard table tbody tr td:last-of-type {
+  width: 47.50594%;
+  float: right;
+  margin-right: 0;
+}
+/* line 355, ../../src/css/_main.scss */
+div.rest main form {
+  width: 96.25668%;
+  float: left;
+  margin-right: 0.26738%;
+  margin-left: 1.87166%;
+  margin-right: 1.87166%;
+  margin-bottom: 1.60428%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #E5E6E9 #DFE0E4 #D0D1D5;
+  border-radius: 3px;
+  background-color: #FFF;
+}
+/* line 357, ../../src/css/_main.scss */
+div.rest main form fieldset {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 1.60428%;
+  width: 94.65241%;
+}
+/* line 359, ../../src/css/_main.scss */
+div.rest main form fieldset legend {
+  font-weight: bold;
+}
+/* line 362, ../../src/css/_main.scss */
+div.rest main form fieldset p {
+  margin-bottom: 1.60428%;
+}
+/* line 365, ../../src/css/_main.scss */
+div.rest main form fieldset label {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 1.60428%;
+}
+/* line 368, ../../src/css/_main.scss */
+div.rest main form fieldset label span {
+  width: 39.21569%;
+  float: left;
+}
+/* line 371, ../../src/css/_main.scss */
+div.rest main form fieldset label input, div.rest main form fieldset label textarea {
+  width: 58.82353%;
+  float: right;
+  margin-right: 0;
+}
+/* line 373, ../../src/css/_main.scss */
+div.rest main form fieldset label input[type="submit"], div.rest main form fieldset label textarea[type="submit"] {
+  width: auto;
+  float: none;
+  margin-left: 39.21569%;
+}
+/* line 379, ../../src/css/_main.scss */
+div.rest main form fieldset label textarea {
+  height: 10em;
+}
+/* line 383, ../../src/css/_main.scss */
+div.rest main form fieldset section.forgotPassword {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  text-align: right;
+}
+/* line 389, ../../src/css/_main.scss */
+div.rest main > div.message {
+  width: 96.25668%;
+  float: left;
+  margin-right: 0.26738%;
+  margin-left: 1.87166%;
+  margin-right: 1.87166%;
+  margin-bottom: 1.60428%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #E5E6E9 #DFE0E4 #D0D1D5;
+  border-radius: 3px;
+  background-color: #FFF;
+}
+/* line 391, ../../src/css/_main.scss */
+div.rest main > div.message section {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 1.60428%;
+  width: 94.65241%;
+}
+/* line 393, ../../src/css/_main.scss */
+div.rest main > div.message section.choices {
+  text-align: center;
+}
+/* line 395, ../../src/css/_main.scss */
+div.rest main > div.message section.choices a {
+  margin-right: 1em;
+}
+@media (min-width: 960px) {
+  /* line 402, ../../src/css/_main.scss */
+  div.rest footer {
+    width: 31.25%;
+    float: right;
+    margin-right: 0;
+  }
+}
+
+/* line 410, ../../src/css/_main.scss */
+section.pagination h3, section.pagination ol, section.pagination li {
+  display: inline;
+}
+/* line 413, ../../src/css/_main.scss */
+section.pagination li {
+  padding: 0.6em;
+}
+
+/* line 419, ../../src/css/_main.scss */
+dl.PhraseSearchResult {
+  width: 96.25668%;
+  float: left;
+  margin-right: 0.26738%;
+  margin-left: 1.87166%;
+  margin-right: 1.87166%;
+  margin-bottom: 1.60428%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #E5E6E9 #DFE0E4 #D0D1D5;
+  border-radius: 3px;
+  background-color: #FFF;
+}
+/* line 421, ../../src/css/_main.scss */
+dl.PhraseSearchResult dt {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 1.60428%;
+  width: 94.65241%;
+  font-weight: bold;
+}
+/* line 425, ../../src/css/_main.scss */
+dl.PhraseSearchResult dd {
+  width: 100%;
+  float: left;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 1.60428%;
+  width: 94.65241%;
+  padding-top: 0;
+}
+/* line 428, ../../src/css/_main.scss */
+dl.PhraseSearchResult dd.missing-definition {
+  text-align: center;
+  font-style: italic;
+}
+
+/* line 435, ../../src/css/_main.scss */
+.oi[data-glyph=person]:before {
+  content: '\e0a5\A';
+  white-space: pre;
+  display: inline;
+}
+
+/* line 440, ../../src/css/_main.scss */
+.oi[data-glyph=people]:before {
+  content: '\e0a4\A';
+  white-space: pre;
+  display: inline;
+}
+
+/* line 445, ../../src/css/_main.scss */
+.oi[data-glyph=plus]:before {
+  content: '\e0aa\A';
+  white-space: pre;
+  display: inline;
+}
+
+/* line 450, ../../src/css/_main.scss */
+.oi[data-glyph=account-logout]:before {
+  content: '\e001\A';
+  white-space: pre;
+  display: inline;
+}
+
+/* line 455, ../../src/css/_main.scss */
+input.error, p.global.error {
+  color: red;
+}
+
+/* line 3, ../../src/css/main-en-US.scss */
+div.top header.TopBar nav.NavBar h2.home a {
+  display: block;
+  width: 100px;
+  height: 28px;
+  background: url(/static/assets/img/slangsco-201x56.png);
+  background-size: 100px 28px;
+  text-indent: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  visibility: visible;
+}

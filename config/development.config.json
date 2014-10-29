@@ -42,9 +42,9 @@
     },
     "localeRootMap": {
         "es-MX": "http://127.0.0.1/",
+        "en-US": "http://dev.slangs.co/",
         "es-CL": "http://www.espanol.com/cl",
         "es-PE": "http://www.espanol.com/pe",
-        "en-US": "http://www.english.com/us",
         "id-ID": "http://www.bahasa.com/id",
         "pt-BR": "http://www.portugues.com/br"
     },
@@ -80,6 +80,46 @@
             },
             "editContributorProfile": {
                 "relUrl": "/ep/editar_perfil_de_usuario"
+            },
+            "phrase": {
+                "relUrl": "/{phrase}",
+                "params": ["phrase"]
+            },
+            "search": {
+                "relUrl": "/"
+            }
+        },
+        "en-US": {
+            "leaderboard": {
+                "relUrl": "/l/leaderboard"
+            },
+            "addDefinition": {
+                "relUrl": "/x/add_definition"
+            },
+            "addPhrase": {
+                "relUrl": "/y/add_phrase_or_word"
+            },
+            "initiatePasswordRecovery": {
+                "relUrl": "/ipr/reset_password"
+            },
+            "passwordRecovery": {
+                "relUrl": "/pr/password_recovery_code"
+            },
+            "verify": {
+                "relUrl": "/v/verify_account"
+            },
+            "login": {
+                "relUrl": "/i/login"
+            },
+            "logout": {
+                "relUrl": "/o/logout"
+            },
+            "contributorProfile": {
+                "relUrl": "/cp/user_profile/{contributor_id}",
+                "params": ["contributor_id"] 
+            },
+            "editContributorProfile": {
+                "relUrl": "/ep/edit_user_profile"
             },
             "phrase": {
                 "relUrl": "/{phrase}",

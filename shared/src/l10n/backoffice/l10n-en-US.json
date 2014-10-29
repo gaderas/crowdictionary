@@ -5,13 +5,13 @@
         "AccountVerificationEmail": {
             "title": "Slangs.Co - email verification",
             "body": {
-                "text": "Welcome to Slangs.Co! \n\n You're on your way to becoming a member of the coolest site for sharing and learning about slangs and other modern definitions. \n\n Click on the following link to activate your account: \n [{prefilledUrl}]. \n\n If the link above doesn't work, try the following one along with these codes: \n [{plainUrl}] \n *email*: {recipientAddress} \n *verification code*: {accountActivationCode} \n\n\n Thanks! \n\n Yours, \n The Slangs.Co team."
+                "text": "Welcome to Slangs.Co! \n\n You're on your way to becoming a member of the coolest site for sharing and learning about slangs and other modern definitions. \n\n Click on the following link to activate your account: \n\n [{prefilledUrl}]. \n\n If the link above doesn't work, try the following one along with these codes: \n\n [{plainUrl}] \n\n *email*: {recipientAddress} \n\n *verification code*: {accountActivationCode} \n\n\n Thanks! \n\n Yours, \n\n The Slangs.Co team."
             }
         },
         "PasswordRecoveryEmail": {
             "title": "Slangs.Co - Reset password",
             "body": {
-                "text": "Dear Slangs.Co user, \n\n You can now reset your password by clicking the following link: \n [{prefilledUrl}] \n\n If the link above doesn't work, you can try this one along with these codes: \n [{plainUrl}] \n *email*: {recipientAddress} \n *password reset code*: {passwordResetCode} \n\n\n Thanks for being part of the Slangs.Co community! \n\n Yours, \n The Slangs.Co team."
+                "text": "Dear Slangs.Co user, \n\n You can now reset your password by clicking the following link: \n\n [{prefilledUrl}] \n\n If the link above doesn't work, you can try this one along with these codes: \n\n [{plainUrl}] \n\n *email*: {recipientAddress} \n\n *password reset code*: {passwordResetCode} \n\n\n Thanks for being part of the Slangs.Co community! \n\n Yours, \n\n The Slangs.Co team."
             }
         }
     }

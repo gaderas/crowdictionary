@@ -1539,7 +1539,9 @@ var CrowDictionary = React.createClass({displayName: 'CrowDictionary',
             titleContent = this.state.searchTerm ? this.fmt(this.msg(this.messages.Titles.search), {phrase: this.state.searchTerm}) : titleContent;
             mainContent = PhraseSearchResults( {topState:this.state, onSelectPhrase:this.handleSelectPhrase, onSetInfo:this.handleSetInfo, key:"PhraseSearchResults"});
         }
-        var faviconUrl = aUrl("/static/assets/img/mexionario-64x64.png", this.state.shortLangCode);
+        var lang = this.state.globalLang,
+            faviconUrl = aUrl("/static/assets/img/" + lang + "-128x128.png", this.state.shortLangCode),
+            mainCssUrl = aUrl("/static/css/main-" + lang + ".css", this.state.shortLangCode);
         return (
             React.DOM.html( {lang:"en-US", dir:"ltr"} , 
             React.DOM.head(null, 
@@ -1550,7 +1552,7 @@ var CrowDictionary = React.createClass({displayName: 'CrowDictionary',
               React.DOM.script( {src:"/static/js/dep/jquery.js"} ),
               React.DOM.script( {src:"/static/js/dep/underscore.js"} ),
               React.DOM.script( {src:"/static/js/dep/backbone.js"} ),
-              React.DOM.link( {href:"/static/css/main.css", rel:"stylesheet"} )
+              React.DOM.link( {href:mainCssUrl, rel:"stylesheet"} )
             ),
             React.DOM.body(null, 
                 React.DOM.div( {className:"top"}, 

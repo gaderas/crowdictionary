@@ -81,7 +81,7 @@
             "newPasswordFieldLabel": "New Password",
             "newPasswordConfirmFieldLabel": "Confirm New Password",
             "submitButtonLabel": "",
-            "signupSuccess": "Your account has been created. Next, we'll send you an account verification email with a link that you should follow to finish the signup process.",
+            "signupSuccess": "Your account has been created. Next, we'll send you an account verification email with a link that you should follow in order to finish the signup process.",
             "editSuccess": "Your user profile has been edited successfuly"
         },
         "EditProfileForm": {

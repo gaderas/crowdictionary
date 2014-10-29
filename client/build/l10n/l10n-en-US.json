@@ -2,22 +2,205 @@
     "locales": ["en-US"],
     "formats": {"number": {}, "date": {}, "time": {}},
     "messages": {
-        "top": {
-            "greeting": {
-                "loggedIn": "Hello, {username}!",
-                "notLoggedIn": "login!!!"
-            }
+        "Errors": {
+            "generic": "something went wrong, we're sorry...",
+            "OK": "OK",
+            "yes": "Yes",
+            "no": "No",
+            "validationError": "Please fix the errors and fill in any missing required fields and try again.",
+            "missingField": "missing field",
+            "duplicateField": "duplicate. please change",
+            "invalidField": "invalid format. please fix",
+            "errno1": "the account belonging to that email address has been verified",
+            "errno2": "you've introduced an invalid verification code",
+            "errno3": "there's no user with the specified email address",
+            "errno4": "something went wrong while trying to mark this user account as verified",
+            "errno5": "we couldn't read the account information in order to verify whether the entered verification code is valid",
+            "errno6": "email is missing",
+            "errno7": "password is missing",
+            "errno8": "wrong password",
+            "errno9": "something went wrong while trying to log you in",
+            "errno10": "something went wrong while trying to show you the edit profile page. please verify that you're logged in before trying again.",
+            "errno11": "the account verification process hasn't been completed for this account",
+            "errno12": "at the moment, this account's status doesn't allow you to log in"
         },
-        "forms": {
-            "newPhrase": {
-                "placeHolder": "enter a new phrase here"
-            },
-            "newDefinition": {
-                "placeHolder": "enter a new definition for phrase '{phrase}' here"
-            }
+        "Infos": {
+            "infono1": "verification has been successful",
+            "infono2": "you've logged in successfully",
+            "infono3": "you've logged out successfully"
+        },
+        "Footer": {
+            "copyrightNotice": "Copyright, all rights reserved © gaderas.com 2014."
+        },
+        "SearchBar": {
+            "placeHolder": "search..."
+        },
+        "UserLinks": {
+            "addPhrase": "add phrase or word",
+            "addDefinition": "add definition",
+            "myActivity": "my profile",
+            "leaderboard": "leaderboard"
+        },
+        "LoginStatus": {
+            "loggedInGreeting": "Hi {username}!",
+            "notLoggedInGreeting": "login",
+            "logOutMessage": "logout"
+        },
+        "LoginPrompt": {
+            "loginFormTitle": "Login",
+            "loginFormDescription": "If you already have a user account with us, you can log in here.",
+            "usernameFieldPlaceholder": "email",
+            "passwordFieldPlaceholder": "password",
+            "submitButtonValue": "Login",
+            "usernameFieldLabel": "Email",
+            "passwordFieldLabel": "Password",
+            "submitButtonLabel": "",
+            "forgotPassword": "Forgot password?"
+        },
+        "LogOutOutcome": {
+            "willLogYouOutShortly": "logging out..."
+        },
+        "SignupForm": {
+            "formTitle": "Create an account",
+            "formDescription": "It's very easy to join to begin contributing new words and definitions. Just fill out the following form!",
+            "usernameFieldPlaceholder": "email",
+            "passwordFieldPlaceholder": "password",
+            "nicknameFieldPlaceholder": "Alias or nick",
+            "firstNameFieldPlaceholder": "name",
+            "lastNameFieldPlaceholder": "last name",
+            "passwordResetCodeFieldPlaceholder": "secret code",
+            "newPasswordFieldPlaceholder": "new password",
+            "newPasswordConfirmFieldPlaceholder": "confirm new password",
+            "submitButtonValue": "Create",
+            "usernameFieldLabel": "Email",
+            "passwordFieldLabel": "Password",
+            "nicknameFieldLabel": "Alias",
+            "firstNameFieldLabel": "Name",
+            "lastNameFieldLabel": "Last Name",
+            "passwordResetCodeFieldLabel": "Secret Code",
+            "newPasswordFieldLabel": "New Password",
+            "newPasswordConfirmFieldLabel": "Confirm New Password",
+            "submitButtonLabel": "",
+            "signupSuccess": "Your account has been created. Next, we'll send you an account verification email with a link that you should follow in order to finish the signup process.",
+            "editSuccess": "Your user profile has been edited successfuly"
+        },
+        "EditProfileForm": {
+            "formTitle": "Edit profile",
+            "formDescription": "Make changes to your user profile here.",
+            "saveSuccess": "Changes have been saved successfully.",
+            "submitButtonValue": "Save"
+        },
+        "InitiatePasswordRecoveryForm": {
+            "formTitle": "Reset password",
+            "formDescription": "If you've lost your password, here you can request a password reset code to be sent to your email address.",
+            "saveSuccess": "We'll shortly send you a password reset code with directions via email.",
+            "submitButtonValue": "Request"
+        },
+        "PasswordRecoveryForm": {
+            "formTitle": "Reset password",
+            "formDescription": "Please fill out the fields below with your email and the password reset code that we've sent you via email.",
+            "saveSuccess": "Your password has been reset. You can now begin using it to log into the system.",
+            "submitButtonValue": "Reset"
+        },
+        "AddPhraseForm": {
+            "addPhrase": "New phase or word",
+            "newPhrasePlaceHolder": "",
+            "submitPhrase": "Add",
+            "loginRequired": "you need to be logged in order to add phrases or words"
+        },
+        "AddDefinitionForm": {
+            "addDefinition": "Add new definition for \"{phrase}\"",
+            "addDefinitionPlaceHolder": "add new definition for \"{phrase}\" here",
+            "addDefinitionExamplesPlaceHolder": "enter examples on how to use \"{phrase}\" here",
+            "addDefinitionTagsPlaceHolder": "enter \"tags\" or \"keywords\" that you think are related to \"{phrase}\" here",
+            "submitDefinition": "send",
+            "loginRequired": "you need to be logged in in order to add definitions",
+            "confirmOverwrite": "You had already contributed a definition for this term. If you decide to modify it, the votes that it had previously received will be lost. OK to continue?",
+            "definitionLabel": "Definition",
+            "examplesLabel": "Examples",
+            "tagsLabel": "Tags"
+        },
+        "NavBar": {
+            "home": "Home",
+            "about": "About",
+            "jobs": "Jobs"
+        },
+        "TopSearchCaption": {
+            "showingResultsForSearchTerm": "You searched for: \"{searchTerm}\""
         },
         "LoggedInMixin": {
-            "requiredLoginMissing": "attempted to perform an operation that requires you to be logged in, without being logged in"
+            "requiredLoginMissing": "you tried to perform an operation for which you need to be logged in, without actually being logged in"
+        },
+        "DefinitionInDetails": {
+            "thumbsUpMessage": "{numVotes, plural, =0 {no votes} =1 {one vote} other {# votes}}",
+            "thumbsDownMessage": "{numVotes, plural, =0 {no votes} =1 {one vote} other {# votes}}",
+            "thumbsUpTitle": "{currentVote, select, up {click to delete your vote} other {vote up}}",
+            "thumbsDownTitle": "{currentVote, select, down {click to delete your vote} other {vote down}}",
+            "loginRequiredToVote": "to be able to vote, you must first log in",
+            "tags": "Tags:",
+            "by": "By:"
+        },
+        "ContributorProfile": {
+            "nickname": "username",
+            "firstName": "name",
+            "lastName": "last name",
+            "memberSince": "member since",
+            "phrasesTab": "Phrases",
+            "definitionsTab": "Definitions",
+            "votesTab": "Votes",
+            "title": "User profile",
+            "editLink": "Edit"
+        },
+        "ContributorActivityItem": {
+            "goToPhraseLink": "Go",
+            "ownPhraseActivityEntry": "You contributed phrase/word \"{phrase}\"",
+            "othersPhraseActivityEntry": "Contributed phrase/word \"{phrase}\"",
+            "ownDefinitionActivityEntry": "You contributed a definition for phrase/word \"{phrase}\"",
+            "othersDefinitionActivityEntry": "Contributed a definition for phrase/word \"{phrase}\"",
+            "ownVoteActivityEntry": "{vote, select, up {You voted for a definition for phrase/word \"{phrase}\"} down {You voted against a definition for phrase/word \"{phrase}\"} other {You voted and then deleted a vote for a definition for phrase/word \"{phrase}\"}}",
+            "othersVoteActivityEntry": "{vote, select, up {Voted for a definition for phrase/word \"{phrase}\"} down {Voted against a definition for phrase/word \"{phrase}\"} other {Voted and then deleted a vote for a definition for phrase/word \"{phrase}\"}}"
+        },
+        "PhraseDetails": {
+            "backToSearchResults": "back to search results"
+        },
+        "PhraseSearchResult": {
+            "missingDefinition": "this phrase/word doesn't yet have any definitions"
+        },
+        "Pagination": {
+            "pages": "Pages: "
+        },
+        "VerificationPrompt": {
+            "formTitle": "New account verification",
+            "verificationCodeFieldLabel": "The verification code that we sent you via email",
+            "verificationCodeFieldPlaceholder": "verification code",
+            "emailFieldLabel": "The email that you used when you signed up",
+            "emailFieldPlaceholder": "email",
+            "submit": "send"
+        },
+        "Abbreviations": {
+            "definition": "def. ",
+            "example": "e.g. "
+        },
+        "PhraseInDetails": {
+            "addDefinitionCaption": "Add a definition"
+        },
+        "Leaderboard": {
+            "leaderboard": "Leaderboard",
+            "user": "User",
+            "points": "Points",
+            "pointCalculationRulesTitle": "Points are calculated by substracting the number of votes against a user's definitions from the number of votes for that user's definitions."
+        },
+        "LeaderboardItem": {
+            "leaderboard": "Leaderboard",
+            "user": "User",
+            "points": "Points"
+        },
+        "Titles": {
+            "home": "Phrase/word slang meanings, definitions, dictionary - Slangs.Co, your online dictionary",
+            "search": "{phrase} - search results - Slangs.Co, your online dictionary",
+            "phrase": "{phrase} - meanings, definitions, slang - Slangs.Co, your online dictionary",
+            "leaderboard": "Leaderboard. Words, phrases, meanings, definitions, slang - Slangs.Co, your online dictionary",
+            "profile": "{nickname} - user profile - Votes, meanings, definitions, words, phrases, slang - Slangs.Co, your online dictionary"
         }
     }
 }

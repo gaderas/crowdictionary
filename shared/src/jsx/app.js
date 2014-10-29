@@ -1539,7 +1539,9 @@ var CrowDictionary = React.createClass({
             titleContent = this.state.searchTerm ? this.fmt(this.msg(this.messages.Titles.search), {phrase: this.state.searchTerm}) : titleContent;
             mainContent = <PhraseSearchResults topState={this.state} onSelectPhrase={this.handleSelectPhrase} onSetInfo={this.handleSetInfo} key="PhraseSearchResults"/>;
         }
-        var faviconUrl = aUrl("/static/assets/img/mexionario-64x64.png", this.state.shortLangCode);
+        var lang = this.state.globalLang,
+            faviconUrl = aUrl("/static/assets/img/" + lang + "-128x128.png", this.state.shortLangCode),
+            mainCssUrl = aUrl("/static/css/main-" + lang + ".css", this.state.shortLangCode);
         return (
             <html lang="en-US" dir="ltr" >
             <head>
@@ -1550,7 +1552,7 @@ var CrowDictionary = React.createClass({
               <script src="/static/js/dep/jquery.js" />
               <script src="/static/js/dep/underscore.js" />
               <script src="/static/js/dep/backbone.js" />
-              <link href="/static/css/main.css" rel="stylesheet" />
+              <link href={mainCssUrl} rel="stylesheet" />
             </head>
             <body>
                 <div className="top">
