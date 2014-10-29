@@ -19,7 +19,11 @@
     },
     "mailer": {
         "transport": "ses",
-        "rateLimit": 10
+        "rateLimit": 10,
+        "localeFromAddressMap": {
+            "es-MX": "dev-notificacion-no-responda@mexionario.com",
+            "en-US": "dev-notify-no-reply@slangs.co"
+        }
     },
     "cookies": {
         "user": {

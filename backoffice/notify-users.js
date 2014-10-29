@@ -13,8 +13,8 @@ nconf.argv().env().file({file: './config/'+NODE_ENV+'.config.json'});
 console.log(util.inspect(Mailer));
 var db = dsFactory(nconf),
     mailer = new Mailer(nconf),
-    localeRootMap = nconf.get('localeRootMap');
-
+    localeRootMap = nconf.get('localeRootMap'),
+    localeFromAddressMap = nconf.get('mailer:localeFromAddressMap');
 
 
 //resetContributorFields, e.g.: [{password_reset_status: 'emailed'}]
@@ -22,11 +22,12 @@ var pEmailContributor = function (kind, contributor, sentCodeFieldName, mailerFu
     var code = contributor[sentCodeFieldName],
         nowTs = appUtil.toUTCISOString(new Date()),
         lang = contributor.preferred_langs.split(',')[0],
-        rootUrl = localeRootMap[lang];
+        rootUrl = localeRootMap[lang],
+        fromAddress = localeFromAddressMap[lang];
     console.log("on emailContributor()");
     return Q.allSettled([
         db.putNotification({type: 'email', kind: kind, code: code, recipient: contributor.email, contributor_id: contributor.id, scheduled: nowTs, sent: nowTs}),
-        mailerFunc.call(null, contributor.email, lang, rootUrl, code)
+        mailerFunc.call(null, fromAddress, contributor.email, lang, rootUrl, code)
     ])
         .spread(function (notificationState, mailerState) {
             console.log("on emailContributor(), spread()");

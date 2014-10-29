@@ -22,7 +22,6 @@ var Mailer = function (nconf) {
         rateLimit = mailerConf.rateLimit,
         accessKeyId = mailerConf.accessKeyId,
         secretAccessKey = mailerConf.secretAccessKey,
-        fromAddress = mailerConf.fromAddress,
         pLangFileReads = [];
     if ('ses' === transport) {
         this.transporter = nodemailer.createTransport(ses({
@@ -33,7 +32,6 @@ var Mailer = function (nconf) {
     } else {
         throw Error("only the 'ses' transport is supported");
     }
-    this.fromAddress = fromAddress;
     _.forEach(localeEndpointsMap, function (endpoints, lang) {
         _.forEach(endpoints, function (endpoint) {
             endpoint.relUrlMsg = new IntlMessageFormat(endpoint.relUrl, 'en-US');
@@ -73,12 +71,12 @@ var Mailer = function (nconf) {
         console.log("dirContents: " + JSON.stringify(dirContents));
     });*/
 
-Mailer.prototype.sendAccountVerificationEmail = function (recipientAddress, lang, rootUrl, code) {
+Mailer.prototype.sendAccountVerificationEmail = function (fromAddress, recipientAddress, lang, rootUrl, code) {
     return this.pL10nData
         .then(function (l10nDatas) {
             var l10nData = l10nDatas[lang];
             return this.pSendMail({
-                from: this.fromAddress,
+                from: fromAddress,
                 to: recipientAddress,
                 subject: l10nData.messages.AccountVerificationEmail.title,
                 text: l10nData.messages.AccountVerificationEmail.body.textMsg.format({prefilledUrl: rootUrl.replace(/\/$/, '') + this.localeEndpointsMap[lang]['verify'].relUrl + "?email=" + recipientAddress + "&validateVerification=" + code, plainUrl: rootUrl.replace(/\/$/, '') + this.localeEndpointsMap[lang]['verify'].relUrl, recipientAddress: recipientAddress, accountActivationCode: code})
@@ -95,12 +93,12 @@ Mailer.prototype.sendAccountVerificationEmail = function (recipientAddress, lang
         });
 };
 
-Mailer.prototype.sendPasswordRecoveryEmail = function (recipientAddress, lang, rootUrl, code) {
+Mailer.prototype.sendPasswordRecoveryEmail = function (fromAddress, recipientAddress, lang, rootUrl, code) {
     return this.pL10nData
         .then(function (l10nDatas) {
             var l10nData = l10nDatas[lang];
             return this.pSendMail({
-                from: this.fromAddress,
+                from: fromAddress,
                 to: recipientAddress,
                 subject: l10nData.messages.PasswordRecoveryEmail.title,
                 text: l10nData.messages.PasswordRecoveryEmail.body.textMsg.format({prefilledUrl: rootUrl.replace(/\/$/, '') + this.localeEndpointsMap[lang]['passwordRecovery'].relUrl + "?email=" + recipientAddress + "&password_reset_code=" + code, plainUrl: rootUrl.replace(/\/$/, '') + this.localeEndpointsMap[lang]['passwordRecovery'].relUrl, recipientAddress: recipientAddress, passwordResetCode: code})

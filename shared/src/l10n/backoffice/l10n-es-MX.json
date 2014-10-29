@@ -11,7 +11,7 @@
         "PasswordRecoveryEmail": {
             "title": "MexiOnario - Reestablecer contraseña",
             "body": {
-                "text": "Apreciable usuario(a) de MexiOnario: \n\n Reestablece tu contraseña visitando la siguiente liga: \n [{prefilledUrl}] \n\n Si la liga anterior no funciona, usa esta otra junto con estos datos: \n [{plainUrl}] \n *correo*: {recipientAddress} \n *código para reestablecer contraseña*: {passwordResetCode} \n\n\n ¡Gracias por ser miembro(a) de la comunidad de MexiOnario! \n\n Atte.: \n El equipo de MexiOnario."
+                "text": "Apreciable usuario(a) de MexiOnario: \n\n Reestablece tu contraseña visitando la siguiente liga: \n [{prefilledUrl}] \n\n Si la liga anterior no funciona, usa esta otra junto con estos datos: \n [{plainUrl}] \n *correo*: {recipientAddress} \n *código para reestablecer contraseña*: {passwordResetCode} \n\n Si tu no solicitaste que se reestableciera tu contraseña, por favor ignora este mensaje y tu cuenta seguirá funcionando normalmente (tu contraseña no cambiará). \n\n\n ¡Gracias por ser miembro(a) de la comunidad de MexiOnario! \n\n Atte.: \n El equipo de MexiOnario."
             }
         }
     }

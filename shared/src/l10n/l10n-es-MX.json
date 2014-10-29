@@ -82,7 +82,7 @@
             "newPasswordConfirmFieldLabel": "Confirma Nueva Contraseña",
             "submitButtonLabel": "",
             "signupSuccess": "Tu cuenta ha sido creada. A continuación te enviaremos un correo de verificación con una liga que deberás seguir para finalizar tu proceso de registro.",
-            "editSuccess": "Tu perfil se ha editado con éxito.."
+            "editSuccess": "Tu perfil se ha editado con éxito"
         },
         "EditProfileForm": {
             "formTitle": "Editar perfil",
@@ -197,10 +197,10 @@
         },
         "Titles": {
             "home": "Significados de palabras, frases, diccionario - MexiOnario, el diccionario de México",
-            "search": "{phrase}, resultados de búsqueda - MexiOnario, el diccionario de México",
-            "phrase": "{phrase}, significados, definiciones - MexiOnario, el diccionario de México",
+            "search": "{phrase} - resultados de búsqueda - MexiOnario, el diccionario de México",
+            "phrase": "{phrase} - significados, definiciones - MexiOnario, el diccionario de México",
             "leaderboard": "Tabla de puntuación. Palabras, significados, definiciones - MexiOnario, el diccionario de México",
-            "profile": "{nickname} - perfil - Votos, significados, frases y palabras - MexiOnario, el diccionario de México"
+            "profile": "{nickname} - perfil de usuario - Votos, significados, frases y palabras - MexiOnario, el diccionario de México"
         }
     }
 }
