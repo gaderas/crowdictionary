@@ -221,6 +221,7 @@ div.rest {
                             @include breakpoint($large-screen) {
                                 @include span(5 of 10);
                                 border-bottom: 0px none black;
+                                min-height: 40px;
                             }
                             @include span(1 of 1);
                             padding-bottom: $base-block-padding;

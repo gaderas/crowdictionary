@@ -1986,6 +1986,8 @@ var DefinitionInDetails = React.createClass({displayName: 'DefinitionInDetails',
         }
         if (tags.length) {
             tagsElements = React.DOM.dd( {className:"tags"}, React.DOM.span(null, tagsCaption),React.DOM.ul(null, tags));
+        } else {
+            tagsElements = React.DOM.dd( {className:"tags"});
         }
         return (
             React.DOM.li(null, 
