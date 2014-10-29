@@ -2061,7 +2061,7 @@ input.error, p.global.error {
 div.top header.TopBar nav.NavBar h2.home a {
   display: block;
   width: 100px;
-  height: 28px;
+  min-height: 63px;
   background: url(/static/assets/img/slangsco-201x56.png);
   background-size: 100px 28px;
   text-indent: 100%;
