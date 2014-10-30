@@ -1543,7 +1543,7 @@ var CrowDictionary = React.createClass({
             faviconUrl = aUrl("/static/assets/img/" + lang + "-128x128.png", this.state.shortLangCode),
             mainCssUrl = aUrl("/static/css/main-" + lang + ".css", this.state.shortLangCode);
         return (
-            <html lang="en-US" dir="ltr" >
+            <html lang={lang} dir="ltr" >
             <head>
               <meta charSet="utf-8" />
               <meta name="viewport" content="width=device-width" />
