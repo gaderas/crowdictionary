@@ -331,7 +331,8 @@ Data.prototype.getContributorLeaderboard = function (params) {
  * # `mode` === `search`*/
 
 Data.prototype.putDefinition = function (payload) {
-    var pQuery = this.pQuery;
+    var pQuery = this.pQuery,
+        pGetConnection = Q.nbind(this.pool.getConnection, this.pool);
 
     if (!payload.contributor_id) {
         throw Error("unauthorized non-authenticated call");
@@ -339,9 +340,26 @@ Data.prototype.putDefinition = function (payload) {
     if (!payload || !payload.lang || !payload.phrase_id || !payload.definition) {
         throw Error("no payload (HTTP body) or no 'lang', 'phrase' or 'definition' in it");
     }
-    return pQuery("INSERT INTO `definition` SET ? ON DUPLICATE KEY UPDATE ?, id=LAST_INSERT_ID(id)", [payload, payload])
-        .then(function () {
-            return pQuery("SELECT LAST_INSERT_ID() AS last_id;")
+    return pGetConnection()
+        .then(function (connection) {
+            console.log("got a connection");
+            var pConnectionQuery = Q.nbind(connection.query, connection);
+            return pConnectionQuery("INSERT INTO `definition` SET ? ON DUPLICATE KEY UPDATE ?, id=LAST_INSERT_ID(id)", [payload, payload])
+                .then(function () {
+                    console.log("inserted");
+                    return pConnectionQuery("SELECT LAST_INSERT_ID() AS last_id;")
+                        .then(function (insertIdRes) {
+                            console.log("got last insert id");
+                            return Q.fcall(connection.release.bind(connection))
+                                .then(function () {
+                                    console.log("released connection. will return last insert id");
+                                    return insertIdRes[0]; // we return index 0 as we do in pQuery (which has advantages/disadvantages)
+                                })
+                                .fail(function (err) {
+                                    console.log("failed to release connection...");
+                                });
+                        });
+                });
         });
 };
 
