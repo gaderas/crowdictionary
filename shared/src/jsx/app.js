@@ -1541,13 +1541,17 @@ var CrowDictionary = React.createClass({
         }
         var lang = this.state.globalLang,
             faviconUrl = aUrl("/static/assets/img/" + lang + "-128x128.png", this.state.shortLangCode),
+            icon128x128Url = aUrl("/static/assets/img/" + lang + "-128x128.png", this.state.shortLangCode),
+            icon152x152Url = aUrl("/static/assets/img/" + lang + "-152x152.png", this.state.shortLangCode),
+            icon192x192Url = aUrl("/static/assets/img/" + lang + "-192x192.png", this.state.shortLangCode),
             mainCssUrl = aUrl("/static/css/main-" + lang + ".css", this.state.shortLangCode);
         return (
             <html lang={lang} dir="ltr" >
             <head>
               <meta charSet="utf-8" />
               <meta name="viewport" content="width=device-width" />
-              <link rel="icon" type="image/png" href={faviconUrl} />
+              <link rel="icon" type="image/png" href={icon192x192Url} />
+              <link rel="apple-touch-icon" href={icon192x192Url} />
               <title>{titleContent}</title>
               <script src="/static/js/dep/jquery.js" />
               <script src="/static/js/dep/underscore.js" />
