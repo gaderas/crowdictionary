@@ -1541,13 +1541,17 @@ var CrowDictionary = React.createClass({displayName: 'CrowDictionary',
         }
         var lang = this.state.globalLang,
             faviconUrl = aUrl("/static/assets/img/" + lang + "-128x128.png", this.state.shortLangCode),
+            icon128x128Url = aUrl("/static/assets/img/" + lang + "-128x128.png", this.state.shortLangCode),
+            icon152x152Url = aUrl("/static/assets/img/" + lang + "-152x152.png", this.state.shortLangCode),
+            icon192x192Url = aUrl("/static/assets/img/" + lang + "-192x192.png", this.state.shortLangCode),
             mainCssUrl = aUrl("/static/css/main-" + lang + ".css", this.state.shortLangCode);
         return (
             React.DOM.html( {lang:lang, dir:"ltr"} , 
             React.DOM.head(null, 
               React.DOM.meta( {charSet:"utf-8"} ),
               React.DOM.meta( {name:"viewport", content:"width=device-width"} ),
-              React.DOM.link( {rel:"icon", type:"image/png", href:faviconUrl} ),
+              React.DOM.link( {rel:"icon", type:"image/png", href:icon192x192Url} ),
+              React.DOM.link( {rel:"apple-touch-icon", href:icon192x192Url} ),
               React.DOM.title(null, titleContent),
               React.DOM.script( {src:"/static/js/dep/jquery.js"} ),
               React.DOM.script( {src:"/static/js/dep/underscore.js"} ),
